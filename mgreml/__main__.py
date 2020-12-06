@@ -1,9 +1,7 @@
 from mgreml.tests import test_aligner
-from mgreml.tests import test_estimator
-from mgreml.tests import test_comparison
+from mgreml.tests import test_writer
 
 if __name__ == '__main__':
-    test_aligner.TestMgremlAligner()
-    test_estimator.TestMgremlEstimator()
-    test_comparison.TestNestedEstimators()
+    #test_aligner.TestMgremlAligner()
+    test_writer.TestMgremlEstimationAndWriter()
     print('Done testing')
