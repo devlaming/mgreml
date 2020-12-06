@@ -30,6 +30,7 @@ class NestedEstimators:
         if not(indFEres.isin(indFEunres).all()):
             raise ValueError('There is at least one environment factor in your nested model that does not appear in your alternative model')
         # select submatrices of free coeffs of unrestricted models
+        # that align with free coeffs of restricted model
         mBGunres_aligned = np.array(pd.DataFrame(mBGunres,columns=indFGunres)[indFGres])
         mBEunres_aligned = np.array(pd.DataFrame(mBEunres,columns=indFEunres)[indFEres])
         if ((mBGunres_aligned - mBGres) < 0).any():
@@ -58,10 +59,10 @@ class NestedEstimators:
             raise RuntimeError('Estimation of the nested model has not converged.')
         if self.estimator_unres.bNotConverged:
             raise RuntimeError('Estimation of the alternative model has not converged.')
-        dTestStat = -2*(self.estimator_res.dLogL - self.estimator_unres.dLogL)*self.estimator_res.mgreml_model.data.iN
-        print('Chi-square test statistic is ' + str(dTestStat))
-        dPval = 1-chi2.cdf(dTestStat, self.iDF)
-        print('P-value = ' + str(dPval))
+        self.dTestStat = -2*(self.estimator_res.dLogL - self.estimator_unres.dLogL)*self.estimator_res.mgreml_model.data.iN
+        print('Chi-square test statistic is ' + str(self.dTestStat))
+        self.dPval = 1-chi2.cdf(self.dTestStat, self.iDF)
+        print('P-value = ' + str(self.dPval))
         
         
         
