@@ -16,7 +16,5 @@ def TestMgremlEstimator():
     MyMgremlEstimator = estimator.MgremlEstimator(MyMgremlData, bBFGS = bBFGS, bSEs = bSEs)
     # perform BFGS
     MyMgremlEstimator.PerformEstimation()
-    # calculate final statistics
-    MyMgremlEstimator.ComputeStatistics()
     # done testing
     print('Done testing the MGREML estimator.')

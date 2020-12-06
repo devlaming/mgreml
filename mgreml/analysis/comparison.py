@@ -44,14 +44,14 @@ class NestedEstimators:
         self.estimator_res.PerformEstimation()
         print('Estimating the parent model (alternative hypothesis):')
         self.estimator_unres.PerformEstimation()
-        # compute statistics
-        self.estimator_res.ComputeStatistics()
-        self.estimator_unres.ComputeStatistics()
         # perform likelihood-ratio test
         self.PerformLRT()
     
     def IsConverged(self):
         return (self.estimator_res.IsConverged() & self.estimator_unres.IsConverged())
+    
+    def IsDone(self):
+        return (self.estimator_res.IsDone() & self.estimator_unres.IsDone())
     
     def PerformLRT(self):
         print('Performing likelihood-ratio test with ' + str(self.iDF) + ' degrees of freedom:')

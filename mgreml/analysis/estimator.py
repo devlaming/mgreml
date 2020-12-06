@@ -36,6 +36,8 @@ class MgremlEstimator:
         self.bNotConverged = True
         # indicate that estimates are still changing from one iter to the next
         self.bEstimatesChanged = True
+        # indicate that estimates and statistics have not been finalised
+        self.bDone = False
         # set whether to perform BFGS or Netwon
         self.bBFGS = bBFGS
         # set whether to store results from each iter
@@ -49,6 +51,8 @@ class MgremlEstimator:
             self.PerformBFGS()
         else:
             self.PerformNewton()
+        # compute statistics
+        self.ComputeStatistics()
         
     def PerformBFGS(self):
         # determine whether we need info matrix at end
@@ -317,10 +321,13 @@ class MgremlEstimator:
     def IsConverged(self):
         return not(self.bNotConverged)
     
+    def IsDone(self):
+        return self.bDone
+    
     def ComputeStatistics(self):
         # if not converged: raise error
         if self.bNotConverged:
-            raise RuntimeError('Estimation of the model has not converged.')
+            raise RuntimeError('Trying to calculate final statistics, while estimatese have not converged.')
         # get variance matrices and coefficient matrices
         (mVG, mCG, mVE, mCE) = self.mgreml_model.model.GetVandC()
         # get genetic variances, environment and total variances
@@ -436,3 +443,5 @@ class MgremlEstimator:
                                    np.matmul(vGradRhoEY,np.matmul(mSamplingVEYY,vGradRhoEY.T)))
                     self.mRhoGSE[j,i] = self.mRhoGSE[i,j]
                     self.mRhoESE[j,i] = self.mRhoESE[i,j]
+        # indicate estimates are now done
+        self.bDone = True
