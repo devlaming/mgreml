@@ -4,8 +4,8 @@ import pickle
 from mgreml.analysis import comparison
 
 def TestNestedEstimators():
-    # compute info at end of BFGS together with standard errors
-    bInfoAtEnd = True
+    # compute standard errors and use BFGS
+    bBFGS = True
     bSEs = True
     # set filenames
     sFilepath = './temp/'
@@ -19,8 +19,8 @@ def TestNestedEstimators():
     # construct dataframe
     dfGenBinFYres = pd.DataFrame(mGenBinFYres,index=MyMgremlData.lPhenos,columns=lFactors)
     # construct estimators for nested models
-    MyNestedEstimators = comparison.NestedEstimators(MyMgremlData, dfNestedGenBinFY = dfGenBinFYres)
+    MyNestedEstimators = comparison.NestedEstimators(MyMgremlData, dfNestedGenBinFY = dfGenBinFYres, bBFGS = bBFGS, bSEs = bSEs)
     # apply BFGS to nested models
-    MyNestedEstimators.PerformBFGS(bInfoAtEnd, bSEs)
+    MyNestedEstimators.PerformEstimation()
     # done testing
     print('Done testing the comparison of nested models using MGREML.')

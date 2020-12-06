@@ -6,9 +6,9 @@ from mgreml.analysis import estimator
 
 class NestedEstimators:
     
-    def __init__(self, mdData, dfNestedGenBinFY = None, dfNestedEnvBinFY = None, dfGenBinFY = None, dfEnvBinFY = None, bStoreIters= False):
-        self.estimator_unres = estimator.MgremlEstimator(mdData, dfGenBinFY, dfEnvBinFY, bStoreIters)
-        self.estimator_res = estimator.MgremlEstimator(mdData, dfNestedGenBinFY, dfNestedEnvBinFY, bStoreIters)        
+    def __init__(self, mdData, dfNestedGenBinFY = None, dfNestedEnvBinFY = None, dfGenBinFY = None, dfEnvBinFY = None, bBFGS = True, bStoreIters= False, bSEs = False, bSamplingV = False):
+        self.estimator_unres = estimator.MgremlEstimator(mdData, dfGenBinFY, dfEnvBinFY, bBFGS, bStoreIters, bSEs, bSamplingV)
+        self.estimator_res = estimator.MgremlEstimator(mdData, dfNestedGenBinFY, dfNestedEnvBinFY, bBFGS, bStoreIters, bSEs, bSamplingV)
         self.CheckModelsNested()
         
     def CheckModelsNested(self):
@@ -39,30 +39,24 @@ class NestedEstimators:
             raise ValueError('There is at least one environment coefficient where the nested model is free and the alternative model is not')
         self.iDF = int((mBGunres.sum() + mBEunres.sum()) - (mBGres.sum() + mBEres.sum()))
         
-    def PerformBFGS(self, bInfoAtEnd = False, bSEs = False, bSamplingV = False):
+    def PerformEstimation(self):
         print('Estimating the nested model (null hypothesis):')
-        self.estimator_res.PerformBFGS(bInfoAtEnd)
-        self.estimator_res.ComputeStatistics(bSEs, bSamplingV)
-        print('Estimating the alternative model (alternative hypothesis):')
-        self.estimator_unres.PerformBFGS(bInfoAtEnd)
-        self.estimator_unres.ComputeStatistics(bSEs, bSamplingV)
+        self.estimator_res.PerformEstimation()
+        print('Estimating the parent model (alternative hypothesis):')
+        self.estimator_unres.PerformEstimation()
+        # compute statistics
+        self.estimator_res.ComputeStatistics()
+        self.estimator_unres.ComputeStatistics()
+        # perform likelihood-ratio test
         self.PerformLRT()
-        
-    def PerformNewton(self, bSEs = False, bSamplingV = False):
-        print('Estimating the nested model (null hypothesis):')
-        self.estimator_res.PerformNewton()
-        self.estimator_res.ComputeStatistics(bSEs, bSamplingV)
-        print('Estimating the alternative model (alternative hypothesis):')
-        self.estimator_unres.PerformNewton()
-        self.estimator_unres.ComputeStatistics(bSEs, bSamplingV)
-        self.PerformLRT()
-        
+    
+    def IsConverged(self):
+        return (self.estimator_res.IsConverged() & self.estimator_unres.IsConverged())
+    
     def PerformLRT(self):
         print('Performing likelihood-ratio test with ' + str(self.iDF) + ' degrees of freedom:')
-        if self.estimator_res.bNotConverged:
-            raise RuntimeError('Estimation of the nested model has not converged.')
-        if self.estimator_unres.bNotConverged:
-            raise RuntimeError('Estimation of the alternative model has not converged.')
+        if not(self.IsConverged()):
+            raise RuntimeError('Estimates of the models have not converged.')
         self.dTestStat = -2*(self.estimator_res.dLogL - self.estimator_unres.dLogL)
         print('Chi-square test statistic is ' + str(self.dTestStat))
         self.dPval = 1-chi2.cdf(self.dTestStat, self.iDF)

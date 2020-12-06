@@ -28,7 +28,7 @@ class MgremlEstimator:
     # each iter
     bSilentNewton = True
     
-    def __init__(self, mdData, dfGenBinFY = None, dfEnvBinFY = None, bStoreIters= False):
+    def __init__(self, mdData, dfGenBinFY = None, dfEnvBinFY = None, bBFGS = True, bStoreIters = False, bSEs = False, bSamplingV = False):
         self.mgreml_model = model.MgremlModel(mdData, dfGenBinFY, dfEnvBinFY)
         # set iteration counter
         self.iIter = 0
@@ -36,10 +36,23 @@ class MgremlEstimator:
         self.bNotConverged = True
         # indicate that estimates are still changing from one iter to the next
         self.bEstimatesChanged = True
+        # set whether to perform BFGS or Netwon
+        self.bBFGS = bBFGS
         # set whether to store results from each iter
         self.bStoreIters = bStoreIters
+        # set whether to compute standard errors and/or sampling V at end
+        self.bSEs = bSEs
+        self.bSamplingV = bSamplingV
         
-    def PerformBFGS(self, bInfoAtEnd = False):
+    def PerformEstimation(self):
+        if self.bBFGS:
+            self.PerformBFGS()
+        else:
+            self.PerformNewton()
+        
+    def PerformBFGS(self):
+        # determine whether we need info matrix at end
+        bInfoAtEnd = (self.bSEs | self.bSamplingV)
         # use two strikes out system to reset inverse hessian to -I,
         # if two subsequent iterations produce to little change
         bStrike1 = False
@@ -301,7 +314,10 @@ class MgremlEstimator:
         # return pseudo-inverse
         return mInvA, bWarning
     
-    def ComputeStatistics(self, bSEs = False, bSamplingV = False):
+    def IsConverged(self):
+        return not(self.bNotConverged)
+    
+    def ComputeStatistics(self):
         # if not converged: raise error
         if self.bNotConverged:
             raise RuntimeError('Estimation of the model has not converged.')
@@ -324,7 +340,7 @@ class MgremlEstimator:
         # compute correlations
         self.mRhoG = np.multiply(mVG,mOneOverSqrtVG)
         self.mRhoE = np.multiply(mVE,mOneOverSqrtVE)
-        if bSEs or bSamplingV:
+        if self.bSEs or self.bSamplingV:
             # set lowest eigenvalue permitted in info matrix per N to 1E-9
             dMinEigValPerN = 1E-18
             # scale back to normal scale
@@ -342,7 +358,7 @@ class MgremlEstimator:
             # invert the information matrix
             (self.mSamplingV,_) = MgremlEstimator.PseudoInvertSymmetricMat(self.mInfo, dMinEigVal)
         # if SEs are required
-        if bSEs:
+        if self.bSEs:
             # get indices and parameters
             (vIndTG, vIndFG, vParamG, vIndTE, vIndFE, vParamE) = self.mgreml_model.model.GetSplitParamsAndIndices()
             # compute gradient of heritability w.r.t. each parameter

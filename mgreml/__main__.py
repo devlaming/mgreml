@@ -6,3 +6,4 @@ if __name__ == '__main__':
     test_aligner.TestMgremlAligner()
     test_estimator.TestMgremlEstimator()
     test_comparison.TestNestedEstimators()
+    print('Done testing')
