@@ -347,11 +347,6 @@ class MgremlModel:
         if bCovs: # if we have covariates
             # get number of covariates
             iK = self.data.iK
-            if not(bSameCovs): # but different covariates per trait
-                # get indices of these covariates in terms of Z matrix etc.
-                vIndCovs = np.array(np.where(np.array(self.data.mBinXY).ravel()==1)).ravel()
-                # count total number of covariates across traits
-                iKtotal = self.data.mBinXY.sum()
         # convert parameters to variance components
         (mVG,mCG,mVE,mCE) = self.model.GetVandC(vNew)
         # stabilize mVE and mVG
@@ -459,7 +454,7 @@ class MgremlModel:
                 for j in range(0,iK): mKronFI[:,j,:,j] = mF
                 mKronFI = mKronFI.reshape(iK*iT,iK*iT)
                 # select appropriate submatrix of mKronFI
-                mKronFI = mKronFI[vIndCovs,:]
+                mKronFI = mKronFI[self.data.vIndCovs,:]
                 # finalise mZ
                 mZ = np.matmul(np.matmul(mKronFI,mZ),mKronFI.T)
                 # stabilise mZ and compute EVD
@@ -468,7 +463,7 @@ class MgremlModel:
                 # compute log|Z|
                 dLogDetZ = np.log(vEigValsZ).sum()
                 # compute inv(Z) and store
-                mInvZ = np.matmul(np.multiply(mEigVecsZ,repmat(1/vEigValsZ,iKtotal,1)),mEigVecsZ.T)
+                mInvZ = np.matmul(np.multiply(mEigVecsZ,repmat(1/vEigValsZ,self.data.iKtotal,1)),mEigVecsZ.T)
                 self.mVarGLS = mInvZ
                 # compute mJ matrix
                 mJ = np.matmul(mKronFI.T,np.matmul(mInvZ,mKronFI))
@@ -537,8 +532,8 @@ class MgremlModel:
                 # set vector with fixed effects for all combinations of traits and params
                 vB = np.zeros(iK*iT)
                 # compute the fixed effects only for covariates that matter, and store
-                vB[vIndCovs] = np.array(np.matmul(mInvZ,np.array(np.matmul(mYjTilde,self.data.mX)).ravel()[vIndCovs])).ravel()
-                self.vBetaGLS = vB[vIndCovs]
+                vB[self.data.vIndCovs] = np.array(np.matmul(mInvZ,np.array(np.matmul(mYjTilde,self.data.mX)).ravel()[self.data.vIndCovs])).ravel()
+                self.vBetaGLS = vB[self.data.vIndCovs]
             # set matrix of GLS residuals
             mR = np.zeros((iT,iN))
             # for each trait

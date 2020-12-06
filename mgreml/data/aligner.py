@@ -301,6 +301,10 @@ class MgremlData:
                 self.dLogDetXTX = (self.iT)*np.log(vThetaXTX).sum()
             # if not same across traits
             else:
+                # get indices of these covariates in terms of Z matrix
+                self.vIndCovs = np.array(np.where(np.array(self.mBinXY).ravel()==1)).ravel()
+                # count total number of covariates across traits
+                self.iKtotal = self.mBinXY.sum()
                 # initialise log|X'X|
                 dLogDetXTX = 0
                 # for each trait
