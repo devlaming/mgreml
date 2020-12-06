@@ -215,6 +215,9 @@ class StructuralModel:
             self.vParam = vNew
         else:
             raise TypeError('The new parameter estimates of the model are invaled.')
+            
+    def GetParamsAndIndices(self):
+        return self.vIndT, self.vIndF, self.vParam
 
 class GeneticModel(StructuralModel):
     
@@ -285,6 +288,11 @@ class CombinedModel:
         vParam[0:self.iParamsG] = self.genmod.vParam
         vParam[self.iParamsG:]  = self.envmod.vParam
         return vParam
+    
+    def GetSplitParamsAndIndices(self):
+        (vIndTG, vIndFG, vParamG) = self.genmod.GetParamsAndIndices()
+        (vIndTE, vIndFE, vParamE) = self.envmod.GetParamsAndIndices()
+        return vIndTG, vIndFG, vParamG, vIndTE, vIndFE, vParamE
     
     def UpdateParams(self, vNew):
         if isinstance(vNew, np.ndarray):

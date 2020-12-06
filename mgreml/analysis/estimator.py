@@ -8,8 +8,6 @@ class MgremlEstimator:
     
     # set the threshold for length gradient per N per parameter
     dGradLengthTolPerParam = 1E-5
-    # set lowest eigenvalue permitted in info matrix per N to 1E-9
-    dMinEigVal = 1E-9
     # set parameter-change threshold for ending golden section
     # and switching from Newton to gradient descent for one iteration
     dEps = 1E-9
@@ -131,8 +129,15 @@ class MgremlEstimator:
             print("WARNING! THIS MAY TAKE HOURS FOR LARGE SAMPLE SIZE AND LARGE NUMBER OF TRAITS!")
             # compute information matrix
             (self.dLogL, self.vGrad, self.mInfo) = self.mgreml_model.ComputeLogLik(MgremlEstimator.bGradBFGS, bInfoAtEnd)
+            # scale information matrix back to normal scale
+            self.mInfo = self.mInfo*self.mgreml_model.data.iN
+        # scale dLogL and vGrad back to normal scale
+        self.dLogL = self.dLogL*self.mgreml_model.data.iN
+        self.vGrad = self.vGrad*self.mgreml_model.data.iN
         
     def PerformNewton(self):
+        # set lowest eigenvalue permitted in info matrix per N to 1E-9
+        dMinEigVal = 1E-9
         # print statement that BFGS starts now
         print("Performing Newton algorithm to find coefficients that maximise the MGREML log-likelihood")
         # while convergence has not occurred
@@ -175,7 +180,7 @@ class MgremlEstimator:
             if self.bNotConverged:
                 if self.bEstimatesChanged: # if the estimates have changed do Newton
                     # compute pseudo inverse of unconstrained part
-                    (mInvInfo,_) = MgremlEstimator.PseudoInvertSymmetricMat(self.mInfo)
+                    (mInvInfo,_) = MgremlEstimator.PseudoInvertSymmetricMat(self.mInfo,dMinEigVal)
                     # compute suggested new parameters
                     vNew = self.mgreml_model.model.GetParams() + np.array(np.matmul(mInvInfo,self.vGrad)).ravel()
                 else: # if the estimates have not changed do gradient descent
@@ -183,6 +188,10 @@ class MgremlEstimator:
                     vNew = self.mgreml_model.model.GetParams() + np.array(self.vGrad).ravel()
                 # perform golden section
                 self.GoldenSection(vNew)
+        # scale dLogL, vGrad and information matrix back to normal scale
+        self.mInfo = self.mInfo*self.mgreml_model.data.iN
+        self.dLogL = self.dLogL*self.mgreml_model.data.iN
+        self.vGrad = self.vGrad*self.mgreml_model.data.iN
                 
     def GoldenSection(self, vNew, bGradAtEnd = False):
         # set iteration counter to 0
@@ -253,7 +262,7 @@ class MgremlEstimator:
             self.vGrad = None
 
     @staticmethod
-    def PseudoInvertSymmetricMat(mA):
+    def PseudoInvertSymmetricMat(mA, dMinEigVal):
         """
         Author     : Ronald de Vlaming
         Date       : December 3, 2020
@@ -275,9 +284,9 @@ class MgremlEstimator:
         iD = mA.shape[0]
         (vD,mP) = np.linalg.eigh(mA)
         # find eigenvalues less than dMinEigVal
-        vIndices = np.where(vD<MgremlEstimator.dMinEigVal)
+        vIndices = np.where(vD<dMinEigVal)
         # count the number of eigenvalues that will be omitted
-        iDropped = ((vD < MgremlEstimator.dMinEigVal).astype(int)).sum()
+        iDropped = ((vD < dMinEigVal).astype(int)).sum()
         # eigenvalues below threshold? warning!
         bWarning = iDropped > 0
         if bWarning:
@@ -291,3 +300,123 @@ class MgremlEstimator:
         mInvA = np.matmul(np.multiply(mP,repmat(vDinv,iD,1)),mP.T)
         # return pseudo-inverse
         return mInvA, bWarning
+    
+    def ComputeStatistics(self, bSEs = False, bSamplingV = False):
+        # if not converged: raise error
+        if self.bNotConverged:
+            raise RuntimeError('Estimation of the model has not converged.')
+        # get variance matrices and coefficient matrices
+        (mVG, mCG, mVE, mCE) = self.mgreml_model.model.GetVandC()
+        # get genetic variances, environment and total variances
+        vVG = np.diag(mVG).copy()
+        vVE = np.diag(mVE).copy()
+        vVY = vVG + vVE
+        # compute heritabilities
+        self.vHSq = vVG / vVY
+        # set variances to nan where zero for further calculations
+        vVG[np.where(vVG==0)] = np.nan
+        vVE[np.where(vVE==0)] = np.nan
+        # compute one over the square root of variances
+        vOneOverSqrtVG = np.power(vVG,-0.5)
+        vOneOverSqrtVE = np.power(vVE,-0.5)
+        mOneOverSqrtVG = np.outer(vOneOverSqrtVG,vOneOverSqrtVG)
+        mOneOverSqrtVE = np.outer(vOneOverSqrtVE,vOneOverSqrtVE)
+        # compute correlations
+        self.mRhoG = np.multiply(mVG,mOneOverSqrtVG)
+        self.mRhoE = np.multiply(mVE,mOneOverSqrtVE)
+        if bSEs or bSamplingV:
+            # set lowest eigenvalue permitted in info matrix per N to 1E-9
+            dMinEigValPerN = 1E-18
+            # scale back to normal scale
+            dMinEigVal = dMinEigValPerN*self.mgreml_model.data.iN
+            # if info matrix has not yet been computed: compute it
+            if not(isinstance(self.mInfo, np.ndarray)):
+                print("COMPUTING SAMPLING COVARIANCE MATRIX OF ESTIMATES.")
+                print("WARNING! THIS MAY TAKE HOURS FOR LARGE SAMPLE SIZE AND LARGE NUMBER OF TRAITS!")
+                # compute information matrix
+                (self.dLogL, self.vGrad, self.mInfo) = self.mgreml_model.ComputeLogLik(MgremlEstimator.bGradNewton, MgremlEstimator.bInfoNewton)
+                # scale dLogL, vGrad and information matrix back to normal scale
+                self.mInfo = self.mInfo*self.mgreml_model.data.iN
+                self.dLogL = self.dLogL*self.mgreml_model.data.iN
+                self.vGrad = self.vGrad*self.mgreml_model.data.iN
+            # invert the information matrix
+            (self.mSamplingV,_) = MgremlEstimator.PseudoInvertSymmetricMat(self.mInfo, dMinEigVal)
+        # if SEs are required
+        if bSEs:
+            # get indices and parameters
+            (vIndTG, vIndFG, vParamG, vIndTE, vIndFE, vParamE) = self.mgreml_model.model.GetSplitParamsAndIndices()
+            # compute gradient of heritability w.r.t. each parameter
+            vGradHSqG = 2*((1-self.vHSq[vIndTG])/vVY[vIndTG])*vParamG
+            vGradHSqE = -2*(self.vHSq[vIndTE]/vVY[vIndTE])*vParamE
+            vGradHSq  = np.hstack((vGradHSqG,vGradHSqE))
+            # scale sampling variance matrix accordingly
+            mGradHSq = np.outer(vGradHSq,vGradHSq)
+            mSamplingVGradHsq = np.multiply(self.mSamplingV,mGradHSq)
+            # define vector for SEs of heritabilities
+            self.vHSqSE = np.zeros(self.mgreml_model.data.iT)
+            # define matrix for SEs of correlations
+            self.mRhoGSE = np.zeros((self.mgreml_model.data.iT,self.mgreml_model.data.iT))
+            self.mRhoESE = np.zeros((self.mgreml_model.data.iT,self.mgreml_model.data.iT))
+            # for each trait
+            for i in range(0,self.mgreml_model.data.iT):
+                # get the variances of X
+                dVGX = vVG[i]
+                dVEX = vVE[i]
+                # find all parameter indices that correspond to current trait
+                vIndGX = np.array(np.where(vIndTG==i)).ravel()
+                vIndEX = np.array(np.where(vIndTE==i)).ravel()
+                vIndX  = np.hstack((vIndGX,self.mgreml_model.model.iParamsG+vIndEX))
+                # compute standard error of heritability estimate of given trait
+                self.vHSqSE[i] = math.sqrt((mSamplingVGradHsq[vIndX,:][:,vIndX]).sum())
+                # find all factors that affect X
+                vIndFGX = vIndFG[vIndGX]
+                vIndFEX = vIndFE[vIndEX]
+                # and find corresponding parameters
+                vParamGX = vParamG[vIndGX]
+                vParamEX = vParamE[vIndEX]
+                # get relevant submatrix of sampling variance matrix for SE correlation
+                mSamplingVGXX = self.mSamplingV[vIndGX,:][:,vIndGX]
+                mSamplingVEXX = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEX,:][:,self.mgreml_model.model.iParamsG+vIndEX]
+                # for each other trait
+                for j in range(i+1,self.mgreml_model.data.iT):
+                    # get the variance of the other trait
+                    dVGY = vVG[j]
+                    dVEY = vVE[j]
+                    # get the correlations
+                    dRhoGXY = self.mRhoG[i,j]
+                    dRhoEXY = self.mRhoE[i,j]
+                    # for the factors affecting X find corresponding parameters of Y
+                    vLambdaG = mCG[j,:][vIndFGX]
+                    vLambdaE = mCE[j,:][vIndFEX]
+                    # compute gradients of correlations with respect to parameters affecting X
+                    vGradRhoGX = (1/math.sqrt(dVGX*dVGY))*vLambdaG - (dRhoGXY/dVGX)*vParamGX
+                    vGradRhoEX = (1/math.sqrt(dVEX*dVEY))*vLambdaE - (dRhoEXY/dVEX)*vParamEX
+                    # find all parameter indices that correspond to Y
+                    vIndGY = np.array(np.where(vIndTG==j)).ravel()
+                    vIndEY = np.array(np.where(vIndTE==j)).ravel()
+                    # find all factors that affect Y
+                    vIndFGY = vIndFG[vIndGY]
+                    vIndFEY = vIndFE[vIndEY]
+                    # and find corresponding parameters
+                    vParamGY = vParamG[vIndGY]
+                    vParamEY = vParamE[vIndEY]
+                    # for the factors affecting Y find corresponding parameters of X
+                    vLambdaG = mCG[i,:][vIndFGY]
+                    vLambdaE = mCE[i,:][vIndFEY]
+                    # compute gradients of correlations with respect to parameters affecting X
+                    vGradRhoGY = (1/math.sqrt(dVGX*dVGY))*vLambdaG - (dRhoGXY/dVGY)*vParamGY
+                    vGradRhoEY = (1/math.sqrt(dVEX*dVEY))*vLambdaE - (dRhoEXY/dVEY)*vParamEY
+                    # get relevant submatrix of sampling variance matrix for SE of correlation
+                    mSamplingVGXY = self.mSamplingV[vIndGX,:][:,vIndGY]
+                    mSamplingVEXY = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEX,:][:,self.mgreml_model.model.iParamsG+vIndEY]
+                    mSamplingVGYY = self.mSamplingV[vIndGY,:][:,vIndGY]
+                    mSamplingVEYY = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEY,:][:,self.mgreml_model.model.iParamsG+vIndEY]
+                    # compute standard errors of correlations
+                    self.mRhoGSE[i,j] = math.sqrt(np.matmul(vGradRhoGX,np.matmul(mSamplingVGXX,vGradRhoGX.T)) + \
+                                   2*np.matmul(vGradRhoGX,np.matmul(mSamplingVGXY,vGradRhoGY.T)) + \
+                                   np.matmul(vGradRhoGY,np.matmul(mSamplingVGYY,vGradRhoGY.T)))
+                    self.mRhoESE[i,j] = math.sqrt(np.matmul(vGradRhoEX,np.matmul(mSamplingVEXX,vGradRhoEX.T)) + \
+                                   2*np.matmul(vGradRhoEX,np.matmul(mSamplingVEXY,vGradRhoEY.T)) + \
+                                   np.matmul(vGradRhoEY,np.matmul(mSamplingVEYY,vGradRhoEY.T)))
+                    self.mRhoGSE[j,i] = self.mRhoGSE[i,j]
+                    self.mRhoESE[j,i] = self.mRhoESE[i,j]

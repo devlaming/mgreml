@@ -39,18 +39,22 @@ class NestedEstimators:
             raise ValueError('There is at least one environment coefficient where the nested model is free and the alternative model is not')
         self.iDF = int((mBGunres.sum() + mBEunres.sum()) - (mBGres.sum() + mBEres.sum()))
         
-    def PerformBFGS(self, bInfoAtEnd = False):
+    def PerformBFGS(self, bInfoAtEnd = False, bSEs = False, bSamplingV = False):
         print('Estimating the nested model (null hypothesis):')
         self.estimator_res.PerformBFGS(bInfoAtEnd)
+        self.estimator_res.ComputeStatistics(bSEs, bSamplingV)
         print('Estimating the alternative model (alternative hypothesis):')
         self.estimator_unres.PerformBFGS(bInfoAtEnd)
+        self.estimator_unres.ComputeStatistics(bSEs, bSamplingV)
         self.PerformLRT()
         
-    def PerformNewton(self):
+    def PerformNewton(self, bSEs = False, bSamplingV = False):
         print('Estimating the nested model (null hypothesis):')
         self.estimator_res.PerformNewton()
+        self.estimator_res.ComputeStatistics(bSEs, bSamplingV)
         print('Estimating the alternative model (alternative hypothesis):')
         self.estimator_unres.PerformNewton()
+        self.estimator_unres.ComputeStatistics(bSEs, bSamplingV)
         self.PerformLRT()
         
     def PerformLRT(self):
@@ -59,7 +63,7 @@ class NestedEstimators:
             raise RuntimeError('Estimation of the nested model has not converged.')
         if self.estimator_unres.bNotConverged:
             raise RuntimeError('Estimation of the alternative model has not converged.')
-        self.dTestStat = -2*(self.estimator_res.dLogL - self.estimator_unres.dLogL)*self.estimator_res.mgreml_model.data.iN
+        self.dTestStat = -2*(self.estimator_res.dLogL - self.estimator_unres.dLogL)
         print('Chi-square test statistic is ' + str(self.dTestStat))
         self.dPval = 1-chi2.cdf(self.dTestStat, self.iDF)
         print('P-value = ' + str(self.dPval))
