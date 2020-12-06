@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import pickle
-from mgreml.analysis import estimator, comparison
+from mgreml.analysis import comparison
 from mgreml.data import writer
 
 def TestMgremlEstimationAndWriter():
@@ -17,19 +17,6 @@ def TestMgremlEstimationAndWriter():
     with open(sFileName, 'rb') as handle:
         MyMgremlData = pickle.load(handle)
     print('Estimating a single model.')
-    # create an Mgreml estimator
-    MyMgremlEstimator = estimator.MgremlEstimator(MyMgremlData, bBFGS = bBFGS, bSEs = bSEs, bReturnFullModelSpecs = bReturnFullModelSpecs)
-    # perform BFGS
-    MyMgremlEstimator.PerformEstimation()
-    # done testing
-    print('Done estimating. Now writing results.')
-    # create an Mgreml writer
-    MyMgremlWriter = writer.DataWriter(MyMgremlEstimator, sPrefix = 'myresults.')
-    MyMgremlWriter.WriteRho()
-    MyMgremlWriter.WriteHSq()
-    MyMgremlWriter.WriteLogLik()
-    MyMgremlWriter.WriteEstimatesGLS()
-    MyMgremlWriter.WriteModelCoefficients()
     # enforce zero genetic correlations: one unique factor per unique traits
     mGenBinFYres = np.eye(MyMgremlData.iT).astype(int)
     lFactors = ['factor ' + str(x) for x in np.arange(MyMgremlData.iT)]
