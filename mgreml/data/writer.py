@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from mgreml.analysis import comparison
 from mgreml.analysis import estimator
 
@@ -14,6 +15,8 @@ class DataWriter:
     sSE = 'SE.'
     sLL = 'loglik.'
     sLRT = 'LRT.'
+    sGLSest = 'GLS.est.'
+    sGLSvar = 'GLS.var.'
     
     def __init__(self, estimates, sPrefix = 'results.'):
         self.sPrefix = sPrefix
@@ -130,8 +133,78 @@ class DataWriter:
                     oLLfile.write('Estimates converged after ' + str(self.estimates.iIter) + ' BFGS iterations \n')
                 else:
                     oLLfile.write('Estimates converged after ' + str(self.estimates.iIter) + ' Newton iterations \n')
+    
     def WriteEstimatesGLS(self):
-        pass
+        if self.bNested:
+            # throw error if no covariates in model
+            if not(self.estimates.estimator_unres.mgreml_model.data.bCovs):
+                raise TypeError('Trying to write GLS estimates, while no covariates were given')
+            # get labels of the phenotypes and covariates
+            indPhenos = pd.Index(self.estimates.estimator_unres.mgreml_model.data.lPhenos)
+            indCovs = pd.Index(self.estimates.estimator_unres.mgreml_model.data.lCovs)
+            # if not the same covariates
+            if not(self.estimates.estimator_unres.mgreml_model.data.bSameCovs):
+                # get the binary matrix inidicating which covariate
+                # applies to which trait
+                mBinXY = self.estimates.estimator_unres.mgreml_model.data.mBinXY
+            else:
+                mBinXY = np.ones((len(indPhenos),len(indCovs))).astype(int)
+            # find trait and covariate indices of active covariates
+            (vIndT,vIndC) = np.where(mBinXY==1)
+            # for each active covariate, find labels of phenos and covs
+            indAllPhenos = indPhenos[vIndT]
+            indAllCovs = indCovs[vIndC]
+            # get GLS estimates
+            vBetaGLS0 = self.estimates.estimator_res.mgreml_model.vBetaGLS
+            mVarGLS0 = self.estimates.estimator_res.mgreml_model.mVarGLS
+            vBetaGLSA = self.estimates.estimator_unres.mgreml_model.vBetaGLS
+            mVarGLSA = self.estimates.estimator_unres.mgreml_model.mVarGLS
+            # construct dataframes
+            dfBetaGLS0 = pd.DataFrame(vBetaGLS0, index=[indAllPhenos,indAllCovs])
+            dfBetaGLSA = pd.DataFrame(vBetaGLSA, index=[indAllPhenos,indAllCovs])
+            dfVarGLS0 = pd.DataFrame(mVarGLS0, index=[indAllPhenos,indAllCovs], columns=[indAllPhenos,indAllCovs])
+            dfVarGLSA = pd.DataFrame(mVarGLSA, index=[indAllPhenos,indAllCovs], columns=[indAllPhenos,indAllCovs])
+            # set output names
+            sBetaGLS0 = DataWriter.sPath + DataWriter.sGLSest + DataWriter.sH0 + self.sPrefix + DataWriter.sExtension
+            sBetaGLSA = DataWriter.sPath + DataWriter.sGLSest + DataWriter.sHA + self.sPrefix + DataWriter.sExtension
+            sVarGLS0 = DataWriter.sPath + DataWriter.sGLSvar + DataWriter.sH0 + self.sPrefix + DataWriter.sExtension
+            sVarGLSA = DataWriter.sPath + DataWriter.sGLSvar + DataWriter.sHA + self.sPrefix + DataWriter.sExtension
+            # write dataframes
+            dfBetaGLS0.to_csv(sBetaGLS0)
+            dfBetaGLSA.to_csv(sBetaGLSA)
+            dfVarGLS0.to_csv(sVarGLS0)
+            dfVarGLSA.to_csv(sVarGLSA)
+        else:
+            # throw error if no covariates in model
+            if not(self.estimates.mgreml_model.data.bCovs):
+                raise TypeError('Trying to write GLS estimates, while no covariates were given')
+            # get labels of the phenotypes and covariates
+            indPhenos = pd.Index(self.estimates.mgreml_model.data.lPhenos)
+            indCovs = pd.Index(self.estimates.mgreml_model.data.lCovs)
+            # if not the same covariates
+            if not(self.estimates.mgreml_model.data.bSameCovs):
+                # get the binary matrix inidicating which covariate
+                # applies to which trait
+                mBinXY = self.estimates.mgreml_model.data.mBinXY
+            else:
+                mBinXY = np.ones((len(indPhenos),len(indCovs))).astype(int)
+            # find trait and covariate indices of active covariates
+            (vIndT,vIndC) = np.where(mBinXY==1)
+            # for each active covariate, find labels of phenos and covs
+            indAllPhenos = indPhenos[vIndT]
+            indAllCovs = indCovs[vIndC]
+            # get GLS estimates
+            vBetaGLS = self.estimates.mgreml_model.vBetaGLS
+            mVarGLS = self.estimates.mgreml_model.mVarGLS
+            # construct dataframes
+            dfBetaGLS = pd.DataFrame(vBetaGLS, index=[indAllPhenos,indAllCovs])
+            dfVarGLS = pd.DataFrame(mVarGLS, index=[indAllPhenos,indAllCovs], columns=[indAllPhenos,indAllCovs])
+            # set output names
+            sBetaGLS = DataWriter.sPath + DataWriter.sGLSest + self.sPrefix + DataWriter.sExtension
+            sVarGLS = DataWriter.sPath + DataWriter.sGLSvar + self.sPrefix + DataWriter.sExtension
+            # write dataframes
+            dfBetaGLS.to_csv(sBetaGLS)
+            dfVarGLS.to_csv(sVarGLS)
     
     def WriteRho(self):
         if self.bNested:
