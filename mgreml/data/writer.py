@@ -17,6 +17,8 @@ class DataWriter:
     sLRT = 'LRT.'
     sGLSest = 'GLS.est.'
     sGLSvar = 'GLS.var.'
+    sCoeff = 'coeff.'
+    sCoeffvar = 'coeff.var.'
     
     def __init__(self, estimates, sPrefix = 'results.'):
         self.sPrefix = sPrefix
@@ -96,7 +98,81 @@ class DataWriter:
             oLRTfile.write('with P-value = ' + str(self.estimates.dPval) + '\n')
     
     def WriteModelCoefficients(self):
-        pass
+        if self.bNested:
+            # get all parameter estimates, with indices of traits and factors
+            (vIndTG_unres, vIndFG_unres, vParamG_unres, vIndTE_unres, vIndFE_unres, vParamE_unres) = self.estimates.estimator_unres.mgreml_model.model.GetSplitParamsAndIndices()
+            (vIndTG_res, vIndFG_res, vParamG_res, vIndTE_res, vIndFE_res, vParamE_res) = self.estimates.estimator_res.mgreml_model.model.GetSplitParamsAndIndices()
+            # get labels of the phenotypes and factors
+            indPhenos_unres = pd.Index(self.estimates.estimator_unres.mgreml_model.data.lPhenos)
+            indPhenos_res = pd.Index(self.estimates.estimator_res.mgreml_model.data.lPhenos)
+            indFG_unres = pd.Index(self.estimates.estimator_unres.mgreml_model.model.genmod.lFactors)
+            indFG_res = pd.Index(self.estimates.estimator_res.mgreml_model.model.genmod.lFactors)
+            indFE_unres = pd.Index(self.estimates.estimator_unres.mgreml_model.model.envmod.lFactors)
+            indFE_res = pd.Index(self.estimates.estimator_res.mgreml_model.model.envmod.lFactors)
+            # for each active coefficient, find labels of phenos and factors
+            indAllPhenosG_unres = indPhenos_unres[vIndTG_unres]
+            indAllPhenosG_res = indPhenos_res[vIndTG_res]
+            indAllPhenosE_unres = indPhenos_unres[vIndTE_unres]
+            indAllPhenosE_res = indPhenos_res[vIndTE_res]
+            indAllFG_unres = indFG_unres[vIndFG_unres]
+            indAllFG_res = indFG_res[vIndFG_res]
+            indAllFE_unres = indFE_unres[vIndFE_unres]
+            indAllFE_res = indFE_res[vIndFE_res]
+            # convert to lists
+            lAllPhenos_unres = indAllPhenosG_unres.to_list()
+            lAllPhenos_res = indAllPhenosG_res.to_list()
+            lAllPhenos_unres.extend(indAllPhenosE_unres.to_list())
+            lAllPhenos_res.extend(indAllPhenosE_res.to_list())
+            lAllF_unres = indAllFG_unres.to_list()
+            lAllF_res = indAllFG_res.to_list()
+            lAllF_unres.extend(indAllFE_unres.to_list())
+            lAllF_res.extend(indAllFE_res.to_list())
+            # concatenate estimates
+            vParam_unres = np.hstack((vParamG_unres, vParamE_unres))
+            vParam_res = np.hstack((vParamG_res, vParamE_res))
+            # construct dataframes
+            dfParams_unres = pd.DataFrame(vParam_unres, index=[lAllPhenos_unres,lAllF_unres])
+            dfParams_res = pd.DataFrame(vParam_res, index=[lAllPhenos_res,lAllF_res])
+            dfSamplingV_unres = pd.DataFrame(self.estimates.estimator_unres.mSamplingV, index=[lAllPhenos_unres,lAllF_unres], columns=[lAllPhenos_unres,lAllF_unres])
+            dfSamplingV_res = pd.DataFrame(self.estimates.estimator_res.mSamplingV, index=[lAllPhenos_res,lAllF_res], columns=[lAllPhenos_res,lAllF_res])
+            # set output names
+            sParams0 = DataWriter.sPath + DataWriter.sCoeff + DataWriter.sH0 + self.sPrefix + DataWriter.sExtension
+            sParamsA = DataWriter.sPath + DataWriter.sCoeff + DataWriter.sHA + self.sPrefix + DataWriter.sExtension
+            sSamplingV0 = DataWriter.sPath + DataWriter.sCoeffvar + DataWriter.sH0 + self.sPrefix + DataWriter.sExtension
+            sSamplingVA = DataWriter.sPath + DataWriter.sCoeffvar + DataWriter.sHA + self.sPrefix + DataWriter.sExtension
+            # write dataframes
+            dfParams_unres.to_csv(sParamsA)
+            dfParams_res.to_csv(sParams0)
+            dfSamplingV_unres.to_csv(sSamplingVA)
+            dfSamplingV_res.to_csv(sSamplingV0)
+        else:
+            # get all parameter estimates, with indices of traits and factors
+            (vIndTG, vIndFG, vParamG, vIndTE, vIndFE, vParamE) = self.estimates.mgreml_model.model.GetSplitParamsAndIndices()
+            # get labels of the phenotypes and factors
+            indPhenos = pd.Index(self.estimates.mgreml_model.data.lPhenos)
+            indFG = pd.Index(self.estimates.mgreml_model.model.genmod.lFactors)
+            indFE = pd.Index(self.estimates.mgreml_model.model.envmod.lFactors)
+            # for each active coefficient, find labels of phenos and factors
+            indAllPhenosG = indPhenos[vIndTG]
+            indAllPhenosE = indPhenos[vIndTE]
+            indAllFG = indFG[vIndFG]
+            indAllFE = indFE[vIndFE]
+            # convert to lists
+            lAllPhenos = indAllPhenosG.to_list()
+            lAllPhenos.extend(indAllPhenosE.to_list())
+            lAllF = indAllFG.to_list()
+            lAllF.extend(indAllFE.to_list())
+            # concatenate estimates
+            vParam = np.hstack((vParamG, vParamE))
+            # construct dataframes
+            dfParams = pd.DataFrame(vParam, index=[lAllPhenos,lAllF])
+            dfSamplingV = pd.DataFrame(self.estimates.mSamplingV, index=[lAllPhenos,lAllF], columns=[lAllPhenos,lAllF])
+            # set output names
+            sParams = DataWriter.sPath + DataWriter.sCoeff + self.sPrefix + DataWriter.sExtension
+            sSamplingV = DataWriter.sPath + DataWriter.sCoeffvar + self.sPrefix + DataWriter.sExtension
+            # write dataframes
+            dfParams.to_csv(sParams)
+            dfSamplingV.to_csv(sSamplingV)
     
     def WriteLogLik(self):
         if self.bNested:
