@@ -11,10 +11,10 @@ class StructuralModel:
     dLambdaInit = 1E-6
     # set minimum required squared sum of coefficients for each factor
     # when diagnosing issues
-    dSSTOL  = 1E-9
+    dSSTOL  = 1E-4
     # set maximum Rsq of coefficients for each factor w.r.t. all other factors
     # when diagnosing issues
-    dRSqTOL = 1-(1E-9)
+    dRSqTOL = 0.99
     
     def __init__(self, mdData, dfBinFY = None, sType=''):
         # check if model has been specified
@@ -132,17 +132,17 @@ class StructuralModel:
         self.vIndT = self.vIndT.astype(int)
         self.vIndF = self.vIndF.astype(int)
         
-    def DiagnoseProblem(self, sType=''):
+    def DiagnoseProblem(self, vNew = None):
         # get coefficient matrix
-        mC = self.GetC()
+        mC = self.GetC(vNew)
         # for each factor
         for f in range(0,self.iF):
             # compute squared sum of coefficients
             dSS = np.power(mC[:,f],2).sum()
             if (dSS < StructuralModel.dSSTOL): # if squared sum too low
                 # print warning
-                sWarning = 'COEFFICIENTS FOR ' + sType + ' FACTOR ' + str(f) + ' ARE ALL CLOSE TO ZERO. I.E. SQUARED SUM OF COEFFICIENTS LESS THAN ' + str(StructuralModel.dSSTOL)
-                raise ValueError(sWarning)
+                sWarning = 'Coefficients for ' + self.lFactors[f] + ' are too close to zero. Squared sum of coefficients is less than ' + str(StructuralModel.dSSTOL) + '.'
+                print(sWarning)
             # if there are multiple factors
             if (self.iF > 1):
                 # take submatrix of all coefficients, except for current factor
@@ -156,31 +156,8 @@ class StructuralModel:
                 dRSq = 1 - ((np.power(vR,2).sum())/(np.power(vC,2).sum()))
                 if (dRSq > StructuralModel.dRSqTOL): # if RSq too high
                     # print warning
-                    sWarning = 'COEFFICIENTS FOR ' + sType + ' FACTOR ' + str(f) + ' ARE MULTICOLLINEAR W.R.T. COEFFICIENTS FOR OTHER FACTORS. I.E. R-SQUARED EXCEEDS ' + str(100*StructuralModel.dRSqTOL) + '%'
-                    raise ValueError(sWarning)
-        # for each phenotype
-        for t in range(0,self.iT):
-            # compute squared sum of coefficients
-            dSS = np.power(mC[t,:],2).sum()
-            if (dSS < StructuralModel.dSSTOL): # if squared sum too low
-                # print warning
-                sWarning = sType + ' COEFFICIENTS FOR PHENOTYPE ' + str(t) + ' ARE ALL CLOSE TO ZERO. I.E. SQUARED SUM OF COEFFICIENTS LESS THAN ' + str(StructuralModel.dSSTOL)
-                raise ValueError(sWarning)
-            # if there are multiple phenotypes
-            if (self.iT > 1):
-                # take submatrix of all phenotypes, except for current phenotype
-                mCS = np.hstack((mC[0:t,:].T,mC[t+1:,:].T))
-                # get coefficients for current factor
-                vC = mC[t,:].T
-                # compute OLS residual for current factor w.r.t. other factors
-                vR = vC - (mCS@(np.linalg.inv(mCS.T@mCS)@(mCS.T@vC)))
-                # compute RSq of regression of current factor coefficients on 
-                # all other factor coefficients
-                dRSq = 1 - ((np.power(vR,2).sum())/(np.power(vC,2).sum()))
-                if (dRSq > StructuralModel.dRSqTOL): # if RSq too high
-                    # print warning
-                    sWarning = sType + ' COEFFICIENTS FOR PHENOTYPE ' + str(t) + ' ARE MULTICOLLINEAR W.R.T. COEFFICIENTS FOR OTHER PHENOTYPES. I.E. R-SQUARED EXCEEDS ' + str(100*StructuralModel.dRSqTOL) + '%'
-                    raise ValueError(sWarning)        
+                    sWarning = 'Coefficients for ' + self.lFactors[f] + ' are multicollinear w.r.t. the coefficients for other factors. R-squared exceeds ' + str(100*StructuralModel.dRSqTOL) + '%.'
+                    print(sWarning)
     
     def GetVandC(self, vNew = None):
         # get matrix of coefficients
@@ -225,15 +202,12 @@ class GeneticModel(StructuralModel):
     # as to emulate initial heritabilities of 20%
     dWeight = math.sqrt(0.2)
     # string describing type of model
-    sType = 'GENETIC'
+    sType = 'genetic'
     
     def __init__(self, mdData, dfBinFY = None):
         super().__init__(mdData, dfBinFY, GeneticModel.sType)
         self.vParam = GeneticModel.dWeight*self.vParam
         self.lFactors = ['genetic ' + str(x) for x in self.lFactors]
-        
-    def DiagnoseProblem(self):
-        super().DiagnoseProblem(GeneticModel.sType)
 
 class EnvironmentModel(StructuralModel):
     
@@ -241,7 +215,7 @@ class EnvironmentModel(StructuralModel):
     # as to emulate initial heritabilities of 80%
     dWeight = math.sqrt(0.8)
     # string describing type of model
-    sType = 'ENVIRONMENT'
+    sType = 'environment'
     
     def __init__(self, mdData, dfBinFY = None):
         super().__init__(mdData, dfBinFY, EnvironmentModel.sType)
@@ -250,9 +224,6 @@ class EnvironmentModel(StructuralModel):
         # if less environment factors than traits: crash, as this is incompatible with MGREML
         if self.iF < self.iT:
             raise ValueError('You have specified less environmental factors than traits. This is not permitted in MGREML.')
-            
-    def DiagnoseProblem(self):
-        super().DiagnoseProblem(EnvironmentModel.sType)
 
 class CombinedModel:
     
@@ -357,7 +328,7 @@ class MgremlModel:
         # abort if eigenvalues of environment variance matrix too low
         if min(vPhi) <= MgremlModel.dMinEigVal:
             print('The environment covariance matrix is rank deficient. Possible reasons: (1) multicollinearity between phenotypes, (2) a poorly specified model, and/or (3) poor starting values.')
-            self.model.envmod.DiagnoseProblem()
+            self.model.envmod.DiagnoseProblem(vNew[iParamsG:])
             raise ValueError('Rank deficient environment covariance matrix')
         # set the outer product of the vector of one over EVs
         vPhiNegSqrt  = np.power(vPhi,-0.5)
