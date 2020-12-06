@@ -96,8 +96,40 @@ class DataWriter:
         pass
     
     def WriteLogLik(self):
-        pass
-    
+        if self.bNested:
+            # set filenames
+            sLL0 = DataWriter.sPath + DataWriter.sLL + DataWriter.sH0 + self.sPrefix + DataWriter.sExtension
+            sLLA = DataWriter.sPath + DataWriter.sLL + DataWriter.sHA + self.sPrefix + DataWriter.sExtension
+            with open(sLL0, 'a') as oLLfile:
+                oLLfile.write('Log-likelihood of nested model (null hypothesis) = ' + str(self.estimates.estimator_res.dLogL) + ',\n')
+                oLLfile.write('based on data on ' + str(self.estimates.estimator_res.mgreml_model.data.iT) + ' traits and ' + str(self.estimates.estimator_res.mgreml_model.data.iN) + ' observations,\n')
+                oLLfile.write('with a model consisting of ' + str(self.estimates.estimator_res.mgreml_model.model.genmod.iF) + ' genetic factors and ' + str(self.estimates.estimator_res.mgreml_model.model.envmod.iF) + ' environment factors,\n')
+                oLLfile.write('comprising ' + str(self.estimates.estimator_res.mgreml_model.model.iParamsG) + ' free genetic factor coefficients and ' + str(self.estimates.estimator_res.mgreml_model.model.iParamsE) + ' free environment factor coefficients in turn.\n')
+                if self.estimates.estimator_res.bBFGS:
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator_res.iIter) + ' BFGS iterations \n')
+                else:
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator_res.iIter) + ' Newton iterations \n')
+            with open(sLLA, 'a') as oLLfile:
+                oLLfile.write('Log-likelihood of parent model (alternative hypothesis) = ' + str(self.estimates.estimator_unres.dLogL) + ',\n')
+                oLLfile.write('based on data on ' + str(self.estimates.estimator_unres.mgreml_model.data.iT) + ' traits and ' + str(self.estimates.estimator_unres.mgreml_model.data.iN) + ' observations,\n')
+                oLLfile.write('with a model consisting of ' + str(self.estimates.estimator_unres.mgreml_model.model.genmod.iF) + ' genetic factors and ' + str(self.estimates.estimator_unres.mgreml_model.model.envmod.iF) + ' environment factors,\n')
+                oLLfile.write('comprising ' + str(self.estimates.estimator_unres.mgreml_model.model.iParamsG) + ' free genetic factor coefficients and ' + str(self.estimates.estimator_unres.mgreml_model.model.iParamsE) + ' free environment factor coefficients in turn.\n')
+                if self.estimates.estimator_unres.bBFGS:
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator_unres.iIter) + ' BFGS iterations \n')
+                else:
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator_unres.iIter) + ' Newton iterations \n')
+        else:
+            # set filenames
+            sLL = DataWriter.sPath + DataWriter.sLL + self.sPrefix + DataWriter.sExtension
+            with open(sLL, 'a') as oLLfile:
+                oLLfile.write('Log-likelihood of model = ' + str(self.estimates.dLogL) + ',\n')
+                oLLfile.write('based on data on ' + str(self.estimates.mgreml_model.data.iT) + ' traits and ' + str(self.estimates.mgreml_model.data.iN) + ' observations,\n')
+                oLLfile.write('with a model consisting of ' + str(self.estimates.mgreml_model.model.genmod.iF) + ' genetic factors and ' + str(self.estimates.mgreml_model.model.envmod.iF) + ' environment factors,\n')
+                oLLfile.write('comprising ' + str(self.estimates.mgreml_model.model.iParamsG) + ' free genetic factor coefficients and ' + str(self.estimates.mgreml_model.model.iParamsE) + ' free environment factor coefficients in turn.\n')
+                if self.estimates.bBFGS:
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.iIter) + ' BFGS iterations \n')
+                else:
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.iIter) + ' Newton iterations \n')
     def WriteEstimatesGLS(self):
         pass
     
