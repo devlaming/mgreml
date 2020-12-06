@@ -28,7 +28,8 @@ class MgremlEstimator:
     # each iter
     bSilentNewton = True
     
-    def __init__(self, mdData, dfGenBinFY = None, dfEnvBinFY = None, bBFGS = True, bStoreIters = False, bSEs = False, bSamplingV = False):
+    def __init__(self, mdData, dfGenBinFY = None, dfEnvBinFY = None, bBFGS = True, bStoreIters = False, bSEs = False, bReturnFullModelSpecs = False):
+        # initialise mgreml model
         self.mgreml_model = model.MgremlModel(mdData, dfGenBinFY, dfEnvBinFY)
         # set iteration counter
         self.iIter = 0
@@ -42,9 +43,11 @@ class MgremlEstimator:
         self.bBFGS = bBFGS
         # set whether to store results from each iter
         self.bStoreIters = bStoreIters
-        # set whether to compute standard errors and/or sampling V at end
+        # set whether to compute standard errors
         self.bSEs = bSEs
-        self.bSamplingV = bSamplingV
+        # set whether to return all parameters estimates
+        # and sampling variance when done
+        self.bReturnFullModelSpecs = bReturnFullModelSpecs
         
     def PerformEstimation(self):
         if self.bBFGS:
@@ -56,7 +59,7 @@ class MgremlEstimator:
         
     def PerformBFGS(self):
         # determine whether we need info matrix at end
-        bInfoAtEnd = (self.bSEs | self.bSamplingV)
+        bInfoAtEnd = (self.bSEs | self.bReturnFullModelSpecs)
         # use two strikes out system to reset inverse hessian to -I,
         # if two subsequent iterations produce to little change
         bStrike1 = False
@@ -347,7 +350,7 @@ class MgremlEstimator:
         # compute correlations
         self.mRhoG = np.multiply(mVG,mOneOverSqrtVG)
         self.mRhoE = np.multiply(mVE,mOneOverSqrtVE)
-        if self.bSEs or self.bSamplingV:
+        if self.bSEs or self.bReturnFullModelSpecs:
             # set lowest eigenvalue permitted in info matrix per N to 1E-9
             dMinEigValPerN = 1E-18
             # scale back to normal scale

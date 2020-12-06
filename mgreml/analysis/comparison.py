@@ -6,9 +6,9 @@ from mgreml.analysis import estimator
 
 class NestedEstimators:
     
-    def __init__(self, mdData, dfNestedGenBinFY = None, dfNestedEnvBinFY = None, dfGenBinFY = None, dfEnvBinFY = None, bBFGS = True, bStoreIters= False, bSEs = False, bSamplingV = False):
-        self.estimator_unres = estimator.MgremlEstimator(mdData, dfGenBinFY, dfEnvBinFY, bBFGS, bStoreIters, bSEs, bSamplingV)
-        self.estimator_res = estimator.MgremlEstimator(mdData, dfNestedGenBinFY, dfNestedEnvBinFY, bBFGS, bStoreIters, bSEs, bSamplingV)
+    def __init__(self, mdData, dfNestedGenBinFY = None, dfNestedEnvBinFY = None, dfGenBinFY = None, dfEnvBinFY = None, bBFGS = True, bStoreIters= False, bSEs = False, bReturnFullModelSpecs = False):
+        self.estimator_unres = estimator.MgremlEstimator(mdData, dfGenBinFY, dfEnvBinFY, bBFGS, bStoreIters, bSEs, bReturnFullModelSpecs)
+        self.estimator_res = estimator.MgremlEstimator(mdData, dfNestedGenBinFY, dfNestedEnvBinFY, bBFGS, bStoreIters, bSEs, bReturnFullModelSpecs)
         self.CheckModelsNested()
         
     def CheckModelsNested(self):

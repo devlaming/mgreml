@@ -8,6 +8,8 @@ def TestMgremlEstimationAndWriter():
     # compute standard errors and use BFGS
     bBFGS = True
     bSEs = True
+    # return complete specification
+    bReturnFullModelSpecs = True
     # set filenames
     sFilepath = './temp/'
     sFileName = sFilepath + 'MyMgremlData.pkl'
@@ -16,7 +18,7 @@ def TestMgremlEstimationAndWriter():
         MyMgremlData = pickle.load(handle)
     print('Estimating a single model.')
     # create an Mgreml estimator
-    MyMgremlEstimator = estimator.MgremlEstimator(MyMgremlData, bBFGS = bBFGS, bSEs = bSEs)
+    MyMgremlEstimator = estimator.MgremlEstimator(MyMgremlData, bBFGS = bBFGS, bSEs = bSEs, bReturnFullModelSpecs = bReturnFullModelSpecs)
     # perform BFGS
     MyMgremlEstimator.PerformEstimation()
     # done testing
@@ -31,7 +33,7 @@ def TestMgremlEstimationAndWriter():
     # construct dataframe
     dfGenBinFYres = pd.DataFrame(mGenBinFYres,index=MyMgremlData.lPhenos,columns=lFactors)
     # construct estimators for nested models
-    MyNestedEstimators = comparison.NestedEstimators(MyMgremlData, dfNestedGenBinFY = dfGenBinFYres, bBFGS = bBFGS, bSEs = bSEs)
+    MyNestedEstimators = comparison.NestedEstimators(MyMgremlData, dfNestedGenBinFY = dfGenBinFYres, bBFGS = bBFGS, bSEs = bSEs, bReturnFullModelSpecs = bReturnFullModelSpecs)
     print('Estimating a nested model versus its parent.')
     # apply BFGS to nested models
     MyNestedEstimators.PerformEstimation()
