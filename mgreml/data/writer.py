@@ -12,6 +12,8 @@ class DataWriter:
     sH0 = 'null.'
     sHA = 'alt.'
     sSE = 'SE.'
+    sLL = 'loglik.'
+    sLRT = 'LRT.'
     
     def __init__(self, estimates, sPrefix = 'results.'):
         self.sPrefix = sPrefix
@@ -80,6 +82,25 @@ class DataWriter:
                 # write dataframes
                 dfHSqSE.to_csv(sHSqSE)
 
+    def WriteLRT(self):
+        if not(self.bNested):
+            raise TypeError('Trying to write results for likelihood-ratio test, while no nested model has been estimated')
+        # set filename
+        sLRTfile = DataWriter.sPath + DataWriter.sLRT + self.sPrefix + DataWriter.sExtension
+        with open(sLRTfile, 'a') as oLRTfile:
+            oLRTfile.write('Results of likelihood-ratio test with ' + str(self.estimates.iDF) + ' degrees of freedom:\n')
+            oLRTfile.write('Chi-square test statistic is ' + str(self.estimates.dTestStat) + '\n')
+            oLRTfile.write('with P-value = ' + str(self.estimates.dPval) + '\n')
+    
+    def WriteModelCoefficients(self):
+        pass
+    
+    def WriteLogLik(self):
+        pass
+    
+    def WriteEstimatesGLS(self):
+        pass
+    
     def WriteRho(self):
         if self.bNested:
             # get correlation matrices 

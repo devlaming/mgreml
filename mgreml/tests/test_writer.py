@@ -43,3 +43,4 @@ def TestMgremlEstimationAndWriter():
     MyMgremlWriter = writer.DataWriter(MyNestedEstimators, sPrefix = 'myresults.')
     MyMgremlWriter.WriteRho()
     MyMgremlWriter.WriteHSq()
+    MyMgremlWriter.WriteLRT()
