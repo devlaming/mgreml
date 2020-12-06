@@ -24,6 +24,7 @@ def TestMgremlEstimationAndWriter():
     # create an Mgreml writer
     MyMgremlWriter = writer.DataWriter(MyMgremlEstimator, sPrefix = 'myresults.')
     MyMgremlWriter.WriteRho()
+    MyMgremlWriter.WriteHSq()
     # enforce zero genetic correlations: one unique factor per unique traits
     mGenBinFYres = np.eye(MyMgremlData.iT).astype(int)
     lFactors = ['factor ' + str(x) for x in np.arange(MyMgremlData.iT)]
@@ -39,3 +40,4 @@ def TestMgremlEstimationAndWriter():
     # create an Mgreml writer
     MyMgremlWriter = writer.DataWriter(MyNestedEstimators, sPrefix = 'myresults.')
     MyMgremlWriter.WriteRho()
+    MyMgremlWriter.WriteHSq()

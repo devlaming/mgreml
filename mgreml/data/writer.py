@@ -27,7 +27,59 @@ class DataWriter:
             raise ValueError('Trying to write output results while estimates have not converged')
         if not(self.estimates.IsDone()):
             raise ValueError('Trying to write output results while final statistic (e.g. genetic correlations) have not been calculated')
-            
+       
+    def WriteHSq(self):
+        if self.bNested:
+            # get heritabilities 
+            vHSq0 = self.estimates.estimator_res.vHSq
+            vHSqA = self.estimates.estimator_unres.vHSq
+            # get trait labels
+            lPhenos = self.estimates.estimator_unres.mgreml_model.data.lPhenos
+            # set dataframes
+            dfHSq0 = pd.DataFrame(vHSq0,index=lPhenos)
+            dfHSqA = pd.DataFrame(vHSqA,index=lPhenos)
+            # set filenames
+            sHSq0 = DataWriter.sPath + DataWriter.sH2 + DataWriter.sH0 + self.sPrefix + DataWriter.sExtension
+            sHSqA = DataWriter.sPath + DataWriter.sH2 + DataWriter.sHA + self.sPrefix + DataWriter.sExtension
+            # write dataframes
+            dfHSq0.to_csv(sHSq0)
+            dfHSqA.to_csv(sHSqA)
+            # if SEs are desired, store them
+            if (self.estimates.estimator_unres.bSEs):
+                # get heritability standard errors 
+                vHSq0SE = self.estimates.estimator_res.vHSqSE
+                vHSqASE = self.estimates.estimator_unres.vHSqSE
+                # set dataframes
+                dfHSq0SE = pd.DataFrame(vHSq0SE,index=lPhenos)
+                dfHSqASE = pd.DataFrame(vHSqASE,index=lPhenos)
+                # set filenames
+                sHSq0SE = DataWriter.sPath + DataWriter.sH2 + DataWriter.sH0 + DataWriter.sSE + self.sPrefix + DataWriter.sExtension
+                sHSqASE = DataWriter.sPath + DataWriter.sH2 + DataWriter.sHA + DataWriter.sSE + self.sPrefix + DataWriter.sExtension
+                # write dataframes
+                dfHSq0SE.to_csv(sHSq0SE)
+                dfHSqASE.to_csv(sHSqASE)
+        else:
+            # get heritability
+            vHSq = self.estimates.vHSq
+            # get trait labels
+            lPhenos = self.estimates.mgreml_model.data.lPhenos
+            # set dataframe
+            dfHSq = pd.DataFrame(vHSq,index=lPhenos)
+            # set filename
+            sHSq = DataWriter.sPath + DataWriter.sH2 + self.sPrefix + DataWriter.sExtension
+            # write dataframe
+            dfHSq.to_csv(sHSq)
+            # if SEs are desired, store them
+            if (self.estimates.bSEs):
+                # get heritability standard errors 
+                vHSqSE = self.estimates.vHSqSE
+                # set dataframe
+                dfHSqSE = pd.DataFrame(vHSqSE,index=lPhenos)
+                # set filenames
+                sHSqSE = DataWriter.sPath + DataWriter.sH2 + DataWriter.sSE + self.sPrefix + DataWriter.sExtension
+                # write dataframes
+                dfHSqSE.to_csv(sHSqSE)
+
     def WriteRho(self):
         if self.bNested:
             # get correlation matrices 
