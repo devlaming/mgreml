@@ -327,9 +327,19 @@ class MgremlModel:
         (vPhi,mQ) = np.linalg.eigh(mVE)
         # abort if eigenvalues of environment variance matrix too low
         if min(vPhi) <= MgremlModel.dMinEigVal:
-            print('The environment covariance matrix is rank deficient. Possible reasons: (1) multicollinearity between phenotypes, (2) a poorly specified model, and/or (3) poor starting values.')
-            self.model.envmod.DiagnoseProblem(vNew[iParamsG:])
-            raise ValueError('Rank deficient environment covariance matrix')
+            # if either gradient descent, BFGS or Newton step is involved here
+            # MgremlEstimator is already at a rank deficient point in
+            # parameter space, so MGREML's toast then; return error
+            if bGrad:
+                print('The environment covariance matrix is rank deficient. Possible reasons: (1) multicollinearity between phenotypes, (2) a poorly specified model, and/or (3) poor starting values.')
+                self.model.envmod.DiagnoseProblem(vNew[iParamsG:])
+                raise ValueError('Rank deficient environment covariance matrix')
+            else: # else, we are just in a golden section step
+                print('Golden section tries set of parameters with rank deficient environment covariance matrix. Setting log-likelihood to -inf for this set of parameters. Interpret results with caution if this warning persists up until the last iteration!')
+                # steer clear from this point: set logL to -infinity
+                dLogL = -np.infty
+                # return logl
+                return dLogL
         # set the outer product of the vector of one over EVs
         vPhiNegSqrt  = np.power(vPhi,-0.5)
         mOuterPhiInv = np.outer(vPhiNegSqrt,vPhiNegSqrt)
@@ -416,9 +426,8 @@ class MgremlModel:
                 mKronInvFI = np.zeros((iT, iK, iT, iK), mInvF.dtype)
                 for j in range(0,iK): mKronInvFI[:,j,:,j] = mInvF
                 mKronInvFI = mKronInvFI.reshape(iK*iT,iK*iT)
-                # compute inv(X'inv(V)X) and store
+                # compute inv(Z)
                 mInvZ = np.matmul(np.matmul(mKronInvFI.T,mJ),mKronInvFI)
-                self.mVarGLS = mInvZ
             else: # if different covariates
                 # compute Kronecker of mF and identity
                 mKronFI = np.zeros((iT, iK, iT, iK), mF.dtype)
@@ -433,9 +442,8 @@ class MgremlModel:
                 (vEigValsZ,mEigVecsZ) = np.linalg.eigh(mZ)
                 # compute log|Z|
                 dLogDetZ = np.log(vEigValsZ).sum()
-                # compute inv(Z) and store
+                # compute inv(Z)
                 mInvZ = np.matmul(np.multiply(mEigVecsZ,repmat(1/vEigValsZ,self.data.iKtotal,1)),mEigVecsZ.T)
-                self.mVarGLS = mInvZ
                 # compute mJ matrix
                 mJ = np.matmul(mKronFI.T,np.matmul(mInvZ,mKronFI))
                 # compute CGTF and CETF
@@ -454,6 +462,11 @@ class MgremlModel:
                 # compute contribution of second trace term to grad
                 mTrG2 = np.matmul(np.matmul(mKronCGTFiota,np.multiply(mGrandBG,mJ)),mKronFTiota)
                 mTrE2 = np.matmul(np.matmul(mKronCETFiota,np.multiply(mGrandBE,mJ)),mKronFTiota)
+            # only store precision matrix of GLS estimates
+            # if we have estimated the model for the current
+            # set of params, rather than a try-out in vNew
+            if not(isinstance(vNew, np.ndarray)):
+                self.mVarGLS = mInvZ
         # if the gradient is desired: compute weighted sums mTG,mTE
         if bGrad:
             mTG = np.matmul(np.multiply(mF,repmat(mDDS.sum(axis=0),iT,1)),mFT)
@@ -498,13 +511,19 @@ class MgremlModel:
             if bSameCovs: # if identical across traits
                 # compute the fixed effects and store
                 vB = np.array(np.matmul(mInvZ,np.array(np.matmul(mYjTilde,self.data.mX)).ravel())).ravel()
-                self.vBetaGLS = vB
+                # only store GLS estimates if we have estimated the model
+                # for true set of params, rather than a try-out in vNew
+                if not(isinstance(vNew, np.ndarray)):
+                    self.vBetaGLS = vB
             else:
                 # set vector with fixed effects for all combinations of traits and params
                 vB = np.zeros(iK*iT)
                 # compute the fixed effects only for covariates that matter, and store
                 vB[self.data.vIndCovs] = np.array(np.matmul(mInvZ,np.array(np.matmul(mYjTilde,self.data.mX)).ravel()[self.data.vIndCovs])).ravel()
-                self.vBetaGLS = vB[self.data.vIndCovs]
+                # only store GLS estimates if we have estimated the model
+                # for true set of params, rather than a try-out in vNew
+                if not(isinstance(vNew, np.ndarray)):
+                    self.vBetaGLS = vB[self.data.vIndCovs]
             # set matrix of GLS residuals
             mR = np.zeros((iT,iN))
             # for each trait
