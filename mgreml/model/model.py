@@ -335,8 +335,7 @@ class MgremlModel:
                 self.model.envmod.DiagnoseProblem(vNew[iParamsG:])
                 raise ValueError('Rank deficient environment covariance matrix')
             else: # else, we are just in a golden section step
-                print('Golden section tries set of parameters with rank deficient environment covariance matrix. Setting log-likelihood to -inf for this set of parameters. Interpret results with caution if this warning persists up until the last iteration!')
-                # steer clear from this point: set logL to -infinity
+                # if so: steer clear from this point: set logL to -infinity
                 dLogL = -np.infty
                 # return logl
                 return dLogL
