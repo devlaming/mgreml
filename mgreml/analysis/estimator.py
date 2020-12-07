@@ -273,7 +273,7 @@ class MgremlEstimator:
         # commit results
         vNew = mParam[:,iIndexMax]
         self.dLogL = dMaxLogL
-        self.bEstimatesChanged = (np.max(abs(vParam4 - vParam5)) >= MgremlEstimator.dEps)
+        self.bEstimatesChanged = (np.max(abs(vNew - vParam5)) >= MgremlEstimator.dEps)
         self.mgreml_model.model.UpdateParams(vNew)
         self.mInfo = None
         if bGradAtEnd:
