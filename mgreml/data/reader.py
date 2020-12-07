@@ -1,4 +1,3 @@
 class MgremlDataReader:
     pass
 	
-	main 
