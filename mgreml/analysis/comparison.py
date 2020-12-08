@@ -8,11 +8,22 @@ class NestedEstimators:
     def __init__(self, mdData, dfGenBinFY0 = None, dfEnvBinFY0 = None, dfGenBinFY = None, dfEnvBinFY = None, bBFGS = True, bStoreIters= False, bSEs = False, bReturnFullModelSpecs = False):
         self.estimatorA = estimator.MgremlEstimator(mdData, dfGenBinFY, dfEnvBinFY, bBFGS, bStoreIters, bSEs, bReturnFullModelSpecs)
         self.estimator0 = estimator.MgremlEstimator(mdData, dfGenBinFY0, dfEnvBinFY0, bBFGS, bStoreIters, bSEs, bReturnFullModelSpecs)
+        # initialisation of StructuralModel instances using
+        # same mdData guarantees that the these StructuralModels
+        # consider the same set of traits, in the same order
+        # checking whether models are nest, is thus only about
+        # checking factors and their free coefficients
         self.CheckModelsNested()
         
     def CheckModelsNested(self):
-        # find out which coefficients are free for genetic and env part
-        # for restricted and unrestricted models
+        ''' For each factor in the null model,
+        find counterpart in alternative model,
+        and assert for those factors, if there
+        are free coefficients under the null,
+        that are constrained under alternative.
+        If so: the null model is not nested.'''
+        # which coefficients are free for each part
+        # of restricted and unrestricted model?
         (mBGA,mBEA) = self.estimatorA.mgreml_model.model.GetFreeCoeffs()
         (mBG0,mBE0) = self.estimator0.mgreml_model.model.GetFreeCoeffs()
         # convert factor labels to pandas indices
@@ -32,6 +43,8 @@ class NestedEstimators:
         # that align with free coeffs of restricted model
         mBGA_aligned = np.array(pd.DataFrame(mBGA,columns=indFGA)[indFG0])
         mBEA_aligned = np.array(pd.DataFrame(mBEA,columns=indFEA)[indFE0])
+        # if there is at least one coefficient there where the altnerative
+        # model is restricted, while the null model is free: not nested!
         if ((mBGA_aligned - mBG0) < 0).any():
             raise ValueError('There is at least one genetic coefficient where the nested model is free and the alternative model is not')
         if ((mBEA_aligned - mBE0) < 0).any():
