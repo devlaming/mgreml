@@ -35,7 +35,7 @@ class MgremlReader:
         self.bRelCutoff     # Boolean based on --rel-cutoff 0.025; DEFAULT = False
         self.dRelCutoff     # number based on --rel-cutoff 0.025; DEFAULT = None
         self.iDropLeadPCs   # integer based on --ignore-pcs 40 [1000]; DEFAULT = 20
-        self.iDropLeadPCs   # integer based on --ignore-pcs 40 [1000]; DEFAULT = 0
+        self.iDropTrailPCs  # integer based on --ignore-pcs 40 [1000]; DEFAULT = 0
         self.bStoreIter     # Boolean based on --store-iter 50; DEFAULT = False
         self.iStoreIterFreq # integer based on --store-iter 50; DEFAULT = None
         self.sInitValsFile  # string based on --reinitialise results.iter.250.pkl
