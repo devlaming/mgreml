@@ -50,14 +50,7 @@ class MgremlReader:
         # can then be used by other classes to retrieve the necessary
         # settings/specifications/data
         
-        # now, within this class e.g. self.dfA can be set in the __init__()
-        # method using some method like ReadGRM. I.e. we can then say:
-        sGRMfilename = '' # based on --grm mygrm
-        self.ReadGRM(sGRMfilename)
-        # here, in the __init__ method, we thus call on the instance method
-        # ReadGRM(), where that method in turn is defined within that class
-        # e.g. along the following lines (notice it's higher up in indentation):
-        
+          
     def read_grm(self, args, logger):
         # read binary GRM
         # names
