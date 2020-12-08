@@ -1,7 +1,17 @@
-from mgreml.tests import test_aligner
-from mgreml.tests import test_writer
+"""
+perform mgreml with set of input arguments
+"""
+import argparse
+import logging
+from data import reader
+
+def main():
+    # initialise parser
+    parser = argparse.ArgumentParser()
+    # initialise logger
+    logger = logging.getLogger(__name__)
+    # read in data
+    myMgremlData = reader.MgremlReader(parser, logger)
 
 if __name__ == '__main__':
-    test_aligner.TestMgremlAligner()
-    test_writer.TestMgremlEstimationAndWriter()
-    print('Done testing')
+    main()
