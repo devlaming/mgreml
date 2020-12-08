@@ -60,3 +60,4 @@ class MgremlReader:
         # first step to read in the grm
         # ......
         self.dfA = None # based on result from preceding steps
+		print('A')
