@@ -38,10 +38,10 @@ class DataWriter:
     def WriteHSq(self):
         if self.bNested:
             # get heritabilities 
-            vHSq0 = self.estimates.estimator_res.vHSq
-            vHSqA = self.estimates.estimator_unres.vHSq
+            vHSq0 = self.estimates.estimator0.vHSq
+            vHSqA = self.estimates.estimatorA.vHSq
             # get trait labels
-            lPhenos = self.estimates.estimator_unres.mgreml_model.data.lPhenos
+            lPhenos = self.estimates.estimatorA.mgreml_model.data.lPhenos
             # set dataframes
             dfHSq0 = pd.DataFrame(vHSq0,index=lPhenos)
             dfHSqA = pd.DataFrame(vHSqA,index=lPhenos)
@@ -52,10 +52,10 @@ class DataWriter:
             dfHSq0.to_csv(sHSq0)
             dfHSqA.to_csv(sHSqA)
             # if SEs are desired, store them
-            if (self.estimates.estimator_unres.bSEs):
+            if (self.estimates.estimatorA.bSEs):
                 # get heritability standard errors 
-                vHSq0SE = self.estimates.estimator_res.vHSqSE
-                vHSqASE = self.estimates.estimator_unres.vHSqSE
+                vHSq0SE = self.estimates.estimator0.vHSqSE
+                vHSqASE = self.estimates.estimatorA.vHSqSE
                 # set dataframes
                 dfHSq0SE = pd.DataFrame(vHSq0SE,index=lPhenos)
                 dfHSqASE = pd.DataFrame(vHSqASE,index=lPhenos)
@@ -100,51 +100,51 @@ class DataWriter:
     def WriteModelCoefficients(self):
         if self.bNested:
             # get all parameter estimates, with indices of traits and factors
-            (vIndTG_unres, vIndFG_unres, vParamG_unres, vIndTE_unres, vIndFE_unres, vParamE_unres) = self.estimates.estimator_unres.mgreml_model.model.GetSplitParamsAndIndices()
-            (vIndTG_res, vIndFG_res, vParamG_res, vIndTE_res, vIndFE_res, vParamE_res) = self.estimates.estimator_res.mgreml_model.model.GetSplitParamsAndIndices()
+            (vIndTGA, vIndFGA, vParamGA, vIndTEA, vIndFEA, vParamEA) = self.estimates.estimatorA.mgreml_model.model.GetSplitParamsAndIndices()
+            (vIndTG0, vIndFG0, vParamG0, vIndTE0, vIndFE0, vParamE0) = self.estimates.estimator0.mgreml_model.model.GetSplitParamsAndIndices()
             # get labels of the phenotypes and factors
-            indPhenos_unres = pd.Index(self.estimates.estimator_unres.mgreml_model.data.lPhenos)
-            indPhenos_res = pd.Index(self.estimates.estimator_res.mgreml_model.data.lPhenos)
-            indFG_unres = pd.Index(self.estimates.estimator_unres.mgreml_model.model.genmod.lFactors)
-            indFG_res = pd.Index(self.estimates.estimator_res.mgreml_model.model.genmod.lFactors)
-            indFE_unres = pd.Index(self.estimates.estimator_unres.mgreml_model.model.envmod.lFactors)
-            indFE_res = pd.Index(self.estimates.estimator_res.mgreml_model.model.envmod.lFactors)
+            indPhenosA = pd.Index(self.estimates.estimatorA.mgreml_model.data.lPhenos)
+            indPhenos0 = pd.Index(self.estimates.estimator0.mgreml_model.data.lPhenos)
+            indFGA = pd.Index(self.estimates.estimatorA.mgreml_model.model.genmod.lFactors)
+            indFG0 = pd.Index(self.estimates.estimator0.mgreml_model.model.genmod.lFactors)
+            indFEA = pd.Index(self.estimates.estimatorA.mgreml_model.model.envmod.lFactors)
+            indFE0 = pd.Index(self.estimates.estimator0.mgreml_model.model.envmod.lFactors)
             # for each active coefficient, find labels of phenos and factors
-            indAllPhenosG_unres = indPhenos_unres[vIndTG_unres]
-            indAllPhenosG_res = indPhenos_res[vIndTG_res]
-            indAllPhenosE_unres = indPhenos_unres[vIndTE_unres]
-            indAllPhenosE_res = indPhenos_res[vIndTE_res]
-            indAllFG_unres = indFG_unres[vIndFG_unres]
-            indAllFG_res = indFG_res[vIndFG_res]
-            indAllFE_unres = indFE_unres[vIndFE_unres]
-            indAllFE_res = indFE_res[vIndFE_res]
+            indAllPhenosGA = indPhenosA[vIndTGA]
+            indAllPhenosG0 = indPhenos0[vIndTG0]
+            indAllPhenosEA = indPhenosA[vIndTEA]
+            indAllPhenosE0 = indPhenos0[vIndTE0]
+            indAllFGA = indFGA[vIndFGA]
+            indAllFG0 = indFG0[vIndFG0]
+            indAllFEA = indFEA[vIndFEA]
+            indAllFE0 = indFE0[vIndFE0]
             # convert to lists
-            lAllPhenos_unres = indAllPhenosG_unres.to_list()
-            lAllPhenos_res = indAllPhenosG_res.to_list()
-            lAllPhenos_unres.extend(indAllPhenosE_unres.to_list())
-            lAllPhenos_res.extend(indAllPhenosE_res.to_list())
-            lAllF_unres = indAllFG_unres.to_list()
-            lAllF_res = indAllFG_res.to_list()
-            lAllF_unres.extend(indAllFE_unres.to_list())
-            lAllF_res.extend(indAllFE_res.to_list())
+            lAllPhenosA = indAllPhenosGA.to_list()
+            lAllPhenos0 = indAllPhenosG0.to_list()
+            lAllPhenosA.extend(indAllPhenosEA.to_list())
+            lAllPhenos0.extend(indAllPhenosE0.to_list())
+            lAllFA = indAllFGA.to_list()
+            lAllF0 = indAllFG0.to_list()
+            lAllFA.extend(indAllFEA.to_list())
+            lAllF0.extend(indAllFE0.to_list())
             # concatenate estimates
-            vParam_unres = np.hstack((vParamG_unres, vParamE_unres))
-            vParam_res = np.hstack((vParamG_res, vParamE_res))
+            vParamA = np.hstack((vParamGA, vParamEA))
+            vParam0 = np.hstack((vParamG0, vParamE0))
             # construct dataframes
-            dfParams_unres = pd.DataFrame(vParam_unres, index=[lAllPhenos_unres,lAllF_unres])
-            dfParams_res = pd.DataFrame(vParam_res, index=[lAllPhenos_res,lAllF_res])
-            dfSamplingV_unres = pd.DataFrame(self.estimates.estimator_unres.mSamplingV, index=[lAllPhenos_unres,lAllF_unres], columns=[lAllPhenos_unres,lAllF_unres])
-            dfSamplingV_res = pd.DataFrame(self.estimates.estimator_res.mSamplingV, index=[lAllPhenos_res,lAllF_res], columns=[lAllPhenos_res,lAllF_res])
+            dfParamsA = pd.DataFrame(vParamA, index=[lAllPhenosA,lAllFA])
+            dfParams0 = pd.DataFrame(vParam0, index=[lAllPhenos0,lAllF0])
+            dfSamplingVA = pd.DataFrame(self.estimates.estimatorA.mSamplingV, index=[lAllPhenosA,lAllFA], columns=[lAllPhenosA,lAllFA])
+            dfSamplingV0 = pd.DataFrame(self.estimates.estimator0.mSamplingV, index=[lAllPhenos0,lAllF0], columns=[lAllPhenos0,lAllF0])
             # set output names
             sParams0 = DataWriter.sPath + DataWriter.sCoeff + DataWriter.sH0 + self.sPrefix + DataWriter.sExtension
             sParamsA = DataWriter.sPath + DataWriter.sCoeff + DataWriter.sHA + self.sPrefix + DataWriter.sExtension
             sSamplingV0 = DataWriter.sPath + DataWriter.sCoeffvar + DataWriter.sH0 + self.sPrefix + DataWriter.sExtension
             sSamplingVA = DataWriter.sPath + DataWriter.sCoeffvar + DataWriter.sHA + self.sPrefix + DataWriter.sExtension
             # write dataframes
-            dfParams_unres.to_csv(sParamsA)
-            dfParams_res.to_csv(sParams0)
-            dfSamplingV_unres.to_csv(sSamplingVA)
-            dfSamplingV_res.to_csv(sSamplingV0)
+            dfParamsA.to_csv(sParamsA)
+            dfParams0.to_csv(sParams0)
+            dfSamplingVA.to_csv(sSamplingVA)
+            dfSamplingV0.to_csv(sSamplingV0)
         else:
             # get all parameter estimates, with indices of traits and factors
             (vIndTG, vIndFG, vParamG, vIndTE, vIndFE, vParamE) = self.estimates.mgreml_model.model.GetSplitParamsAndIndices()
@@ -180,23 +180,23 @@ class DataWriter:
             sLL0 = DataWriter.sPath + DataWriter.sLL + DataWriter.sH0 + self.sPrefix + DataWriter.sExtension
             sLLA = DataWriter.sPath + DataWriter.sLL + DataWriter.sHA + self.sPrefix + DataWriter.sExtension
             with open(sLL0, 'w') as oLLfile:
-                oLLfile.write('Log-likelihood of nested model (null hypothesis) = ' + str(self.estimates.estimator_res.dLogL) + ',\n')
-                oLLfile.write('based on data on ' + str(self.estimates.estimator_res.mgreml_model.data.iT) + ' traits and ' + str(self.estimates.estimator_res.mgreml_model.data.iN) + ' observations,\n')
-                oLLfile.write('with a model consisting of ' + str(self.estimates.estimator_res.mgreml_model.model.genmod.iF) + ' genetic factors and ' + str(self.estimates.estimator_res.mgreml_model.model.envmod.iF) + ' environment factors,\n')
-                oLLfile.write('comprising ' + str(self.estimates.estimator_res.mgreml_model.model.iParamsG) + ' free genetic factor coefficients and ' + str(self.estimates.estimator_res.mgreml_model.model.iParamsE) + ' free environment factor coefficients in turn.\n')
-                if self.estimates.estimator_res.bBFGS:
-                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator_res.iIter) + ' BFGS iterations \n')
+                oLLfile.write('Log-likelihood of nested model (null hypothesis) = ' + str(self.estimates.estimator0.dLogL) + ',\n')
+                oLLfile.write('based on data on ' + str(self.estimates.estimator0.mgreml_model.data.iT) + ' traits and ' + str(self.estimates.estimator0.mgreml_model.data.iN) + ' observations,\n')
+                oLLfile.write('with a model consisting of ' + str(self.estimates.estimator0.mgreml_model.model.genmod.iF) + ' genetic factors and ' + str(self.estimates.estimator0.mgreml_model.model.envmod.iF) + ' environment factors,\n')
+                oLLfile.write('comprising ' + str(self.estimates.estimator0.mgreml_model.model.iParamsG) + ' free genetic factor coefficients and ' + str(self.estimates.estimator0.mgreml_model.model.iParamsE) + ' free environment factor coefficients in turn.\n')
+                if self.estimates.estimator0.bBFGS:
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator0.iIter) + ' BFGS iterations \n')
                 else:
-                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator_res.iIter) + ' Newton iterations \n')
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator0.iIter) + ' Newton iterations \n')
             with open(sLLA, 'w') as oLLfile:
-                oLLfile.write('Log-likelihood of parent model (alternative hypothesis) = ' + str(self.estimates.estimator_unres.dLogL) + ',\n')
-                oLLfile.write('based on data on ' + str(self.estimates.estimator_unres.mgreml_model.data.iT) + ' traits and ' + str(self.estimates.estimator_unres.mgreml_model.data.iN) + ' observations,\n')
-                oLLfile.write('with a model consisting of ' + str(self.estimates.estimator_unres.mgreml_model.model.genmod.iF) + ' genetic factors and ' + str(self.estimates.estimator_unres.mgreml_model.model.envmod.iF) + ' environment factors,\n')
-                oLLfile.write('comprising ' + str(self.estimates.estimator_unres.mgreml_model.model.iParamsG) + ' free genetic factor coefficients and ' + str(self.estimates.estimator_unres.mgreml_model.model.iParamsE) + ' free environment factor coefficients in turn.\n')
-                if self.estimates.estimator_unres.bBFGS:
-                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator_unres.iIter) + ' BFGS iterations \n')
+                oLLfile.write('Log-likelihood of parent model (alternative hypothesis) = ' + str(self.estimates.estimatorA.dLogL) + ',\n')
+                oLLfile.write('based on data on ' + str(self.estimates.estimatorA.mgreml_model.data.iT) + ' traits and ' + str(self.estimates.estimatorA.mgreml_model.data.iN) + ' observations,\n')
+                oLLfile.write('with a model consisting of ' + str(self.estimates.estimatorA.mgreml_model.model.genmod.iF) + ' genetic factors and ' + str(self.estimates.estimatorA.mgreml_model.model.envmod.iF) + ' environment factors,\n')
+                oLLfile.write('comprising ' + str(self.estimates.estimatorA.mgreml_model.model.iParamsG) + ' free genetic factor coefficients and ' + str(self.estimates.estimatorA.mgreml_model.model.iParamsE) + ' free environment factor coefficients in turn.\n')
+                if self.estimates.estimatorA.bBFGS:
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimatorA.iIter) + ' BFGS iterations \n')
                 else:
-                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator_unres.iIter) + ' Newton iterations \n')
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimatorA.iIter) + ' Newton iterations \n')
         else:
             # set filenames
             sLL = DataWriter.sPath + DataWriter.sLL + self.sPrefix + DataWriter.sExtension
@@ -213,16 +213,16 @@ class DataWriter:
     def WriteEstimatesGLS(self):
         if self.bNested:
             # throw error if no covariates in model
-            if not(self.estimates.estimator_unres.mgreml_model.data.bCovs):
+            if not(self.estimates.estimatorA.mgreml_model.data.bCovs):
                 raise TypeError('Trying to write GLS estimates, while no covariates were given')
             # get labels of the phenotypes and covariates
-            indPhenos = pd.Index(self.estimates.estimator_unres.mgreml_model.data.lPhenos)
-            indCovs = pd.Index(self.estimates.estimator_unres.mgreml_model.data.lCovs)
+            indPhenos = pd.Index(self.estimates.estimatorA.mgreml_model.data.lPhenos)
+            indCovs = pd.Index(self.estimates.estimatorA.mgreml_model.data.lCovs)
             # if not the same covariates
-            if not(self.estimates.estimator_unres.mgreml_model.data.bSameCovs):
+            if not(self.estimates.estimatorA.mgreml_model.data.bSameCovs):
                 # get the binary matrix inidicating which covariate
                 # applies to which trait
-                mBinXY = self.estimates.estimator_unres.mgreml_model.data.mBinXY
+                mBinXY = self.estimates.estimatorA.mgreml_model.data.mBinXY
             else:
                 mBinXY = np.ones((len(indPhenos),len(indCovs))).astype(int)
             # find trait and covariate indices of active covariates
@@ -231,10 +231,10 @@ class DataWriter:
             indAllPhenos = indPhenos[vIndT]
             indAllCovs = indCovs[vIndC]
             # get GLS estimates
-            vBetaGLS0 = self.estimates.estimator_res.mgreml_model.vBetaGLS
-            mVarGLS0 = self.estimates.estimator_res.mgreml_model.mVarGLS
-            vBetaGLSA = self.estimates.estimator_unres.mgreml_model.vBetaGLS
-            mVarGLSA = self.estimates.estimator_unres.mgreml_model.mVarGLS
+            vBetaGLS0 = self.estimates.estimator0.mgreml_model.vBetaGLS
+            mVarGLS0 = self.estimates.estimator0.mgreml_model.mVarGLS
+            vBetaGLSA = self.estimates.estimatorA.mgreml_model.vBetaGLS
+            mVarGLSA = self.estimates.estimatorA.mgreml_model.mVarGLS
             # construct dataframes
             dfBetaGLS0 = pd.DataFrame(vBetaGLS0, index=[indAllPhenos,indAllCovs])
             dfBetaGLSA = pd.DataFrame(vBetaGLSA, index=[indAllPhenos,indAllCovs])
@@ -285,12 +285,12 @@ class DataWriter:
     def WriteRho(self):
         if self.bNested:
             # get correlation matrices 
-            mRhoG0 = self.estimates.estimator_res.mRhoG
-            mRhoE0 = self.estimates.estimator_res.mRhoE
-            mRhoGA = self.estimates.estimator_unres.mRhoG
-            mRhoEA = self.estimates.estimator_unres.mRhoE
+            mRhoG0 = self.estimates.estimator0.mRhoG
+            mRhoE0 = self.estimates.estimator0.mRhoE
+            mRhoGA = self.estimates.estimatorA.mRhoG
+            mRhoEA = self.estimates.estimatorA.mRhoE
             # get trait labels
-            lPhenos = self.estimates.estimator_unres.mgreml_model.data.lPhenos
+            lPhenos = self.estimates.estimatorA.mgreml_model.data.lPhenos
             # set dataframes
             dfRhoG0 = pd.DataFrame(mRhoG0,index=lPhenos,columns=lPhenos)
             dfRhoE0 = pd.DataFrame(mRhoE0,index=lPhenos,columns=lPhenos)
@@ -307,12 +307,12 @@ class DataWriter:
             dfRhoGA.to_csv(sRhoGA)
             dfRhoEA.to_csv(sRhoEA)
             # if SEs are desired, store them
-            if (self.estimates.estimator_unres.bSEs):
+            if (self.estimates.estimatorA.bSEs):
                 # get SE matrices 
-                mRhoG0SE = self.estimates.estimator_res.mRhoGSE
-                mRhoE0SE = self.estimates.estimator_res.mRhoESE
-                mRhoGASE = self.estimates.estimator_unres.mRhoGSE
-                mRhoEASE = self.estimates.estimator_unres.mRhoESE
+                mRhoG0SE = self.estimates.estimator0.mRhoGSE
+                mRhoE0SE = self.estimates.estimator0.mRhoESE
+                mRhoGASE = self.estimates.estimatorA.mRhoGSE
+                mRhoEASE = self.estimates.estimatorA.mRhoESE
                 # set dataframes
                 dfRhoG0SE = pd.DataFrame(mRhoG0SE,index=lPhenos,columns=lPhenos)
                 dfRhoE0SE = pd.DataFrame(mRhoE0SE,index=lPhenos,columns=lPhenos)
