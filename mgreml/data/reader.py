@@ -52,9 +52,9 @@ class MgremlReader:
         # method using some method like ReadGRM. I.e. we can then say:
         sGRMfilename = '' # based on --grm mygrm
         self.ReadGRM(sGRMfilename)
-        # here, in the __init__ method, where that method within that class
-        # is defined e.g. along the following lines (notice one drop
-        # in level of indentation)
+        # here, in the __init__ method, we thus call on the instance method
+        # ReadGRM(), where that method in turn is defined within that class
+        # e.g. along the following lines (notice it's higher up in indentation):
         
     def ReadGRM(self, sGRMfilename):
         # first step to read in the grm
