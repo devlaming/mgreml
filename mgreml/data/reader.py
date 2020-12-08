@@ -17,8 +17,11 @@ class MgremlReader:
         MGREML estimation; the attributes of the MgremlReader will be 
         used to determine what needs to be done
         '''
+        # store logger and args as attributes of instance
+        self.args = args
+        self.logger = logger
         # get DataFrame for GRM based on --grm mygrm option
-        self.read_grm(args, logger)
+        self.read_grm()
         self.sPrefix        # string based on --out results
         self.dfY            # DataFrame based on --pheno mypheno.txt [nolabelpheno]
         self.dfX            # DataFrame based on --covar mycovar.txt; DEFAULT = None
@@ -51,12 +54,12 @@ class MgremlReader:
         # settings/specifications/data
         
           
-    def read_grm(self, args, logger):
+    def read_grm(self):
         # read binary GRM
         # names
-        BinFileName = args.grm + ".grm.bin"
-        NFileName   = args.grm + ".grm.N.bin"
-        IDFileName  = args.grm + ".grm.id"
+        BinFileName = self.args.grm + ".grm.bin"
+        NFileName   = self.args.grm + ".grm.N.bin"
+        IDFileName  = self.args.grm + ".grm.id"
         # read IDs and sample size
         ids = pd.read_csv(IDFileName, sep = '\t', header = None)
         ids.columns=['FID','IID']
@@ -64,7 +67,7 @@ class MgremlReader:
         tuples = list(zip(*arrays))
         index = pd.MultiIndex.from_tuples(tuples, names=['FID', 'IID'])
         iN   = len(ids.index)
-        logger.info('{iN} individuals in {f}'.format(iN=iN, f=IDFileName))
+        self.logger.info('{iN} individuals in {f}'.format(iN=iN, f=IDFileName))
         # read GRM from bin file
         dt  = np.dtype('f4') # Relatedness is stored as a float of size 4 in the binary file
         a = np.fromfile(BinFileName, dtype = dt)
