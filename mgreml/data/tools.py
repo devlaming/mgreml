@@ -10,6 +10,5 @@ def sec_to_str(t):
         f += '{H}h:'.format(H=h)
     if m > 0:
         f += '{M}m:'.format(M=m)
-
     f += '{S}s'.format(S=s)
     return f
