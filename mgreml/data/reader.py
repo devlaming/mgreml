@@ -1,8 +1,9 @@
 import pandas as pd
+import numpy as np
 
 class MgremlReader:
     
-    def __init__(self, logger, args):
+    def __init__(self, args, logger):
         '''
         MgremlReader is provided with a logger and the input arguments
         from the call of the main mgreml script e.g.
@@ -16,7 +17,8 @@ class MgremlReader:
         MGREML estimation; the attributes of the MgremlReader will be 
         used to determine what needs to be done
         '''
-        self.dfA            # DataFrame based on --grm mygrm
+        # get DataFrame for GRM based on --grm mygrm option
+        self.read_grm(args, logger)
         self.sPrefix        # string based on --out results
         self.dfY            # DataFrame based on --pheno mypheno.txt [nolabelpheno]
         self.dfX            # DataFrame based on --covar mycovar.txt; DEFAULT = None
@@ -56,8 +58,36 @@ class MgremlReader:
         # ReadGRM(), where that method in turn is defined within that class
         # e.g. along the following lines (notice it's higher up in indentation):
         
-    def ReadGRM(self, sGRMfilename):
-        # first step to read in the grm
-        # ......
-        self.dfA = None # based on result from preceding steps
-		print('A')
+    def read_grm(self, args, logger):
+        # read binary GRM
+        # names
+        BinFileName = args.grm + ".grm.bin"
+        NFileName   = args.grm + ".grm.N.bin"
+        IDFileName  = args.grm + ".grm.id"
+        # read IDs and sample size
+        ids = pd.read_csv(IDFileName, sep = '\t', header = None)
+        ids.columns=['FID','IID']
+        arrays=[ids['FID'],ids['IID']]  
+        tuples = list(zip(*arrays))
+        index = pd.MultiIndex.from_tuples(tuples, names=['FID', 'IID'])
+        iN   = len(ids.index)
+        logger.info('{iN} individuals in {f}'.format(iN=iN, f=IDFileName))
+        # read GRM from bin file
+        dt  = np.dtype('f4') # Relatedness is stored as a float of size 4 in the binary file
+        a = np.fromfile(BinFileName, dtype = dt)
+        # create GRM as 2D-array
+        mA = np.zeros((iN,iN))
+        # set counter for elements of GRM read thus far
+        k = 0
+        # for each row
+        for i in range(0,iN):
+            # for each column
+            for j in range(0,i+1):
+                dThisVal = a[k]
+                mA[i,j] = dThisVal
+                mA[j,i] = dThisVal
+                k += 1
+        #convert to pd dataframe        
+        dfA = pd.DataFrame(mA, columns=index, index=index)
+        # store dfA as attribute of instance
+        self.dfA = dfA
