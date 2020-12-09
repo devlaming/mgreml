@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 import math
 from numpy.matlib import repmat
-from mgreml.model import model
+from model import model
 
 class MgremlEstimator:
     
