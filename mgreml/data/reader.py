@@ -21,7 +21,7 @@ class MgremlReader:
         # store logger and parser as attributes of instance
         self.logger = logger
         self.parser = parser
-        # initialise arguments
+        # initialize arguments
         self.InitialiseArgsAndLogger()
         #initialize out directory
         if self.args.out is not None:
@@ -114,7 +114,10 @@ class MgremlReader:
         # check if boolean rel cutoff is passed based on --rel-cutoff 0.025; DEFAULT = None
         self.dRelCutoff =None
         if self.args.rel_cutoff is not None:
-            self.dRelCutoff=self.args.rel_cutoff     # number based on --rel-cutoff 0.025; DEFAULT = None
+		    if self.args.rel_cutoff>1 or self.args.rel_cutoff<0:
+			    raise ValueError('The argument of the --rel-cutoff flag is incorrectly specified, it should be between 0 and 1.')
+            else:
+			    self.dRelCutoff=self.args.rel_cutoff     # number based on --rel-cutoff 0.025; DEFAULT = None
         
         # set the number of lead and trail pcs to be dropped based on --ignore-pcs 40 [1000]; DEFAULT = 20 0
         self.iDropLeadPCs=20
@@ -179,8 +182,7 @@ class MgremlReader:
         self.parser.add_argument('--covar', default=None, type=str,nargs='*',
                             help='Name of the covariates file. NB: case insensitive.')
         self.parser.add_argument('--covar-model', default=None, type=str,nargs='*',
-                            help='Name of a file that has the specification for which covariate affects which phenotype. Possible to add the flags nolabelpheno and/or nolabelcovar.')
-       
+                            help='Name of a file that has the specification for which covariate affects which phenotype. Possible to add the flags nolabelpheno and/or nolabelcovar.')      
         self.parser.add_argument('--no-se', default=None,action='store_true',  
                             help='optional flag to indicate whether to skip calculating SEs (e.g. when only interested in doing a likelihood-ratio test).')
         self.parser.add_argument('--rel-cutoff', default=None, type=float,
