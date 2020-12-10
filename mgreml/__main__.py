@@ -1,6 +1,3 @@
-"""
-perform mgreml with set of input arguments
-"""
 import argparse
 import logging
 import time
@@ -27,7 +24,7 @@ def main():
             # align the data
             logger.info('Aligning data and applying the canonical transformation')
             logger.info('This may take some time...')
-            myMgremlData = aligner.MgremlData(myMgremlReader.dfY, myMgremlReader.dfA, myMgremlReader.dfX)
+            myMgremlData = aligner.MgremlData(myMgremlReader)
             logger.info('Initialising estimator')
             myMgremlEstimator = estimator.MgremlEstimator(myMgremlData, bSEs = True, bReturnFullModelSpecs = True)
             logger.info('Performing MGREML estimation')
@@ -39,7 +36,7 @@ def main():
             myMgremlWriter.WriteRho()
             myMgremlWriter.WriteLogLik()
             myMgremlWriter.WriteEstimatesGLS()
-            MyMgremlWriter.WriteModelCoefficients()
+            myMgremlWriter.WriteModelCoefficients()
         else:
             logger.warning('No MGREML analysis will be carried out.')
             logger.info('mgreml_prepare.py -h describes options')
