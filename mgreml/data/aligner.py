@@ -4,9 +4,17 @@ pd.options.mode.chained_assignment = None
 
 class MgremlData:
     
-    def __init__(self, dfY, dfA, dfX = None, dfBinXY = None, iDropLeadPCs = 20, iDropTrailPCs = 0):
+    def __init__(self, mReader):
+        # read out MgremlReader
+        self.logger = mReader.logger
+        dfA = mReader.dfA
+        dfY = mReader.dfY
+        dfX = mReader.dfX
+        dfBinXY = mReader.dfBinXY
+        iDropLeadPCs = mReader.iDropLeadPCs
+        iDropTrailPCs = mReader.iDropTrailPCs
         # find out if we have covariates
-        (bCovs, bSameCovs) = MgremlData.DetermineIfCovsAreGiven(dfX, dfBinXY)
+        (bCovs, bSameCovs) = self.DetermineIfCovsAreGiven(dfX, dfBinXY)
         # store resulting booleans as attributes
         self.bCovs     = bCovs
         self.bSameCovs = bSameCovs
@@ -28,14 +36,14 @@ class MgremlData:
         # finalise Mgreml data using canonical transformation
         self.FinaliseData(dfY, dfA, dfX, dfBinXY, iDropLeadPCs, iDropTrailPCs)
         
-    @staticmethod
-    def DetermineIfCovsAreGiven(dfX, dfBinXY):
+    def DetermineIfCovsAreGiven(self, dfX, dfBinXY):
         # assert whether we have covariates and whether we have same covs across traits
         bCovs     = isinstance(dfX, pd.DataFrame)
         bSameCovs = not(isinstance(dfBinXY, pd.DataFrame))
         # if we have no covariates, yet different covariates have been specified
         if not(bCovs) and not(bSameCovs):
-            raise TypeError('You have specified different covariates to apply to different traits, without supplying data on those covariates.')
+            self.logger.error('Error: you have specified different covariates to apply to different traits, without supplying data on those covariates using --covar.')
+            raise TypeError
         return bCovs, bSameCovs
     
     def CleanSpecificationCovariates(self, dfY, dfX, dfBinXY):
@@ -230,9 +238,8 @@ class MgremlData:
                 for i in miIDs:
                     # set missing phenotype to zero
                     dfY.loc[i,t] = 0
-                    # set missing covariates to zero
                     # construct label for new dummy variable
-                    lLabel = ['dummy_' + str(t) + '_' + str(i)]
+                    lLabel = ['dummy_trait_' + str(t) + '_obs_' + str(i)]
                     # create dummy variable
                     dfXadd = pd.DataFrame(data=0, index=dfX.index, columns=lLabel)
                     dfXadd.loc[i] = 1
