@@ -52,6 +52,9 @@ class MgremlReader:
     iDropLeadPCsDefault = 20
     iDropTrailPCsDefault = 0
     
+    # set default convergence treshold
+    dGradTol = 1E-5
+    
     def __init__(self, parser, logger):
         # store logger and parser as attributes of instance
         self.logger = logger
@@ -74,6 +77,27 @@ class MgremlReader:
             self.bAnalyse = False
         # if we can analyse, read in data
         if self.bAnalyse:
+            # determine whether rel-cutoff has been used
+            self.SetRelCutOff()
+            # determine how many PCs to drop
+            self.SetNumberOfPCs()
+            # determine whether SEs are desired
+            self.NeedSEs()
+            # determine whether all coeffs are desired
+            self.NeedAllCoeffs()
+            # determine whether we do BFGS or Newton
+            self.DoBFGS()
+            # set convergence threshold
+            self.SetGradTol()
+            # determine whether we story anything during iterations
+            self.SetIterStoreFreq()
+            # assert if one or two models have been specified
+            self.IsNested()
+            # determine if we need to reinitialise anything
+            self.NeedToReinitialise()
+            self.NeedToReinitialiseRestricted()
+            # determine whether any correlations are fixed to zero or one
+            self.FindFixedRho()
             # read phenotype file
             self.ReadData(MgremlReader.sPhe)
             # if covariate file specified: read
@@ -111,17 +135,6 @@ class MgremlReader:
             # set number of leading and trailing PCs
             self.iDropLeadPCs = MgremlReader.iDropLeadPCsDefault
             self.iDropTrailPCs = MgremlReader.iDropTrailPCsDefault            
-        # self.bPerfectRhoG   # Boolean based on --rho-genetic 1; DEFAULT = False
-        # self.bNoRhoG        # Boolean based on --rho-genetic 0; DEFAULT = False
-        # self.bNoRhoE        # Boolean based on --rho-environment 0; DEFAULT = False
-        # self.bPerfectRhoG0  # Boolean based on --restricted-rho-genetic 1; DEFAULT = False
-        # self.bNoRhoG0       # Boolean based on --restricted-rho-genetic 0; DEFAULT = False
-        # self.bNoRhoE0       # Boolean based on --restricted-rho-environment 0; DEFAULT = False
-        # self.bSE            # Boolean based on --no-se; DEFAULT = True (so reporting SEs is the default!)
-        # self.bRelCutoff     # Boolean based on --rel-cutoff 0.025; DEFAULT = False
-        # self.dRelCutoff     # number based on --rel-cutoff 0.025; DEFAULT = None
-        # self.iDropLeadPCs   # integer based on --ignore-pcs 40 [1000]; DEFAULT = 20
-        # self.iDropTrailPCs  # integer based on --ignore-pcs 40 [1000]; DEFAULT = 0
         # self.bStoreIter     # Boolean based on --store-iter 50; DEFAULT = False
         # self.iStoreIterFreq # integer based on --store-iter 50; DEFAULT = None
         # self.sInitValsFile  # string based on --reinitialise results.iter.250.pkl
@@ -160,7 +173,7 @@ class MgremlReader:
                             help = 'Name of a file that specifies for a restricted model which environment factors (columns) affect which phenotypes (row). Possible to add the flags nolabelpheno and/or nolabelfactor; not recommended, always name things.')
         groupRestrictedEnvironment.add_argument('--restricted-rho-environment', choices = [0], default = None, type = int,
                             help = 'Optional flag followed by integer equal to zero, forcing all environment correlations in the restricted model to zero. This flag cannot be combined with --restricted-environment-model.')
-        self.parser.add_argument('--ignore-pcs', metavar = '20 [0]', default = None, type = int,
+        self.parser.add_argument('--ignore-pcs', metavar = '20 [0]', default = None, type = int, nargs = '+',
                             help = 'optional flag to specify how many leading principal components (PCs) to ignore (as method to control for population stratification) and how many trailing PCs to ignore (for computational efficiency); if just one non-negative integer is supplied this take as the number of leading PCs to ignore')
         self.parser.add_argument('--rel-cutoff', metavar = '0.025', default = None, type = float,
                             help = 'optional flag followed by a value above which overly related individuals are removed from the GRM using a greedy algorithm')
@@ -223,7 +236,7 @@ class MgremlReader:
             header += "\nCall: \n"
             header += 'mgreml \\\n'
             options = ['--'+x.replace('_','-')+' '+str(opts[x])+' \\' for x in non_defaults]
-            header += '\n'.join(options).replace('True','').replace('False','').replace("', \'", ' ').replace("']", '').replace("['", '')
+            header += '\n'.join(options).replace('True','').replace('False','').replace("', \'", ' ').replace("']", '').replace("['", '').replace('[', '').replace(']', '').replace(', ', ' ')
             header = header[0:-1]+'\n'
             self.logger.info(header)
         except Exception:
@@ -446,3 +459,173 @@ class MgremlReader:
                 self.dfEnvBinFY = dfBin
         # report reading data is done
         self.logger.info('Finished reading in the ' + sData)
+    
+    def IsNested(self):
+        self.bNested = (self.args.restricted_genetic_model is not None) \
+                    or (self.args.restricted_environment_model is not None) \
+                    or (self.args.restricted_rho_genetic is not None) \
+                    or (self.args.restricted_rho_environment is not None)
+        if self.bNested:
+            self.logger.info('You specified two models for comparison. Results will include a likelihood-ratio test comparing the restricted model (null hypothesis) to the main model (alternative hypothesis).')
+        else:
+            self.logger.info('You specified only the main model. No likelihood-ratio test will be performed.')
+    
+    def FindFixedRho(self):
+        # set all booleans for fixed rhoG and rhoE to False
+        self.bPerfectRhoG = False
+        self.bNoRhoG = False
+        self.bPerfectRhoG0 = False
+        self.bNoRhoG0 = False
+        self.bNoRhoE = False
+        self.bNoRhoE0 = False
+        # assess whether rhoG is perfect or zero
+        if self.args.rho_genetic is not None:
+            if self.args.rho_genetic==1:
+                self.logger.info('Genetic correlations in the main model all set to one.')
+                self.bPerfectRhoG = True
+            else:
+                self.logger.info('Genetic correlations in the main model all set to zero.')
+                self.bNoRhoG = True
+        # assess whether rhoG is perfect or zero in the restricted model
+        if self.args.restricted_rho_genetic is not None:
+            if self.args.restricted_rho_genetic==1:
+                self.logger.info('Genetic correlations in the null model all set to one.')
+                self.bPerfectRhoG0 = True
+            else:
+                self.logger.info('Genetic correlations in the null model all set to zero.')
+                self.bNoRhoG0 = True
+        # assess whether rhoE is zero
+        if self.args.rho_environment is not None:
+            self.logger.info('Environment correlations in the main model all set to zero.')
+            self.bNoRhoE = True
+        # assess whether rhoE is zero in the restricted model  
+        if self.args.restricted_rho_environment is not None:
+            self.logger.info('Environment correlations in the null model all set to zero.')
+            self.bNoRhoE0 = True
+
+    def DoBFGS(self):
+        # if --newton option used
+        if self.args.newton:
+            # don't do BFGS but print warning
+            self.bBFGS = False
+            self.logger.info('MGREML will use a Newton algorithm instead of BFGS for estimation')
+            self.logger.warning('Warning: Newton not recommended for a large number of traits')
+        else:
+            self.bBFGS = True
+            self.logger.info('MGREML will use a BFGS algorithm for estimation')
+    
+    def SetGradTol(self):
+        if self.args.grad_tol is not None:
+            if (self.args.grad_tol <= 0):
+                self.logger.error('Error: --grad-tol should be followed by a positive number e.g. 1E-6, 1e-5, or 0.0001')
+                raise ValueError
+            self.dGradTol = self.args.grad_tol
+        else:
+            self.dGradTol = MgremlReader.dGradTol
+        self.logger.info('Setting convergence threshold for length of gradient per observation per parameter to ' + str(self.dGradTol))
+    
+    def NeedSEs(self):
+        # if --no-se option used
+        if self.args.no_se:
+            # report no SEs
+            self.bSEs = False
+            self.logger.info('Your results will not include any standard errors.')
+        else:
+            self.bSEs = True
+            self.logger.info('Your results will include standard errors.')
+            
+    def NeedAllCoeffs(self):
+        # if --all-coefficients option used
+        if self.args.all_coefficients:
+            # report them
+            self.bAllCoeffs = True
+            self.logger.info('Your results will include estimates of all factor coefficients and their sampling covariance')
+            if self.bSEs == False:
+                self.logger.warning('Warning: as the sampling covariance matrix will be calculated, computing the standard errors will add little computational burden. Are you sure you want to use the --no-se option?')
+        else:
+            self.bAllCoeffs = False
+            
+    def SetRelCutOff(self):
+        # if --rel-cutoff used
+        if self.args.rel_cutoff is not None:
+            if (self.args.rel_cutoff < 0):
+                self.logger.error('Error: --rel-cutoff should be followed by non-negative value.')
+                raise ValueError
+            else:
+                self.bRelCutoff = True
+                self.dRelCutoff = self.args.rel_cutoff
+                self.logger.info('A relatedness cutoff of ' + str(self.dRelCutoff) + ' will be applied to your GRM.')
+        else:
+            self.bRelCutoff = False
+            self.logger.info('No relatedness cutoff will be applied to your GRM.')
+
+    def SetNumberOfPCs(self):
+        # if no. of PCs specified
+        if self.args.ignore_pcs is not None:
+            if len(self.args.ignore_pcs)==1:
+                if (self.args.ignore_pcs[0] < 0):
+                    self.logger.error('Error: --ignore-pcs should be followed by one or two non-negative integers')
+                    raise ValueError
+                elif (self.args.ignore_pcs[0] > 100):
+                    self.logger.warning('Warning: are you sure you want to ignore more than a hundred leading principal components from your genetic data?')
+                self.iDropLeadPCs = self.args.ignore_pcs[0]
+                self.iDropTrailPCs = MgremlReader.iDropTrailPCsDefault
+            elif len(self.args.ignore_pcs)==2:
+                if (self.args.ignore_pcs[0] < 0) or (self.args.ignore_pcs[1] < 0):
+                    self.logger.error('Error: --ignore-pcs should be followed by one or two non-negative integers')
+                    raise ValueError
+                elif (self.args.ignore_pcs[0] > 100):
+                    self.logger.warning('Warning: are you sure you want to ignore more than a hundred leading eigenvectors from your GRM?')
+                self.iDropLeadPCs = self.args.ignore_pcs[0]
+                self.iDropTrailPCs = self.args.ignore_pcs[1]
+                self.logger.info('Ignoring ' + str(self.iDropTrailPCs) + ' trailings eigenvectors from GRM to improve computational efficiency')
+            else:
+                self.logger.error('Error: --ignore-pcs should be followed by one or two non-negative integers')
+                raise ValueError
+        else:
+            self.iDropLeadPCs = MgremlReader.iDropLeadPCsDefault
+            self.iDropTrailPCs = MgremlReader.iDropTrailPCsDefault
+        self.logger.info('Ignoring ' + str(self.iDropLeadPCs) + ' leading eigenvectors from GRM to control for population stratification')
+        
+    def SetIterStoreFreq(self):
+        if self.args.store_iter is not None:
+            if (self.args.store_iter < 1):
+                self.logger.error('Error: --store-iter should be followed by a positive integer')
+                raise ValueError
+            self.bStoreIter = True
+            self.iStoreIterFreq = self.args.store_iter
+            self.logger.info('Storing parameter estimates every ' + str(self.iStoreIterFreq) + ' iterations')
+        else:
+            self.bStoreIter = False
+            self.logger.info('Not storing parameter estimates during iterations')
+
+    def NeedToReinitialise(self):
+        if self.args.reinitialise is not None:
+            if not(os.path.isfile(self.args.reinitialise)):
+                self.logger.error('Error: iteration file ' + self.args.reinitialise + ' does not exist')
+                raise ValueError
+            elif self.args.reinitialise[-4:] != '.pkl':
+                self.logger.error('Error: ' + self.args.reinitialise + ' is not a .pkl file')
+                raise ValueError
+            self.bReinitialise = True
+            self.sInitValsFile = self.args.reinitialise
+            self.logger.info('MGREML will reinitialise using estimates in ' + self.sInitValsFile)
+        else:
+            self.bReinitialise = False
+
+    def NeedToReinitialiseRestricted(self):
+        if self.args.restricted_reinitialise is not None:
+            if not(os.path.isfile(self.args.restricted_reinitialise)):
+                self.logger.error('Error: iteration file ' + self.args.restricted_reinitialise + ' does not exist')
+                raise ValueError
+            elif self.args.restricted_reinitialise[-4:] != '.pkl':
+                self.logger.error('Error: ' + self.args.restricted_reinitialise + ' is not a .pkl file')
+                raise ValueError
+            elif self.bNested == False:
+                self.logger.error('Error: you cannot use --restricted-reinitialise when no restricted model has been specified')
+                raise ValueError
+            self.bReinitialise0 = True
+            self.sInitValsFile0 = self.args.restricted_reinitialise
+            self.logger.info('MGREML will reinitialise restricted model using estimates in ' + self.sInitValsFile0)
+        else:
+            self.bReinitialise0 = False
