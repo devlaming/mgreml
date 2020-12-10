@@ -41,7 +41,7 @@ def main():
             logger.warning('No MGREML analysis will be carried out.')
             logger.info('mgreml_prepare.py -h describes options')
     except Exception:
-        logger.error('MGREML failed.')
+        logger.error('Error: MGREML did not exit properly. Please inspect the log file.')
     finally:
         logger.info('Total time elapsed: {T}'.format(T=tools.sec_to_str(round(time.time() - dStartTime, 2))))
 
