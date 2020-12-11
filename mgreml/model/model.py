@@ -11,12 +11,14 @@ class StructuralModel:
     dLambdaInit = 1E-6
     # set minimum required squared sum of coefficients for each factor
     # when diagnosing issues
-    dSSTOL  = 1E-4
+    dSSTOL = 1E-4
     # set maximum Rsq of coefficients for each factor w.r.t. all other factors
     # when diagnosing issues
     dRSqTOL = 0.99
     
     def __init__(self, mdData, dfBinFY = None, sType=''):
+        # store logger
+        self.logger = mdData.logger
         # check if model has been specified
         bModelSpecified = isinstance(dfBinFY, pd.DataFrame)
         # if model specified, set structural model accordingly
@@ -32,7 +34,7 @@ class StructuralModel:
             # count number of traits and factors
             self.iT = mdData.mY.shape[1]
             self.iF = self.iT
-            print('Assuming saturated ' + sType + ' model')
+            self.logger.info('Assuming saturated ' + sType + 'model')
             # initialise saturated model
             self.InitialiseSaturatedModel(mdData)
         
@@ -142,7 +144,7 @@ class StructuralModel:
             if (dSS < StructuralModel.dSSTOL): # if squared sum too low
                 # print warning
                 sWarning = 'Coefficients for ' + self.lFactors[f] + ' are too close to zero. Squared sum of coefficients is less than ' + str(StructuralModel.dSSTOL) + '.'
-                print(sWarning)
+                self.logger.warning(sWarning)
             # if there are multiple factors
             if (self.iF > 1):
                 # take submatrix of all coefficients, except for current factor
@@ -157,7 +159,7 @@ class StructuralModel:
                 if (dRSq > StructuralModel.dRSqTOL): # if RSq too high
                     # print warning
                     sWarning = 'Coefficients for ' + self.lFactors[f] + ' are multicollinear w.r.t. the coefficients for other factors. R-squared exceeds ' + str(100*StructuralModel.dRSqTOL) + '%.'
-                    print(sWarning)
+                    self.logger.warning(sWarning)
     
     def GetVandC(self, vNew = None):
         # get matrix of coefficients
@@ -202,12 +204,12 @@ class GeneticModel(StructuralModel):
     # as to emulate initial heritabilities of 20%
     dWeight = math.sqrt(0.2)
     # string describing type of model
-    sType = 'genetic'
+    sType = 'genetic '
     
     def __init__(self, mdData, dfBinFY = None):
         super().__init__(mdData, dfBinFY, GeneticModel.sType)
         self.vParam = GeneticModel.dWeight*self.vParam
-        self.lFactors = ['genetic ' + str(x) for x in self.lFactors]
+        self.lFactors = [GeneticModel.sType + str(x) for x in self.lFactors]
 
 class EnvironmentModel(StructuralModel):
     
@@ -215,12 +217,12 @@ class EnvironmentModel(StructuralModel):
     # as to emulate initial heritabilities of 80%
     dWeight = math.sqrt(0.8)
     # string describing type of model
-    sType = 'environment'
+    sType = 'environment '
     
     def __init__(self, mdData, dfBinFY = None):
         super().__init__(mdData, dfBinFY, EnvironmentModel.sType)
         self.vParam = EnvironmentModel.dWeight*self.vParam
-        self.lFactors = ['environment ' + str(x) for x in self.lFactors]
+        self.lFactors = [EnvironmentModel.sType + str(x) for x in self.lFactors]
         # if less environment factors than traits: crash, as this is incompatible with MGREML
         if self.iF < self.iT:
             raise ValueError('You have specified less environmental factors than traits. This is not permitted in MGREML.')
@@ -284,6 +286,7 @@ class MgremlModel:
     dMinEigVal = 1E-12
     
     def __init__(self, mdData, dfGenBinFY = None, dfEnvBinFY = None):
+        self.logger = mdData.logger
         self.model = CombinedModel(mdData, dfGenBinFY, dfEnvBinFY)
         self.data  = mdData
         self.vBetaGLS = None
@@ -331,7 +334,7 @@ class MgremlModel:
             # MgremlEstimator is already at a rank deficient point in
             # parameter space, so MGREML's toast then; return error
             if bGrad:
-                print('The environment covariance matrix is rank deficient. Possible reasons: (1) multicollinearity between phenotypes, (2) a poorly specified model, and/or (3) poor starting values.')
+                self.logger.error('The environment covariance matrix is rank deficient. Possible reasons: (1) multicollinearity between phenotypes, (2) a poorly specified model, and/or (3) poor starting values.')
                 self.model.envmod.DiagnoseProblem(vNew[iParamsG:])
                 raise ValueError('Rank deficient environment covariance matrix')
             else: # else, we are just in a golden section step
@@ -474,7 +477,7 @@ class MgremlModel:
         if bInfo:
             if not(bSilent):
                 # print statement
-                print("Preparing for efficient calculation of AI matrix.")
+                self.logger.info("Preparing for efficient calculation of AI matrix.")
                 tAIprogress = tqdm(total=iN)
             if bCovs and not(bSameCovs):
                 mFTCG = mCGTF.T
@@ -571,7 +574,7 @@ class MgremlModel:
                     mW = np.zeros((iK*iT,iParams))
                 if not(bSilent):
                     # print statement
-                    print("Computing AI matrix.")
+                    self.logger.info("Computing AI matrix.")
                     tAIprogress = tqdm(total=iParamCombos)
                 # for each genetic parameter
                 for g1 in range(0,iParamsG):
