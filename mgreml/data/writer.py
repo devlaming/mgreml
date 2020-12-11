@@ -19,20 +19,36 @@ class DataWriter:
     sCoeff = 'coeff.'
     sCoeffvar = 'coeff.var.'
     
-    def __init__(self, estimates, sPrefix = 'results.'):
-        self.sPrefix = sPrefix
-        if isinstance(estimates, comparison.NestedEstimators):
-            self.bNested = True
-            self.estimates = estimates
-        elif isinstance(estimates, estimator.MgremlEstimator):
-            self.bNested = False
-            self.estimates = estimates
-        else:
-            raise TypeError('No estimates have been provided to write result files from')
+    def __init__(self, estimates, data):
+        self.logger = data.logger
+        self.sPrefix = data.sPrefix
+        self.bNested = data.bNested
+        self.bSEs = data.bSEs
+        self.bAllCoeffs = data.bAllCoeffs
+        self.bCovs = data.bCovs
+        self.estimates = estimates
+    
+    def WriteResults(self):
         if not(self.estimates.IsConverged()):
-            raise ValueError('Trying to write output results while estimates have not converged')
+            raise RuntimeError('Trying to write output results while estimates have not converged')
         if not(self.estimates.IsDone()):
-            raise ValueError('Trying to write output results while final statistic (e.g. genetic correlations) have not been calculated')
+            raise RuntimeError('Trying to write output results while final statistic (e.g. genetic correlations) have not been calculated')
+        self.logger.info('WRITING HERITABILITIES')
+        self.WriteHSq()
+        self.logger.info('WRITING GENETIC AND ENVIRONMENT CORRELATIONS')
+        self.WriteRho()
+        self.logger.info('WRITING LOG-LIKELIHOOD AND OTHER DESCRIPTIVES')
+        self.WriteLogLik()
+        if self.bCovs:
+            self.logger.info('WRITING GLS ESTIMATES OF FIXED EFFECTS')
+            self.WriteEstimatesGLS()
+        if self.bAllCoeffs:
+            self.logger.info('WRITING ALL FACTOR COEFFICIENTS')
+            self.WriteModelCoefficients()
+        if self.bNested:
+            self.logger.info('WRITING RESULTS LIKELIHOOD-RATIO TEST')
+            self.WriteLRT()
+        self.logger.info('Done writing results\n')
        
     def WriteHSq(self):
         if self.bNested:
@@ -51,7 +67,7 @@ class DataWriter:
             dfHSq0.to_csv(sHSq0)
             dfHSqA.to_csv(sHSqA)
             # if SEs are desired, store them
-            if (self.estimates.estimatorA.bSEs):
+            if (self.bSEs):
                 # get heritability standard errors 
                 vHSq0SE = self.estimates.estimator0.vHSqSE
                 vHSqASE = self.estimates.estimatorA.vHSqSE
@@ -76,7 +92,7 @@ class DataWriter:
             # write dataframe
             dfHSq.to_csv(sHSq)
             # if SEs are desired, store them
-            if (self.estimates.bSEs):
+            if (self.bSEs):
                 # get heritability standard errors 
                 vHSqSE = self.estimates.vHSqSE
                 # set dataframe
@@ -306,7 +322,7 @@ class DataWriter:
             dfRhoGA.to_csv(sRhoGA)
             dfRhoEA.to_csv(sRhoEA)
             # if SEs are desired, store them
-            if (self.estimates.estimatorA.bSEs):
+            if (self.bSEs):
                 # get SE matrices 
                 mRhoG0SE = self.estimates.estimator0.mRhoGSE
                 mRhoE0SE = self.estimates.estimator0.mRhoESE
@@ -343,7 +359,7 @@ class DataWriter:
             dfRhoG.to_csv(sRhoG)
             dfRhoE.to_csv(sRhoE)
             # if SEs are desired, store them
-            if (self.estimates.bSEs):
+            if (self.bSEs):
                 # get SE matrices 
                 mRhoGSE = self.estimates.mRhoGSE
                 mRhoESE = self.estimates.mRhoESE
