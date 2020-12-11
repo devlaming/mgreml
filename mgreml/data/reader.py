@@ -430,7 +430,6 @@ class MgremlReader:
         dfBin = dfBin.apply(pd.to_numeric, errors='coerce')
         # get the number of traits and factors/covariates involved and report
         (iT,iK) = dfBin.shape
-        print(dfBin)
         self.logger.info('Found a ' + sData + ' on ' + str(iT) + ' phenotypes and ' + str(iK) + ' ' + sDescr + '.')
         # store dataframe as appropriate attribute of MgremlReader
         if sType == MgremlReader.sCov:
