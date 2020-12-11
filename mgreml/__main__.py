@@ -20,22 +20,25 @@ def main():
     try:
         # read in data
         myMgremlReader = reader.MgremlReader(parser, logger)
-        # if analysis is implied
+        # if analysis is implied by reader
         if myMgremlReader.bAnalyse:
             # align the data
             myMgremlData = aligner.MgremlData(myMgremlReader)
-            logger.info('Initialising estimator')
-            myMgremlEstimator = estimator.MgremlEstimator(myMgremlData, bSEs = True, bReturnFullModelSpecs = True)
-            logger.info('Performing MGREML estimation')
-            myMgremlEstimator.PerformEstimation()
-            logger.info('Initialising file writer for results')
-            myMgremlWriter = writer.DataWriter(myMgremlEstimator, sPrefix = myMgremlReader.sPrefix)
-            logger.info('Writing results')
-            myMgremlWriter.WriteHSq()
-            myMgremlWriter.WriteRho()
-            myMgremlWriter.WriteLogLik()
-            myMgremlWriter.WriteEstimatesGLS()
-            myMgremlWriter.WriteModelCoefficients()
+            # if we have a nested model
+            if myMgremlData.bNested:
+                # initialise nested estimators
+                logger.info('4. INTIALISING MGREML ESTIMATORS FOR NESTED MODELS')
+                myEstimator = comparison.NestedEstimators(myMgremlData)
+            else:
+                # initialise estimator of the main model
+                logger.info('4. INTIALISING MGREML ESTIMATOR FOR MAIN MODEL')
+                myEstimator = estimator.MgremlEstimator(myMgremlData)
+            logger.info('5. PERFORMING MGREML ESIMATION')
+            myEstimator.PerformEstimation()
+            logger.info('6. WRITING MGREML RESULTS')
+            myMgremlWriter = writer.DataWriter(myEstimator, myMgremlData)
+            myMgremlWriter.WriteResults()
+            logger.info('MGREML HAS FINISHED.')
         else:
             logger.warning('No MGREML analysis will be carried out.')
             logger.info('mgreml_prepare.py -h describes options')
