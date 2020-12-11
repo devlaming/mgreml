@@ -6,13 +6,11 @@ from model import model
 
 class MgremlEstimator:
     
-    # set the threshold for length gradient per N per parameter
-    dGradLengthTolPerParam = 1E-5
     # set parameter-change threshold for ending golden section
     # and switching from Newton to gradient descent for one iteration
     dEps = 1E-9
     # set maximum number of iterations for golden section
-    iMaxIter = 60
+    iMaxIterGold = 60
     # set the golden section fraction
     dTheta   = 2/(1+math.sqrt(5)) # golden ratio
     # newton requires gradient and info
@@ -27,8 +25,19 @@ class MgremlEstimator:
     # when doing Newton, let it be quiet about calculating AI matrix in
     # each iter
     bSilentNewton = True
+    # set maximum number of iterations for Newton and BFGS
+    iMaxIter = 2000
     
-    def __init__(self, mdData, dfGenBinFY = None, dfEnvBinFY = None, bBFGS = True, bStoreIters = False, bSEs = False, bReturnFullModelSpecs = False):
+    def __init__(self, mdData, bNested = False):
+        # if null model, read out appropriate attributes
+        if bNested:
+            dfGenBinFY = mdData.dfGenBinFY0
+            dfEnvBinFY = mdData.dfEnvBinFY0
+        else: # if alternative model, read out appropriate attributes
+            dfGenBinFY = mdData.dfGenBinFY
+            dfEnvBinFY = mdData.dfEnvBinFY
+        # store the logger
+        self.logger = mdData.logger
         # initialise mgreml model
         self.mgreml_model = model.MgremlModel(mdData, dfGenBinFY, dfEnvBinFY)
         # set iteration counter
@@ -40,14 +49,23 @@ class MgremlEstimator:
         # indicate that estimates and statistics have not been finalised
         self.bDone = False
         # set whether to perform BFGS or Netwon
-        self.bBFGS = bBFGS
+        self.bBFGS = mdData.bBFGS
         # set whether to store results from each iter
-        self.bStoreIters = bStoreIters
+        self.bStoreIter = mdData.bStoreIter
+        # set frequency with which to store results from iters
+        self.iStoreIterFreq = mdData.iStoreIterFreq
         # set whether to compute standard errors
-        self.bSEs = bSEs
+        self.bSEs = mdData.bSEs
+        # set whether we are estimating a nested model
+        self.bNested = bNested
         # set whether to return all parameters estimates
         # and sampling variance when done
-        self.bReturnFullModelSpecs = bReturnFullModelSpecs
+        self.bAllCoeffs = mdData.bAllCoeffs
+        # set convergence threshold
+        self.dGradTol = mdData.dGradTol
+        # set prefix for storing iteration results
+        self.sPrefix = mdData.sPrefix
+        self.logger.info('Model initialised\n')
         
     def PerformEstimation(self):
         if self.bBFGS:
@@ -56,38 +74,45 @@ class MgremlEstimator:
             self.PerformNewton()
         # compute statistics
         self.ComputeStatistics()
+        self.logger.info('Model estimation complete\n')
         
     def PerformBFGS(self):
         # determine whether we need info matrix at end
-        bInfoAtEnd = (self.bSEs | self.bReturnFullModelSpecs)
+        bInfoAtEnd = (self.bSEs | self.bAllCoeffs)
         # use two strikes out system to reset inverse hessian to -I,
         # if two subsequent iterations produce to little change
         bStrike1 = False
         bStrike2 = False
         # print statement that BFGS starts now
-        print("Performing BFGS algorithm to find coefficients that maximise the MGREML log-likelihood")
+        self.logger.info('Performing BFGS algorithm to find coefficients that maximise the MGREML log-likelihood')
         # compute logL and gradient for current estimates
         (self.dLogL, self.vGrad) = self.mgreml_model.ComputeLogLik(MgremlEstimator.bGradBFGS)
         # computer value of convergence criterion
         self.dGradLengthPerParam = np.sqrt(np.power(self.vGrad.ravel(),2).mean())
         # assess convergence
-        self.bNotConverged = self.dGradLengthPerParam > MgremlEstimator.dGradLengthTolPerParam
+        self.bNotConverged = self.dGradLengthPerParam > self.dGradTol
         # initialise approx. inverse Hessian as -I, so 1st step is gradient descent
         self.mIH = -np.eye(self.mgreml_model.model.iParams)
         # while convergence has not occurred
         while self.bNotConverged:
             # update iteration counter
             self.iIter += 1
-            print("BFGS iteration",self.iIter,": log-likelihood per observation =",self.dLogL,", length of gradient per parameter = ",self.dGradLengthPerParam)
+            if self.iIter > MgremlEstimator.iMaxIter:
+                raise RuntimeError('Aborting BFGS algorithm after ' + str(MgremlEstimator.iMaxIter) + ' iterations. Have you set a too stringent convergence threshold using --grad-tol? We recommend using the default value of 1E-5.')
+            self.logger.info('BFGS iteration ' + str(self.iIter) + ': log-likelihood per observation = ' + str(self.dLogL) + ', length of gradient per parameter = ' + str(self.dGradLengthPerParam))
             # if results are stored in each iteration
-            if self.bStoreIters:
-                # print status and set filename for output
-                sFileName = 'ESTIMATES.ITER.' + str(self.iIter) + '.BFGS.pkl'
-                # construct output dict
-                dictOut = {'currentCombinedModel': self.mgreml_model.model, 'iIter': self.iIter, 'dLogL': self.dLogL, 'vGrad': self.vGrad, 'vBetaGLS': self.mgreml_model.vBetaGLS, 'mVarGLS': self.mgreml_model.mVarGLS}
-                # write output to pickled file
-                with open(sFileName, 'wb') as handle:
-                    pickle.dump(dictOut, handle)
+            if self.bStoreIter:
+                if (self.iIter % self.iStoreIterFreq) == 0:
+                    # print status and set filename for output
+                    if self.bNested:
+                        sFileName = self.sPrefix + 'estimates0.iter.' + str(self.iIter) + '.bfgs.pkl'
+                    else:
+                        sFileName = self.sPrefix + 'estimates.iter.' + str(self.iIter) + '.bfgs.pkl'
+                    # construct output dict
+                    dictOut = {'currentCombinedModel': self.mgreml_model.model, 'iIter': self.iIter, 'dLogL': self.dLogL, 'vGrad': self.vGrad, 'vBetaGLS': self.mgreml_model.vBetaGLS, 'mVarGLS': self.mgreml_model.mVarGLS}
+                    # write output to pickled file
+                    with open(sFileName, 'wb') as handle:
+                        pickle.dump(dictOut, handle)
             # store the old gradient and parameters
             vGradOld  = self.vGrad
             vParamOld = self.mgreml_model.model.GetParams()
@@ -98,7 +123,7 @@ class MgremlEstimator:
             # computer value of convergence criterion
             self.dGradLengthPerParam = np.sqrt(np.power(self.vGrad.ravel(),2).mean())
             # assess convergence
-            self.bNotConverged = self.dGradLengthPerParam > MgremlEstimator.dGradLengthTolPerParam
+            self.bNotConverged = self.dGradLengthPerParam > self.dGradTol
             # if not converged: update inverse Hessian
             if self.bNotConverged:
                 # compute difference in gradient and parameters
@@ -113,14 +138,14 @@ class MgremlEstimator:
                         # indicate this is second strike
                         bStrike2 = True
                         # print warning
-                        print("Warning: too small change in two subsequent BFGS iterations; reinitialising approximate inverse Hessian")
+                        self.logger.warning("Warning: too small change in two subsequent BFGS iterations; reinitialising approximate inverse Hessian")
                     else: # if first strike has not yet occurred
                         # indicate this is first strike
                         bStrike1 = True
                         # replace dot product by tolerance
                         dSTY = -MgremlEstimator.dTolDot
                         # print warning
-                        print("Warning: too small change in BFGS iteration; may have disproportionate effect on approximate inverse Hessian")
+                        self.logger.warning("Warning: too small change in BFGS iteration; may have disproportionate effect on approximate inverse Hessian")
                 else:
                     # if change has occurred in this iteration,
                     # set both strike booleans to False
@@ -145,8 +170,8 @@ class MgremlEstimator:
                     bStrike2 = False
         if bInfoAtEnd:
             # print update
-            print("BFGS CONVERGED. NOW COMPUTING SAMPLING COVARIANCE MATRIX OF BFGS ESTIMATES.")
-            print("WARNING! THIS MAY TAKE HOURS FOR LARGE SAMPLE SIZE AND LARGE NUMBER OF TRAITS!")
+            self.logger.info("BFGS CONVERGED. NOW COMPUTING SAMPLING COVARIANCE MATRIX OF BFGS ESTIMATES.")
+            self.logger.warning("WARNING! THIS MAY TAKE HOURS FOR LARGE SAMPLE SIZE AND LARGE NUMBER OF TRAITS!")
             # compute information matrix
             (self.dLogL, self.vGrad, self.mInfo) = self.mgreml_model.ComputeLogLik(MgremlEstimator.bGradBFGS, bInfoAtEnd)
             # scale information matrix back to normal scale
@@ -159,23 +184,29 @@ class MgremlEstimator:
         # set lowest eigenvalue permitted in info matrix per N to 1E-9
         dMinEigVal = 1E-9
         # print statement that BFGS starts now
-        print("Performing Newton algorithm to find coefficients that maximise the MGREML log-likelihood")
+        self.logger.info("Performing Newton algorithm to find coefficients that maximise the MGREML log-likelihood")
         # while convergence has not occurred
         while self.bNotConverged:
             # update iteration counter
             self.iIter += 1
+            if self.iIter > MgremlEstimator.iMaxIter:
+                raise RuntimeError('Aborting Newton algorithm after ' + str(MgremlEstimator.iMaxIter) + ' iterations. Have you set a too stringent convergence threshold using --grad-tol? We recommend using the default value of 1E-5.')
             if self.bEstimatesChanged: # if the estimates have changed
                 # compute the log likelihoodper observation etc.
                 (self.dLogL, self.vGrad, self.mInfo) = self.mgreml_model.ComputeLogLik(MgremlEstimator.bGradNewton,MgremlEstimator.bInfoNewton,bSilent = MgremlEstimator.bSilentNewton)
                 # computer value of convergence criterion
                 self.dGradLengthPerParam = np.sqrt(np.power(self.vGrad.ravel(),2).mean())
                 # assess convergence
-                self.bNotConverged = self.dGradLengthPerParam > MgremlEstimator.dGradLengthTolPerParam
+                self.bNotConverged = self.dGradLengthPerParam > self.dGradTol
                 # if results are stored in each iteration
-                if self.bStoreIters:
-                    # print status and set filenames for output
-                    sFileName = 'ESTIMATES.ITER.' + str(self.iIter) + '.NEWTON.pkl'
-                print("Newton iteration",self.iIter,": log-likelihood per observation =",self.dLogL,", length of gradient per parameter = ",self.dGradLengthPerParam)
+                if self.bStoreIter:
+                    if (self.iIter % self.iStoreIterFreq) == 0:
+                        # print status and set filenames for output
+                        if self.bNested:
+                            sFileName = self.sPrefix + 'estimates0.iter.' + str(self.iIter) + '.newton.pkl'
+                        else:
+                            sFileName = self.sPrefix + 'estimates.iter.' + str(self.iIter) + '.newton.pkl'
+                self.logger.info('Newton iteration ' + str(self.iIter) + ': log-likelihood per observation = ' + str(self.dLogL) + ', length of gradient per parameter = ' + str(self.dGradLengthPerParam))
             else: # if they have not changed, defer testing of convergence for now
                 # compute the log likelihood and gradient per observation
                 (self.dLogL, self.vGrad) = self.mgreml_model.ComputeLogLik(MgremlEstimator.bGradNewton)
@@ -183,19 +214,24 @@ class MgremlEstimator:
                 self.mInfo = None
                 self.dGradLengthPerParam = None
                 # if results are stored in each iteration
-                if self.bStoreIters:
-                    # print status and set filenames for output
-                    sFileName = 'ESTIMATES.ITER.' + str(self.iIter) + '.GRAD_DESCENT.pkl'
-                print("WARNING: Estimates did not change in previous iteration, while gradient is too large")
-                print("Carrying out one gradient-descent step")
-                print("Gradient-descent iteration",self.iIter,": log-likelihood per observation =",self.dLogL,", length of gradient per parameter = ",self.dGradLengthPerParam)
+                if self.bStoreIter:
+                    if (self.iIter % self.iStoreIterFreq) == 0:
+                        # print status and set filenames for output
+                        if self.bNested:
+                            sFileName = self.sPrefix + 'estimates0.iter.' + str(self.iIter) + '.grad_descent.pkl'
+                        else:
+                            sFileName = self.sPrefix + 'estimates.iter.' + str(self.iIter) + '.grad_descent.pkl'
+                self.logger.warning("WARNING: Estimates did not change in previous iteration, while gradient is too large")
+                self.logger.info("Carrying out one gradient-descent step")
+                self.logger.info('Gradient-descent iteration  ' + str(self.iIter) + ': log-likelihood per observation = ' + str(self.dLogL) + ', length of gradient per parameter = ' + str(self.dGradLengthPerParam))
             # if results are stored in each iteration
-            if self.bStoreIters:
-                # construct output dict
-                dictOut = {'currentCombinedModel': self.mgreml_model.model, 'iIter': self.iIter, 'dLogL': self.dLogL, 'vGrad': self.vGrad, 'vBetaGLS': self.mgreml_model.vBetaGLS, 'mVarGLS': self.mgreml_model.mVarGLS}
-                # write output to pickled file
-                with open(sFileName, 'wb') as handle:
-                    pickle.dump(dictOut, handle)
+            if self.bStoreIter:
+                if (self.iIter % self.iStoreIterFreq) == 0:
+                    # construct output dict
+                    dictOut = {'currentCombinedModel': self.mgreml_model.model, 'iIter': self.iIter, 'dLogL': self.dLogL, 'vGrad': self.vGrad, 'vBetaGLS': self.mgreml_model.vBetaGLS, 'mVarGLS': self.mgreml_model.mVarGLS}
+                    # write output to pickled file
+                    with open(sFileName, 'wb') as handle:
+                        pickle.dump(dictOut, handle)
             # if not converged in this iteration: update parameters
             if self.bNotConverged:
                 if self.bEstimatesChanged: # if the estimates have changed do Newton
@@ -235,7 +271,7 @@ class MgremlEstimator:
         vLogL[2] = self.mgreml_model.ComputeLogLik(vNew = mParam[:,2])
         vLogL[3] = self.mgreml_model.ComputeLogLik(vNew = mParam[:,3])
         # while the largest absolute difference between two parameters in vector x3 and x2 is larger than epsilon AND the maximum no. of iterations hasn't passed yet
-        while (np.max(abs(mParam[:,2] - mParam[:,3])) >= MgremlEstimator.dEps) and (iIterGold < MgremlEstimator.iMaxIter):
+        while (np.max(abs(mParam[:,2] - mParam[:,3])) >= MgremlEstimator.dEps) and (iIterGold < MgremlEstimator.iMaxIterGold):
             # if f2 > f3: go towards x0
             if (vLogL[2] > vLogL[3]):
                 # set x3 as new x1: the upper bound
@@ -311,7 +347,11 @@ class MgremlEstimator:
         bWarning = iDropped > 0
         if bWarning:
             # print warning
-            print("WARNING!",iDropped,"eigenvalues ignored in pseudo inverse of matrix; probably this is related to the AI matrix; phenotypes may be multicollinear or the current set of estimates may be poor; pay attention to whether this message persists up until the last iteration; if so, be very cautious in interpreting sampling variance matrix and standard errors of estimates!")
+            self.logger.warning('WARNING! ' + str(iDropped) + ' eigenvalues ignored in pseudo inverse of matrix')
+            self.logger.info('Probably this is related to the AI matrix')
+            self.logger.info('Phenotypes may be multicollinear or the current set of estimates may be poor')
+            self.logger.info('Pay attention to whether this message persists up until the last iteration;')
+            self.logger.info('If so, be very cautious in interpreting sampling variance matrix and standard errors of estimates!')
         # set the eigenvalues of the pseudo inverse equal to eigenvalues of inverse
         vDinv = 1/vD
         # except for problematic ones; set those eigenvalues in inverse equal to zero
@@ -350,15 +390,15 @@ class MgremlEstimator:
         # compute correlations
         self.mRhoG = np.multiply(mVG,mOneOverSqrtVG)
         self.mRhoE = np.multiply(mVE,mOneOverSqrtVE)
-        if self.bSEs or self.bReturnFullModelSpecs:
+        if self.bSEs or self.bAllCoeffs:
             # set lowest eigenvalue permitted in info matrix per N to 1E-9
             dMinEigValPerN = 1E-18
             # scale back to normal scale
             dMinEigVal = dMinEigValPerN*self.mgreml_model.data.iN
             # if info matrix has not yet been computed: compute it
             if not(isinstance(self.mInfo, np.ndarray)):
-                print("COMPUTING SAMPLING COVARIANCE MATRIX OF ESTIMATES.")
-                print("WARNING! THIS MAY TAKE HOURS FOR LARGE SAMPLE SIZE AND LARGE NUMBER OF TRAITS!")
+                self.logger.info("COMPUTING SAMPLING COVARIANCE MATRIX OF ESTIMATES.")
+                self.logger.warning("WARNING! THIS MAY TAKE HOURS FOR LARGE SAMPLE SIZE AND LARGE NUMBER OF TRAITS!")
                 # compute information matrix
                 (self.dLogL, self.vGrad, self.mInfo) = self.mgreml_model.ComputeLogLik(MgremlEstimator.bGradNewton, MgremlEstimator.bInfoNewton)
                 # scale dLogL, vGrad and information matrix back to normal scale
