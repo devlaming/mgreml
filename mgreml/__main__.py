@@ -23,8 +23,6 @@ def main():
         # if analysis is implied
         if myMgremlReader.bAnalyse:
             # align the data
-            logger.info('Aligning data and applying the canonical transformation')
-            logger.info('This may take some time...')
             myMgremlData = aligner.MgremlData(myMgremlReader)
             logger.info('Initialising estimator')
             myMgremlEstimator = estimator.MgremlEstimator(myMgremlData, bSEs = True, bReturnFullModelSpecs = True)

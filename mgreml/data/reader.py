@@ -67,16 +67,18 @@ class MgremlReader:
         self.bAnalyse = True
         # if GRM, pheno or output has not been specified: stop analysing
         if self.args.grm is None:
-            self.logger.warning('Error: no GRM was specified.')
+            self.logger.error('Error: no GRM was specified.')
             self.bAnalyse = False
         if self.args.pheno is None:
-            self.logger.warning('Error: no phenotype file was specified.')
+            self.logger.error('Error: no phenotype file was specified.')
             self.bAnalyse = False            
         if self.args.out is None:
-            self.logger.warning('Error: no prefix for the output files was specified.')
+            self.logger.error('Error: no prefix for the output files was specified.')
             self.bAnalyse = False
         # if we can analyse, read in data
         if self.bAnalyse:
+            self.logger.info('1. READING IN ALL DATA, MODELS, AND INPUT OPTIONS')
+            self.logger.info('READING OPTIONS')
             # determine whether rel-cutoff has been used
             self.SetRelCutOff()
             # determine how many PCs to drop
@@ -98,13 +100,7 @@ class MgremlReader:
             self.NeedToReinitialiseRestricted()
             # determine whether any correlations are fixed to zero or one
             self.FindFixedRho()
-            # read phenotype file
-            self.ReadData(MgremlReader.sPhe)
-            # if covariate file specified: read
-            if self.args.covar is not None:
-                self.ReadData(MgremlReader.sCov)
-            else:
-                self.dfX = None
+            self.logger.info('READING MODELS')
             # if covar model has been specified: read
             if self.args.covar_model is not None:
                 self.ReadModel(MgremlReader.sCov)
@@ -130,6 +126,14 @@ class MgremlReader:
                 self.ReadModel(MgremlReader.sEnv, MgremlReader.bNull)
             else:
                 self.dfEnvBinFY0 = None
+            self.logger.info('READING DATA')
+            # read phenotype file
+            self.ReadData(MgremlReader.sPhe)
+            # if covariate file specified: read
+            if self.args.covar is not None:
+                self.ReadData(MgremlReader.sCov)
+            else:
+                self.dfX = None
             # read GRM
             self.ReadGRM()
             # set number of leading and trailing PCs
@@ -277,7 +281,7 @@ class MgremlReader:
         # convert to pd dataframe        
         self.dfA = pd.DataFrame(mA, columns=index, index=index)
         # print update
-        self.logger.info('Finished reading in GRM')
+        self.logger.info('Finished reading in GRM\n')
         
     def ReadData(self, sType):
         # figure out what type of input data we have
