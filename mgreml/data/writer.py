@@ -64,8 +64,8 @@ class DataWriter:
             sHSq0 = self.sPrefix + DataWriter.sH2 + DataWriter.sH0 + DataWriter.sExtension
             sHSqA = self.sPrefix + DataWriter.sH2 + DataWriter.sHA + DataWriter.sExtension
             # write dataframes
-            dfHSq0.to_csv(sHSq0)
-            dfHSqA.to_csv(sHSqA)
+            dfHSq0.to_csv(sHSq0, sep='\t')
+            dfHSqA.to_csv(sHSqA, sep='\t')
             # if SEs are desired, store them
             if (self.bSEs):
                 # get heritability standard errors 
@@ -78,8 +78,8 @@ class DataWriter:
                 sHSq0SE = self.sPrefix + DataWriter.sH2 + DataWriter.sH0 + DataWriter.sSE + DataWriter.sExtension
                 sHSqASE = self.sPrefix + DataWriter.sH2 + DataWriter.sHA + DataWriter.sSE + DataWriter.sExtension
                 # write dataframes
-                dfHSq0SE.to_csv(sHSq0SE)
-                dfHSqASE.to_csv(sHSqASE)
+                dfHSq0SE.to_csv(sHSq0SE, sep='\t')
+                dfHSqASE.to_csv(sHSqASE, sep='\t')
         else:
             # get heritability
             vHSq = self.estimates.vHSq
@@ -90,7 +90,7 @@ class DataWriter:
             # set filename
             sHSq = self.sPrefix + DataWriter.sH2 + DataWriter.sExtension
             # write dataframe
-            dfHSq.to_csv(sHSq)
+            dfHSq.to_csv(sHSq, sep='\t')
             # if SEs are desired, store them
             if (self.bSEs):
                 # get heritability standard errors 
@@ -100,7 +100,7 @@ class DataWriter:
                 # set filenames
                 sHSqSE = self.sPrefix + DataWriter.sH2 + DataWriter.sSE + DataWriter.sExtension
                 # write dataframes
-                dfHSqSE.to_csv(sHSqSE)
+                dfHSqSE.to_csv(sHSqSE, sep='\t')
 
     def WriteLRT(self):
         if not(self.bNested):
@@ -156,10 +156,10 @@ class DataWriter:
             sSamplingV0 = self.sPrefix + DataWriter.sCoeffvar + DataWriter.sH0 + DataWriter.sExtension
             sSamplingVA = self.sPrefix + DataWriter.sCoeffvar + DataWriter.sHA + DataWriter.sExtension
             # write dataframes
-            dfParamsA.to_csv(sParamsA)
-            dfParams0.to_csv(sParams0)
-            dfSamplingVA.to_csv(sSamplingVA)
-            dfSamplingV0.to_csv(sSamplingV0)
+            dfParamsA.to_csv(sParamsA, sep='\t')
+            dfParams0.to_csv(sParams0, sep='\t')
+            dfSamplingVA.to_csv(sSamplingVA, sep='\t')
+            dfSamplingV0.to_csv(sSamplingV0, sep='\t')
         else:
             # get all parameter estimates, with indices of traits and factors
             (vIndTG, vIndFG, vParamG, vIndTE, vIndFE, vParamE) = self.estimates.mgreml_model.model.GetSplitParamsAndIndices()
@@ -186,8 +186,8 @@ class DataWriter:
             sParams = self.sPrefix + DataWriter.sCoeff + DataWriter.sExtension
             sSamplingV = self.sPrefix + DataWriter.sCoeffvar + DataWriter.sExtension
             # write dataframes
-            dfParams.to_csv(sParams)
-            dfSamplingV.to_csv(sSamplingV)
+            dfParams.to_csv(sParams, sep='\t')
+            dfSamplingV.to_csv(sSamplingV, sep='\t')
     
     def WriteLogLik(self):
         if self.bNested:
@@ -261,10 +261,10 @@ class DataWriter:
             sVarGLS0 = self.sPrefix + DataWriter.sGLSvar + DataWriter.sH0 + DataWriter.sExtension
             sVarGLSA = self.sPrefix + DataWriter.sGLSvar + DataWriter.sHA + DataWriter.sExtension
             # write dataframes
-            dfBetaGLS0.to_csv(sBetaGLS0)
-            dfBetaGLSA.to_csv(sBetaGLSA)
-            dfVarGLS0.to_csv(sVarGLS0)
-            dfVarGLSA.to_csv(sVarGLSA)
+            dfBetaGLS0.to_csv(sBetaGLS0, sep='\t')
+            dfBetaGLSA.to_csv(sBetaGLSA, sep='\t')
+            dfVarGLS0.to_csv(sVarGLS0, sep='\t')
+            dfVarGLSA.to_csv(sVarGLSA, sep='\t')
         else:
             # throw error if no covariates in model
             if not(self.estimates.mgreml_model.data.bCovs):
@@ -294,8 +294,8 @@ class DataWriter:
             sBetaGLS = self.sPrefix + DataWriter.sGLSest + DataWriter.sExtension
             sVarGLS = self.sPrefix + DataWriter.sGLSvar + DataWriter.sExtension
             # write dataframes
-            dfBetaGLS.to_csv(sBetaGLS)
-            dfVarGLS.to_csv(sVarGLS)
+            dfBetaGLS.to_csv(sBetaGLS, sep='\t')
+            dfVarGLS.to_csv(sVarGLS, sep='\t')
     
     def WriteRho(self):
         if self.bNested:
@@ -317,10 +317,10 @@ class DataWriter:
             sRhoGA = self.sPrefix + DataWriter.sRG + DataWriter.sHA + DataWriter.sExtension
             sRhoEA = self.sPrefix + DataWriter.sRE + DataWriter.sHA + DataWriter.sExtension
             # write dataframes
-            dfRhoG0.to_csv(sRhoG0)
-            dfRhoE0.to_csv(sRhoE0)
-            dfRhoGA.to_csv(sRhoGA)
-            dfRhoEA.to_csv(sRhoEA)
+            dfRhoG0.to_csv(sRhoG0, sep='\t')
+            dfRhoE0.to_csv(sRhoE0, sep='\t')
+            dfRhoGA.to_csv(sRhoGA, sep='\t')
+            dfRhoEA.to_csv(sRhoEA, sep='\t')
             # if SEs are desired, store them
             if (self.bSEs):
                 # get SE matrices 
@@ -339,10 +339,10 @@ class DataWriter:
                 sRhoGASE = self.sPrefix + DataWriter.sRG + DataWriter.sHA + DataWriter.sSE + DataWriter.sExtension
                 sRhoEASE = self.sPrefix + DataWriter.sRE + DataWriter.sHA + DataWriter.sSE + DataWriter.sExtension
                 # write dataframes
-                dfRhoG0SE.to_csv(sRhoG0SE)
-                dfRhoE0SE.to_csv(sRhoE0SE)
-                dfRhoGASE.to_csv(sRhoGASE)
-                dfRhoEASE.to_csv(sRhoEASE)
+                dfRhoG0SE.to_csv(sRhoG0SE, sep='\t')
+                dfRhoE0SE.to_csv(sRhoE0SE, sep='\t')
+                dfRhoGASE.to_csv(sRhoGASE, sep='\t')
+                dfRhoEASE.to_csv(sRhoEASE, sep='\t')
         else:
             # get correlation matrices 
             mRhoG = self.estimates.mRhoG
@@ -356,8 +356,8 @@ class DataWriter:
             sRhoG = self.sPrefix + DataWriter.sRG + DataWriter.sExtension
             sRhoE = self.sPrefix + DataWriter.sRE + DataWriter.sExtension
             # write dataframes
-            dfRhoG.to_csv(sRhoG)
-            dfRhoE.to_csv(sRhoE)
+            dfRhoG.to_csv(sRhoG, sep='\t')
+            dfRhoE.to_csv(sRhoE, sep='\t')
             # if SEs are desired, store them
             if (self.bSEs):
                 # get SE matrices 
@@ -370,6 +370,6 @@ class DataWriter:
                 sRhoGSE = self.sPrefix + DataWriter.sRG + DataWriter.sSE + DataWriter.sExtension
                 sRhoESE = self.sPrefix + DataWriter.sRE + DataWriter.sSE + DataWriter.sExtension
                 # write dataframes
-                dfRhoGSE.to_csv(sRhoGSE)
-                dfRhoESE.to_csv(sRhoESE)
+                dfRhoGSE.to_csv(sRhoGSE, sep='\t')
+                dfRhoESE.to_csv(sRhoESE, sep='\t')
 
