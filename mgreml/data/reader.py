@@ -137,9 +137,6 @@ class MgremlReader:
                 self.dfX = None
             # read GRM
             self.ReadGRM()
-            # set number of leading and trailing PCs
-            self.iDropLeadPCs = MgremlReader.iDropLeadPCsDefault
-            self.iDropTrailPCs = MgremlReader.iDropTrailPCsDefault            
     
     def InitialiseArgumentsAndLogger(self):
         #create mutually exclusive groups
