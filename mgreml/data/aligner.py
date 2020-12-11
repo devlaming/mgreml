@@ -1,8 +1,11 @@
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 pd.options.mode.chained_assignment = None
 
 class MgremlData:
+
+    iManyDummies = 1000
     
     def __init__(self, mReader):
         # read out MgremlReader
@@ -13,13 +16,11 @@ class MgremlData:
         dfBinXY = mReader.dfBinXY
         iDropLeadPCs = mReader.iDropLeadPCs
         iDropTrailPCs = mReader.iDropTrailPCs
+        self.logger.info('2. CLEANING YOUR DATA')
         # find out if we have covariates
-        (bCovs, bSameCovs) = self.DetermineIfCovsAreGiven(dfX, dfBinXY)
-        # store resulting booleans as attributes
-        self.bCovs     = bCovs
-        self.bSameCovs = bSameCovs
+        self.DetermineIfCovsAreGiven(dfX, dfBinXY)
         # if we have covariates, and different covariates apply to different traits
-        if bCovs and not(bSameCovs):
+        if self.bCovs and not(self.bSameCovs):
             # clean up the specification of the part of the model on covariates
             (dfX, dfBinXY) = self.CleanSpecificationCovariates(dfY, dfX, dfBinXY)
         # check if there are duplicates and/or rank defficiency
@@ -38,68 +39,76 @@ class MgremlData:
         
     def DetermineIfCovsAreGiven(self, dfX, dfBinXY):
         # assert whether we have covariates and whether we have same covs across traits
-        bCovs     = isinstance(dfX, pd.DataFrame)
-        bSameCovs = not(isinstance(dfBinXY, pd.DataFrame))
+        self.bCovs = isinstance(dfX, pd.DataFrame)
+        self.bSameCovs = not(isinstance(dfBinXY, pd.DataFrame))
         # if we have no covariates, yet different covariates have been specified
-        if not(bCovs) and not(bSameCovs):
-            self.logger.error('Error: you have specified different covariates to apply to different traits, without supplying data on those covariates using --covar.')
-            raise TypeError
-        return bCovs, bSameCovs
+        if not(self.bCovs) and not(self.bSameCovs):
+            raise SyntaxError('you have specified different covariates to apply to different traits, without supplying data on those covariates using --covar')
     
     def CleanSpecificationCovariates(self, dfY, dfX, dfBinXY):
+        self.logger.info('INSPECTING YOUR COVARIATE MODEL')
         # get indices phenotypes from dfY and dfBinXY
         indY_Y  = dfY.columns
         indXY_Y = dfBinXY.index
         # get labels of covariates from dfX and dfBinXY
         indX_X  = dfX.columns
         indXY_X = dfBinXY.columns
+        self.logger.info('You specified which covariates apply to ' + str(dfBinXY.shape[0]) + ' phenotypes')
+        self.logger.info('There are ' + str(dfY.shape[1]) + ' phenotypes in your data')
         # all phenotypes in dfY should refer to phenotypes in dfBinXY; abort if problematic
         if not(indY_Y.isin(indXY_Y).all()):
-            raise ValueError('There is at least one phenotype for which you have not specified which covariates apply to it.') 
+            raise ValueError('there is at least one phenotype for which you have not specified which covariates apply to it') 
         # all covariates in dfBinXY should refer to covariates dfX; abort if problematic
         if not(indXY_X.isin(indX_X).all()):
-            raise ValueError('There is at least one phenotype-specific covariate for which you have not supplied the underlying data.') 
+            raise ValueError('there is at least one phenotype-specific covariate for which you have not supplied the underlying data') 
+        if (dfBinXY.shape[0] - dfY.shape[1]) != 0:
+            self.logger.info('The ' + str(dfBinXY.shape[0] - dfY.shape[1]) + ' redundant phenotypes will be removed from your coviarate model')
         # eliminate phenotypes from dfBinXY that are not in dfY
         dfBinXY = dfBinXY.loc[indY_Y]
+        self.logger.info('You specified for ' + str(dfBinXY.shape[1]) + ' covariates to which phenotypes they apply')
+        self.logger.info('There are ' + str(dfX.shape[1]) + ' covariates in your data')
+        if (dfX.shape[1] - dfBinXY.shape[1]) != 0:
+            self.logger.info('The ' + str(dfX.shape[1] - dfBinXY.shape[1]) + ' redundant covariates will be removed from your coviarate data')
         # eliminate covariates from dfX that are not used according to dfBinXY
         dfX = dfX[indXY_X]
         # if dfBinXY is not binary: abort
         if ((dfBinXY==0).sum().sum() + (dfBinXY==1).sum().sum()) != (dfBinXY.shape[0]*dfBinXY.shape[1]):
-            raise ValueError('Your data indicating which covariate affects which phenotype does not only comprise zeros and ones.')
+            raise ValueError('your model indicating which covariate affects which phenotype does not only comprise zeros and ones')
         # if dfBinXY is all ones: print warning and drop
         if ((dfBinXY==1).sum().sum()) == (dfBinXY.shape[0]*dfBinXY.shape[1]):
-            print('Warning! Your data indicating which covariate affects which phenotype comprises only ones.')
-            print('Assuming all covariates apply to all traits.')
-            dfBinXY        = None
+            self.logger.warning('Warning: your model indicating which covariate affects which phenotype now comprises only ones')
+            self.logger.warning('Assuming all covariates apply to all traits.')
+            dfBinXY = None
             self.bSameCovs = True
         return dfX, dfBinXY
     
     def CheckDuplicatesAndRank(self, dfY, dfA, dfX, dfBinXY):
+        self.logger.info('CHECKING FOR DUPLICATES AND MULTICOLLINEARITY')
         # if duplicates in index or columns of dfA
         if (dfA.index.duplicated().sum() > 0) or (dfA.columns.duplicated().sum() > 0):
-            raise ValueError('You have individuals with the same FID-IID combination in your GRM.')
+            raise ValueError('you have individuals with the same FID-IID combination in your GRM')
         # if duplicates in columns of dfY
         if dfY.columns.duplicated().sum() > 0:
-            raise ValueError('You have phenotypes with duplicate labels in your data.')
+            raise ValueError('you have phenotypes with duplicate labels in your data')
         # if duplicates in index of dfY
         if dfY.index.duplicated().sum() > 0:
-            raise ValueError('You have individuals with the same FID-IID combination in your phenotype data.')
+            raise ValueError('you have individuals with the same FID-IID combination in your phenotype data')
         # if we have covariates
         if self.bCovs:
             # if duplicates in columns of dfX
             if dfX.columns.duplicated().sum() > 0:
-                raise ValueError('You have covariates with duplicate labels in your data.')
+                raise ValueError('you have covariates with duplicate labels in your data')
             # if duplicates in index of dfX
             if dfX.index.duplicated().sum() > 0:
-                raise ValueError('You have covariates with the same FID-IID combination in your covariate data.')
+                raise ValueError('you have covariates with the same FID-IID combination in your covariate data')
             # if we have different covariates across traits
             if not(self.bSameCovs):
                 # if duplicates in columns of dfBinXY
                 if dfBinXY.columns.duplicated().sum() > 0:
-                    raise ValueError('In your specification which covariates apply to which phenotypes, you have specified duplicate covariates.')
+                    raise ValueError('in your specification which covariates apply to which phenotypes, you have specified duplicate covariates')
                 # if duplicates in index of dfBinXY
                 if dfBinXY.index.duplicated().sum() > 0:
-                    raise ValueError('In your specification which covariates apply to which phenotypes, you have specified duplicate phenotypes.')
+                    raise ValueError('in your specification which covariates apply to which phenotypes, you have specified duplicate phenotypes')
             # get matrix of covariates and set missings to zero
             mX = np.array(dfX)
             mX[np.where(np.isnan(mX))] = 0
@@ -109,9 +118,9 @@ class MgremlData:
             iK = dfX.shape[1]
             # if rank is below the number of covariates
             if dRankX < iK:
-                raise ValueError('Your matrix of covariates does not have full rank. I.e. there is perfect multicollinearity.')
+                raise ValueError('your matrix of covariates does not have full rank, i.e. there is perfect multicollinearity')
         # get matrix of phenotypes and set missings to zero
-        mY = np.array(dfY)
+        mY = np.array(dfY.copy())
         mY[np.where(np.isnan(mY))] = 0
         # compute the rank of the matrix of phenotypes
         dRankY = np.linalg.matrix_rank(mY)
@@ -119,18 +128,22 @@ class MgremlData:
         iT = dfY.shape[1]
         # if rank is below the number of covariates
         if dRankY < iT:
-            print('Warning! Your data of phenotypes does not have full rank.')
-            print('I.e. there is perfect multicollinearity between your phenotypes.')
-            print('This may lead to poorly identified models.')
+            self.logger.warning('Warning: your phenotype data is rank deficient, i.e. there is perfect multicollinearity.')
+            self.logger.warning('This may lead to poorly identified models.')
         # compute the phenotype variance of each trait
         vVarY = np.var(mY,axis=0)
         # if there is at least one trait with no variance
         if (vVarY == 0).sum() > 0:
-            raise ValueError('You have specified one or more phenotypes without any variance at all.')
+            raise ValueError('you have specified one or more phenotypes without any variance at all')
+        self.logger.info('No irregularities found')
     
     def FindOverlapAndSort(self, dfY, dfA, dfX, dfBinXY):
+        self.logger.info('JOINING YOUR DATA')
+        self.logger.info('There are ' + str(dfY.shape[0]) + ' individuals in your phenotype data')
+        self.logger.info('There are ' + str(dfA.shape[0]) + ' individuals in your GRM')
         # if we have covariates
         if self.bCovs:
+            self.logger.info('There are ' + str(dfX.shape[0]) + ' individuals in your covariate data')
             # define list of dataframes to include dfX
             ldfs = [dfY,dfA,dfX]
         else:
@@ -145,19 +158,20 @@ class MgremlData:
             lIDs.append(pd.DataFrame(data=None, columns=None, index=df.index))
         # find the FID-IID combos that are present in all relevant dataframes
         miIDs = pd.concat(lIDs, axis=1, join='inner').index
+        self.logger.info('Keeping only the ' + str(len(miIDs)) + ' overlapping individuals')
         # select and order phenotypes and GRM by those individuals
         dfY = dfY.loc[miIDs]
         dfA = dfA.loc[miIDs,miIDs]
         # double-check if everything is now lined up
         if not(all(dfY.index == dfA.index)) or not(all(dfY.index == dfA.columns)):
-            raise ValueError('The FID-IID combinations in your GRM cannot be lined up properly with those in your phenotype data.')
+            raise ValueError('the FID-IID combinations in your GRM cannot be lined up properly with those in your phenotype data')
         # if we have covariates
         if self.bCovs:
             # select and order covariates by those individuals
             dfX = dfX.loc[miIDs]
             # double-check if everything is now lined up
             if not(all(dfY.index == dfX.index)):
-                raise ValueError('The FID-IID combinations in your covariates cannot be lined up properly with those in your phenotype data.')
+                raise ValueError('the FID-IID combinations in your covariates cannot be lined up properly with those in your phenotype data')
             # if we have different covariates across traits
             if not(self.bSameCovs):
                 # get labels of phenotypes and covariates
@@ -168,27 +182,39 @@ class MgremlData:
                 dfBinXY = (dfBinXY.loc[indY_Y])[indX_X]
                 # double-check if everything is now lined up
                 if not(all(dfBinXY.index == indY_Y)):
-                    raise ValueError('Your specification which covariates applies to which phenotype cannot be properly lined up with the phenotypes.')
+                    raise ValueError('your specification which covariates applies to which phenotype cannot be properly lined up with the phenotypes')
                 if not(all(dfBinXY.columns == indX_X)):
-                    raise ValueError('Your specification which covariates applies to which phenotype cannot be properly lined up with the covariates.')   
+                    raise ValueError('your specification which covariates applies to which phenotype cannot be properly lined up with the covariates')
         return dfY, dfA, dfX, dfBinXY
     
     def DropMissings(self, dfY, dfA, dfX, dfBinXY):
+        self.logger.info('DROPPING PROBLEMATIC INDIVIDUALS BECAUSE OF MISSING PHENOTYPES AND/OR COVARIATES')
         # if we have covariates
         if self.bCovs:
+            iCount = 0
             # and all covariates apply to all traits
             if self.bSameCovs:
+                tDrop = tqdm(total=dfY.shape[0])
                 # and for a given observations
                 for i in dfY.index:
+                    tDrop.update(1)
                     # if at least one covariate is  missing
                     if (dfX.loc[i].isnull().sum() > 0) or (dfX.loc[i].isna().sum() > 0):
                         # set all phenotypes for that individual to missing
                         dfY.loc[i] = None
+                        iCount += 1
+                tDrop.close()
+                self.logger.info('Found ' + str(iCount) + ' individuals with missing data on one or more covariates')
+                self.logger.info('Setting all phenotypes to missing for those individuals')
             else: # if not all covariates apply to all traits
+                tDrop = tqdm(total=dfY.shape[0])
                 # for a given observation
                 for i in dfY.index:
+                    tDrop.update(1)
                     # find indices of missing covariates
                     vIndMissingCovs = np.array(np.where(dfX.loc[i].isnull() | dfX.loc[i].isna())).ravel()
+                    if len(vIndMissingCovs) > 0:
+                        iCount += 1
                     # for each missing covariate
                     for j in vIndMissingCovs:
                         # find phenotypes affected by the missing covariate
@@ -197,8 +223,15 @@ class MgremlData:
                         for k in vIndPhenotypes:
                             # set phenotypic value to missing
                             dfY.loc[i].iloc[k] = None
-        # count the number of traits in dfY
+                tDrop.close()
+                self.logger.info('Found ' + str(iCount) + ' individuals with missing data on one or more covariates')
+                self.logger.info('Setting all phenotypes affected by missing covariates to missing for those individiuals')
+        # count the number of traits and observations in dfY
         iT = dfY.shape[1]
+        iN = dfY.shape[0]
+        # count number of observations to be dropped i.e. with all phenos missing
+        iM = ((dfY.isnull() | dfY.isna()).sum(axis=1) == iT).sum()
+        self.logger.info('Dropping ' + str(iM) + ' out of ' + str(iN) + ' individuals from data for whom all phenotypes are now missing')
         # keep only observations that have at least one pheno non-missing
         dfY = dfY[((dfY.isnull() | dfY.isna()).sum(axis=1) < iT)]
         # get list of individuals that remain
@@ -214,6 +247,7 @@ class MgremlData:
     def CreateDummies(self, dfY, dfX, dfBinXY):
         # if there are any missings at all
         if any(dfY.isnull() | dfY.isna()):
+            self.logger.info('CREATING PHENOTYPE-SPECIFIC DUMMY VARIABLES TO CONTROL FOR REMAINING MISSINGNESS')
             # if there are no covariates yet
             if not(self.bCovs):
                 # initialise dfX and dfBinXY
@@ -230,6 +264,7 @@ class MgremlData:
                     dfBinXY = pd.DataFrame(data=1, index=dfY.columns, columns=dfX.columns)
                     # set covariates to being not the same across traits
                     self.bSameCovs = False
+            iCount = 0
             # for each trait
             for t in dfY.columns:
                 # get all observations with missing values
@@ -250,14 +285,18 @@ class MgremlData:
                     dfBinXYadd.loc[t] = 1
                     # append to existing specification which covs apply to which phenos
                     dfBinXY = pd.concat([dfBinXY, dfBinXYadd], axis=1, join='inner')
-            # for each observation
-            for i in dfX.index:
-                # find columns where dfX has missing values, and set value
-                # of those columns to zero
-                dfX.loc[i,(dfX.loc[i].isna() | dfX.loc[i].isnull())] = 0
+            # replace missing in dfX by 0
+            dfX = dfX.fillna(0)
+            self.logger.info('Added ' + str(iCount) + ' phenotype-specific dummies to your covariate model')
+            if iCount*dfY.shape[1] > MgremlData.iManyDummies:
+                self.logger.warning('This is a large number of phenotype-specific covariates, given you have ' + str(dfY.shape[1]) + ' traits in your data')
+                self.logger.warning(str(iCount*dfY.shape[1]) + ' additional fixed-effect covariates implied, of which ' + str(iCount*dfY.shape[1] - iCount) + ' are set to zero')
+                self.logger.warning('CPU time of MGREML may increase dramatically')
+                self.logger.warning('Consider running MGREML on a subset of your data with a much lower degree of missingness')
         return dfY, dfX, dfBinXY
     
     def FinaliseData(self, dfY, dfA, dfX, dfBinXY, iDropLeadPCs, iDropTrailPCs):
+        self.logger.info('FINALISING DATA BEFORE MGREML ANALYSIS')
         # convert dataframes to numpy arrays
         mY = np.array(dfY)
         mA = np.array(dfA)
@@ -272,8 +311,15 @@ class MgremlData:
                 self.mBinXY = np.array(dfBinXY).astype(int)
         # stabilise GRM
         mA = (mA+mA.T)/2
+        self.logger.info('Computing eigenvalue decomposition of the GRM')
+        self.logger.info('This may take a long time...')
         # compute its EVD
         (vD,mP) = np.linalg.eigh(mA)
+        self.logger.info('Applying the canonical transformation to your data')
+        self.logger.info('Sample size prior to the canonical transformation is ' + str(mY.shape[0]))
+        self.logger.info('Ignoring ' + str(iDropLeadPCs) + ' leading eigenvectors to control for population stratification')
+        if iDropTrailPCs > 0:
+            self.logger.info('Ignoring ' + str(iDropTrailPCs) + ' trailing eigenvectors to improve computational efficiency')
         # ignore trailing columns and leading columns from eigenvector matrix
         mPT = (mP[:,iDropTrailPCs:-iDropLeadPCs]).T
         # ignore trailing and leading values from eigenvalue vector
@@ -303,7 +349,7 @@ class MgremlData:
                 # if any eigenvalue is too close to zero or negative
                 if any(vThetaXTX < abs(np.finfo(float).eps)):
                     # raise an error with a proper explanation of the likely cause
-                    raise ValueError('Your covariates are rank deficient after the canonical transformation (i.e. perfectly multicollinear). Likely reason: you specified principal components (PCs) from your genetic data as fixed-effect covariates. MGREML already controls for population stratification in the canonical transformation. Please do not control for PCs manually as well. Rather, use --control-lead-pcs NUM, to indicate for how many PCs you want to control via the canonical transformation.')
+                    raise ValueError('your covariates are rank deficient after the canonical transformation (i.e. perfectly multicollinear). Likely reason: you specified principal components (PCs) from your genetic data as fixed-effect covariates. MGREML already controls for population stratification in the canonical transformation. Please do not control for PCs manually as well. Rather, use --ignore-pcs INTEGER, to indicate for how many PCs you want to control via the canonical transformation.')
                 # compute log|X'X| and store
                 self.dLogDetXTX = (self.iT)*np.log(vThetaXTX).sum()
             # if not same across traits
@@ -325,7 +371,7 @@ class MgremlData:
                     # if any eigenvalue is too close to zero or negative
                     if any(vThetaXTX < abs(np.finfo(float).eps)):
                         # raise an error with a proper explanation of the likely cause
-                        raise ValueError('Your covariates are rank deficient after the canonical transformation (i.e. perfectly multicollinear). Likely reason: you specified principal components (PCs) from your genetic data as fixed-effect covariates. MGREML already controls for population stratification in the canonical transformation. Please do not control for PCs manually as well. Rather, use --control-lead-pcs NUM, to indicate for how many PCs you want to control via the canonical transformation.')
+                        raise ValueError('Your covariates are rank deficient after the canonical transformation (i.e. perfectly multicollinear). Likely reason: you specified principal components (PCs) from your genetic data as fixed-effect covariates. MGREML already controls for population stratification in the canonical transformation. Please do not control for PCs manually as well. Rather, use --ignore-pcs INTEGER, to indicate for how many PCs you want to control via the canonical transformation.')
                     # compute log|X'X| and add to grand total
                     dLogDetXTX = dLogDetXTX + np.log(vThetaXTX).sum()
                 # store log|X'X|
@@ -333,4 +379,13 @@ class MgremlData:
         # otherwise set log|X'X| to zero
         else:
             self.dLogDetXTX = 0
-
+        self.logger.info('Sample size after the canonical transformation is ' + str(self.iN)) 
+        self.logger.info('Final sample size, N = ' + str(self.iN))
+        self.logger.info('Final number of traits, T = ' + str(self.iT))
+        if self.bCovs:
+            self.logger.info('Final number of unique covariates, k = ' + str(self.iK))
+            if self.bSameCovs:
+                self.logger.info('Final number of fixed effects, K = ' + str(self.iK*self.iT))
+            else:
+                self.logger.info('Final number of fixed effects, K = ' + str(self.iKtotal))
+        self.logger.info('Data cleaning complete\n')
