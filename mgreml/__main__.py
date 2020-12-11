@@ -1,6 +1,7 @@
 import argparse
 import logging
 import time
+import traceback
 from data import tools
 from data import reader
 from data import aligner
@@ -41,8 +42,12 @@ def main():
             logger.warning('No MGREML analysis will be carried out.')
             logger.info('mgreml_prepare.py -h describes options')
     except Exception:
+        # print the traceback
+        logger.error(traceback.print_exc())
+        # wrap up with final error message
         logger.error('Error: MGREML did not exit properly. Please inspect the log file.')
     finally:
+        # print total time elapsed for MGREML analysis
         logger.info('Total time elapsed: {T}'.format(T=tools.sec_to_str(round(time.time() - dStartTime, 2))))
 
 if __name__ == '__main__':

@@ -199,8 +199,7 @@ class MgremlReader:
             self.args = self.parser.parse_args()
         except Exception:
             # if doesn't work: print error
-            self.logger.error('Error: you specified incorrect input options.')
-            raise ValueError
+            raise SyntaxError('you specified incorrect input options.')
         # customise the logger using the prefix for output-files
         c_handler = logging.StreamHandler()
         # if no --out option has not been specified
@@ -240,8 +239,7 @@ class MgremlReader:
             header = header[0:-1]+'\n'
             self.logger.info(header)
         except Exception:
-            self.logger.error('Error: you specified incorrect input options.')
-            raise ValueError
+            raise SyntaxError('you specified incorrect input options.')
 
     def ReadGRM(self):
         # set filenames for reading binary GRM
@@ -250,8 +248,7 @@ class MgremlReader:
         IDFileName = self.args.grm + ".grm.id"
         # check if one or more files are missing:
         if not(os.path.isfile(BinFileName)) or not(os.path.isfile(NFileName)) or not(os.path.isfile(IDFileName)):
-            self.logger.error('Error: specified set of GRM files either incomplete or non-existent.')
-            raise ValueError
+            raise TypeError('specified set of GRM files either incomplete or non-existent.')
         # read IDs and sample size
         ids = pd.read_csv(IDFileName, sep = '\t', header = None)
         ids.columns= MgremlReader.lLabelsFID_IID
@@ -296,8 +293,7 @@ class MgremlReader:
             sOption = '--covar'
             lArgs = self.args.covar
         else:
-            self.logger.error('Error: MgremlReader.ReadData() can only be used to read a phenotype file or covariate file. How did you even get here?')
-            raise ValueError
+            raise TypeError('MgremlReader.ReadData() can only be used to read a phenotype file or covariate file.')
         # if no. of input args. is one
         if len(lArgs) == 1:
             # we have a header
@@ -306,14 +302,12 @@ class MgremlReader:
             # but the 2nd arg. != no-label string
             if lArgs[1] != sNoLabel:
                 # raise an error
-                self.logger.error('Error: the second argument of ' + sOption + ' is incorrect. Did you mean ' + sNoLabel + '?')
-                raise ValueError
+                raise ValueError('the second argument of ' + sOption + ' is incorrect. Did you mean ' + sNoLabel + '?')
             # otherwise: we do not have a header
             bHeader=False
         else:
             # if we have neither 1 nor 2 input args: raise an errror
-            self.logger.error('Error: ' + sOption + ' requires a filename and can have the optional argument ' + sNoLabel + '.')
-            raise ValueError
+            raise SyntaxError(sOption + ' requires a filename and can have the optional argument ' + sNoLabel + '.')
         # prepare string to let user know whether header has been set, yes or no
         if bHeader:
             sInfoString = 'Headers specified in ' + sData + ' file\nUsing headers to set labels'
@@ -324,8 +318,7 @@ class MgremlReader:
         # check if the data file is missing:
         if not(os.path.isfile(lArgs[0])):
             # if so raise an error
-            self.logger.error('Error: specified ' + sData + ' file does not exist')
-            raise ValueError
+            raise TypeError('specified ' + sData + ' file does not exist')
         # report whether header has been set, yes or no
         self.logger.info(sInfoString)
         # indicate data is being read
@@ -336,7 +329,7 @@ class MgremlReader:
         dfData.apply(pd.to_numeric, errors='coerce')
         # get number of observations and traits, and report
         (iN,iT) = dfData.shape
-        self.logger.info(sData + ' file contains data on {N} individuals and {T} '.format(N=iN,T=iT) + sData + 's')
+        self.logger.info('The ' + sData + ' file contains data on {N} individuals and {T} '.format(N=iN,T=iT) + sData + 's')
         # find number of NaNs and report
         iMiss = dfData.isnull().sum().sum()
         self.logger.info('Encountered {M} missings'.format(M=iMiss))
@@ -389,8 +382,7 @@ class MgremlReader:
                 sOption = '--environment-model'
                 lArgs = self.args.environment_model
         else:
-            self.logger.error('Error: MgremlReader.ReadModel() can only be used to read a model specification for factors or covariates. How did you even get here?')
-            raise ValueError
+            raise TypeError('MgremlReader.ReadModel() can only be used to read a model specification for factors or covariates.')
         # if no. of input args. is one
         if len(lArgs) == 1:
             # we have a header and index
@@ -407,8 +399,7 @@ class MgremlReader:
                 bIndex = True
             else:
                 # raise an error
-                self.logger.error('Error: the second argument of ' + sOption + ' is incorrect. Did you mean ' + sNoLabelIndex + ' or ' + sNoLabelHeader + '?')
-                raise ValueError
+                raise ValueError('the second argument of ' + sOption + ' is incorrect. Did you mean ' + sNoLabelIndex + ' or ' + sNoLabelHeader + '?')
         elif len(lArgs)==3: # if it's 3
             if (sNoLabelIndex in lArgs[1:]) and (sNoLabelHeader in lArgs[1:]):
                 # we have neither index nor header
@@ -416,12 +407,10 @@ class MgremlReader:
                 bIndex = False
             else:
                 # raise an error
-                self.logger.error('Error: the second or third argument of ' + sOption + ' is incorrect. Did you mean ' + sNoLabelIndex + ' ' + sNoLabelHeader + '?')
-                raise ValueError
+                raise ValueError('the second or third argument of ' + sOption + ' is incorrect. Did you mean ' + sNoLabelIndex + ' ' + sNoLabelHeader + '?')
         else:
             # if we have neither 1, 2, nor 3 input args: raise an errror
-            self.logger.error('Error: ' + sOption + ' requires a filename and can have the optional arguments ' + sNoLabelIndex + ' and/or ' + sNoLabelHeader + '.')
-            raise ValueError
+            raise SyntaxError(sOption + ' requires a filename and can have the optional arguments ' + sNoLabelIndex + ' and/or ' + sNoLabelHeader + '.')
         # assign False/None as column/row where indices/headers are found
         iIndCol = False
         iHeadRow = None
@@ -433,8 +422,7 @@ class MgremlReader:
         # check if the data file is missing:
         if not(os.path.isfile(lArgs[0])):
             # if so raise an error
-            self.logger.error('Error: specified file for the ' + sData + ' does not exist')
-            raise ValueError
+            raise TypeError('specified file for the ' + sData + ' does not exist')
         self.logger.info('Reading {S} file {f}'.format(S=sData,f=lArgs[0]))
         # read the file
         dfBin = pd.read_csv(lArgs[0], header = iHeadRow, sep = "\s+|\t+|,", engine = 'python', index_col = iIndCol)
@@ -517,8 +505,7 @@ class MgremlReader:
     def SetGradTol(self):
         if self.args.grad_tol is not None:
             if (self.args.grad_tol <= 0):
-                self.logger.error('Error: --grad-tol should be followed by a positive number e.g. 1E-6, 1e-5, or 0.0001')
-                raise ValueError
+                raise ValueError('--grad-tol should be followed by a positive number e.g. 1E-6, 1e-5, or 0.0001')
             self.dGradTol = self.args.grad_tol
         else:
             self.dGradTol = MgremlReader.dGradTol
@@ -549,8 +536,7 @@ class MgremlReader:
         # if --rel-cutoff used
         if self.args.rel_cutoff is not None:
             if (self.args.rel_cutoff < 0):
-                self.logger.error('Error: --rel-cutoff should be followed by non-negative value.')
-                raise ValueError
+                raise ValueError('--rel-cutoff should be followed by non-negative value.')
             else:
                 self.bRelCutoff = True
                 self.dRelCutoff = self.args.rel_cutoff
@@ -564,24 +550,17 @@ class MgremlReader:
         if self.args.ignore_pcs is not None:
             if len(self.args.ignore_pcs)==1:
                 if (self.args.ignore_pcs[0] < 0):
-                    self.logger.error('Error: --ignore-pcs should be followed by one or two non-negative integers')
-                    raise ValueError
-                elif (self.args.ignore_pcs[0] > 100):
-                    self.logger.warning('Warning: are you sure you want to ignore more than a hundred leading principal components from your genetic data?')
+                    raise ValueError('--ignore-pcs should be followed by one or two non-negative integers')
                 self.iDropLeadPCs = self.args.ignore_pcs[0]
                 self.iDropTrailPCs = MgremlReader.iDropTrailPCsDefault
             elif len(self.args.ignore_pcs)==2:
                 if (self.args.ignore_pcs[0] < 0) or (self.args.ignore_pcs[1] < 0):
-                    self.logger.error('Error: --ignore-pcs should be followed by one or two non-negative integers')
-                    raise ValueError
-                elif (self.args.ignore_pcs[0] > 100):
-                    self.logger.warning('Warning: are you sure you want to ignore more than a hundred leading eigenvectors from your GRM?')
+                    raise ValueError('--ignore-pcs should be followed by one or two non-negative integers')
                 self.iDropLeadPCs = self.args.ignore_pcs[0]
                 self.iDropTrailPCs = self.args.ignore_pcs[1]
                 self.logger.info('Ignoring ' + str(self.iDropTrailPCs) + ' trailings eigenvectors from GRM to improve computational efficiency')
             else:
-                self.logger.error('Error: --ignore-pcs should be followed by one or two non-negative integers')
-                raise ValueError
+                raise SyntaxError('--ignore-pcs should be followed by one or two non-negative integers')
         else:
             self.iDropLeadPCs = MgremlReader.iDropLeadPCsDefault
             self.iDropTrailPCs = MgremlReader.iDropTrailPCsDefault
@@ -590,8 +569,7 @@ class MgremlReader:
     def SetIterStoreFreq(self):
         if self.args.store_iter is not None:
             if (self.args.store_iter < 1):
-                self.logger.error('Error: --store-iter should be followed by a positive integer')
-                raise ValueError
+                raise ValueError('--store-iter should be followed by a positive integer')
             self.bStoreIter = True
             self.iStoreIterFreq = self.args.store_iter
             self.logger.info('Storing parameter estimates every ' + str(self.iStoreIterFreq) + ' iterations')
@@ -602,11 +580,9 @@ class MgremlReader:
     def NeedToReinitialise(self):
         if self.args.reinitialise is not None:
             if not(os.path.isfile(self.args.reinitialise)):
-                self.logger.error('Error: iteration file ' + self.args.reinitialise + ' does not exist')
-                raise ValueError
+                raise TypeError('iteration file ' + self.args.reinitialise + ' does not exist')
             elif self.args.reinitialise[-4:] != '.pkl':
-                self.logger.error('Error: ' + self.args.reinitialise + ' is not a .pkl file')
-                raise ValueError
+                raise TypeError('file ' + self.args.reinitialise + ' is not a .pkl file')
             self.bReinitialise = True
             self.sInitValsFile = self.args.reinitialise
             self.logger.info('MGREML will reinitialise using estimates in ' + self.sInitValsFile)
@@ -616,14 +592,11 @@ class MgremlReader:
     def NeedToReinitialiseRestricted(self):
         if self.args.restricted_reinitialise is not None:
             if not(os.path.isfile(self.args.restricted_reinitialise)):
-                self.logger.error('Error: iteration file ' + self.args.restricted_reinitialise + ' does not exist')
-                raise ValueError
+                raise TypeError('iteration file ' + self.args.restricted_reinitialise + ' does not exist')
             elif self.args.restricted_reinitialise[-4:] != '.pkl':
-                self.logger.error('Error: ' + self.args.restricted_reinitialise + ' is not a .pkl file')
-                raise ValueError
+                raise TypeError('file ' + self.args.restricted_reinitialise + ' is not a .pkl file')
             elif self.bNested == False:
-                self.logger.error('Error: you cannot use --restricted-reinitialise when no restricted model has been specified')
-                raise ValueError
+                raise SyntaxError('you cannot use --restricted-reinitialise when no restricted model has been specified')
             self.bReinitialise0 = True
             self.sInitValsFile0 = self.args.restricted_reinitialise
             self.logger.info('MGREML will reinitialise restricted model using estimates in ' + self.sInitValsFile0)
