@@ -6,6 +6,7 @@ pd.options.mode.chained_assignment = None
 class MgremlData:
 
     iManyDummies = 1000
+    sF = 'factor '
     
     def __init__(self, mReader):
         # read out MgremlReader
@@ -29,6 +30,9 @@ class MgremlData:
         (dfY, dfA, dfX, dfBinXY) = self.FindOverlapAndSort(dfY, dfA, dfX, dfBinXY)
         # drop observations where missingness affects all traits
         (dfY, dfA, dfX) = self.DropMissings(dfY, dfA, dfX, dfBinXY)
+        # apply relatedness pruning if desired
+        if mReader.bRelCutoff:
+            (dfY, dfA, dfX) = self.PruneByRelatedness(dfY, dfA, dfX, mReader.dRelCutoff)
         # contruct pheno-specific dummies to address remaining missingness
         (dfY, dfX, dfBinXY) = self.CreateDummies(dfY, dfX, dfBinXY)
         # store variable names
@@ -36,6 +40,62 @@ class MgremlData:
         self.lPhenos = dfY.columns.tolist()
         # finalise Mgreml data using canonical transformation
         self.FinaliseData(dfY, dfA, dfX, dfBinXY, iDropLeadPCs, iDropTrailPCs)
+        
+        self.logger.info('3. STORING ALL MGREML SETTINGS')
+        # store whether we have a nested model
+        self.bNested = mReader.bNested
+        # store booleans indicating if any models
+        # are of the type perfect or no correlations
+        self.bPerfectRhoG = mReader.bPerfectRhoG
+        self.bNoRhoG = mReader.bNoRhoG
+        self.bNoRhoE = mReader.bNoRhoE
+        self.bPerfectRhoG0 = mReader.bPerfectRhoG0
+        self.bNoRhoG0 = mReader.bNoRhoG0
+        self.bNoRhoE0 = mReader.bNoRhoE0
+        self.dfGenBinFY = mReader.dfGenBinFY
+        self.dfGenBinFY0 = mReader.dfGenBinFY0
+        self.dfEnvBinFY = mReader.dfEnvBinFY
+        self.dfEnvBinFY0 = mReader.dfEnvBinFY0
+        # if such rho=0,1 models present: set binary matrices accordingly
+        if self.bPerfectRhoG:
+            self.dfGenBinFY = MgremlData.SetPerfectRho(self.lPhenos, MgremlData.sF)
+        if self.bNoRhoG:
+            self.dfGenBinFY = MgremlData.SetNoRho(self.lPhenos, MgremlData.sF)
+        if self.bNoRhoE:
+            self.dfEnvBinFY = MgremlData.SetNoRho(self.lPhenos, MgremlData.sF)
+        if self.bNested:
+            if self.bPerfectRhoG0:
+                self.dfGenBinFY0 = MgremlData.SetPerfectRho(self.lPhenos, MgremlData.sF)
+            if self.bNoRhoG0:
+                self.dfGenBinFY0 = MgremlData.SetNoRho(self.lPhenos, MgremlData.sF)
+            if self.bNoRhoE0:
+                self.dfEnvBinFY0 = MgremlData.SetNoRho(self.lPhenos, MgremlData.sF)
+        # store all the other stuff
+        self.sPrefix = mReader.sPrefix
+        self.bBFGS = mReader.bBFGS
+        self.dGradTol = mReader.dGradTol
+        self.bSEs = mReader.bSEs
+        self.bAllCoeffs = mReader.bAllCoeffs
+        self.bStoreIter = mReader.bStoreIter
+        self.iStoreIterFreq = mReader.iStoreIterFreq
+        self.bReinitialise = mReader.bReinitialise
+        self.sInitValsFile = mReader.sInitValsFile
+        self.bReinitialise0 = mReader.bReinitialise0
+        self.sInitValsFile0 = mReader.sInitValsFile0
+        self.logger.info('Settings stored\n')
+    
+    @staticmethod
+    def SetPerfectRho(lLabels, sPrefix):
+        lFactorName = [sPrefix + str(0)]
+        dfBinFY = pd.DataFrame(data=1, index=pd.Index(lLabels), columns=pd.Index(lFactorName))
+        return dfBinFY
+        
+    @staticmethod
+    def SetNoRho(lLabels, sPrefix):
+        iT = len(lLabels)
+        lFactors = [sPrefix + str(x) for x in range(0,iT)]
+        dfBinFY = pd.DataFrame(data=np.eye(iT), index=pd.Index(lLabels), columns=pd.Index(lFactors))
+        return dfBinFY
         
     def DetermineIfCovsAreGiven(self, dfX, dfBinXY):
         # assert whether we have covariates and whether we have same covs across traits
@@ -244,6 +304,17 @@ class MgremlData:
             dfX = dfX.loc[miIDs]
         return dfY, dfA, dfX
     
+    def PruneByRelatedness(self, dfY, dfA, dfX, dRelCutoff):
+        self.logger.info('APPLYING RELATEDNESS CUTOFF')
+        self.logger.warning('Warning: this method is currently still only a placeholder. Cutoff has not been applied.')
+        self.logger.info('Removing individuals such that there is no relatedness in excess of ' + str(dRelCutoff) + ' in GRM')
+        self.logger.info('Using greedy algorithm as implemented in PLINK v...')
+        iN = dfY.shape[0]
+        iDropped = 0
+        # INSERT CODE ERIC HERE
+        self.logger.info('Dropping ' + str(iDropped) + ' out of ' + str(iN) + ' individiuals')
+        return dfY, dfA, dfX
+        
     def CreateDummies(self, dfY, dfX, dfBinXY):
         # if there are any missings at all
         if any(dfY.isnull() | dfY.isna()):
@@ -285,6 +356,7 @@ class MgremlData:
                     dfBinXYadd.loc[t] = 1
                     # append to existing specification which covs apply to which phenos
                     dfBinXY = pd.concat([dfBinXY, dfBinXYadd], axis=1, join='inner')
+                    iCount += 1
             # replace missing in dfX by 0
             dfX = dfX.fillna(0)
             self.logger.info('Added ' + str(iCount) + ' phenotype-specific dummies to your covariate model')
