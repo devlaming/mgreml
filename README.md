@@ -39,6 +39,7 @@ Now, having cloned the `mgreml` repository, the main directory should contain a 
 |FID 4 | IID 5004 | 1.6194526928930257 | -2.0202273150035266 | 0.5181602837960307 | ... |
 |FID 5 | IID 5005 | 6.975860581713028 | -6.119102476053191 | -4.788694474107947 | ... |
 
+Details on how this dataset has been generated using simulation can be found in the python script in `./tutorial/simulate.py`
 
 ## Updating `mgreml`
 
