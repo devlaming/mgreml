@@ -20,6 +20,7 @@ class DataWriter:
     sCoeffvar = 'coeff.var.'
     lHsqSE = ['heritability', 'standard error']
     lHsq = ['heritability']
+    lBetaSE = ['beta hat', 'standard error']
     
     def __init__(self, estimates, data):
         self.logger = data.logger
@@ -242,11 +243,13 @@ class DataWriter:
             # get GLS estimates
             vBetaGLS0 = self.estimates.estimator0.mgreml_model.vBetaGLS
             mVarGLS0 = self.estimates.estimator0.mgreml_model.mVarGLS
+            vBetaGLS0SE = np.power(np.diag(mVarGLS0),0.5)
             vBetaGLSA = self.estimates.estimatorA.mgreml_model.vBetaGLS
             mVarGLSA = self.estimates.estimatorA.mgreml_model.mVarGLS
+            vBetaGLSASE = np.power(np.diag(mVarGLSA),0.5)
             # construct dataframes
-            dfBetaGLS0 = pd.DataFrame(vBetaGLS0, index=[indAllPhenos,indAllCovs])
-            dfBetaGLSA = pd.DataFrame(vBetaGLSA, index=[indAllPhenos,indAllCovs])
+            dfBetaGLS0 = pd.DataFrame(np.stack((vBetaGLS0,vBetaGLS0SE)).T, index=[indAllPhenos,indAllCovs], columns=DataWriter.lBetaSE)
+            dfBetaGLSA = pd.DataFrame(np.stack((vBetaGLSA,vBetaGLSASE)).T, index=[indAllPhenos,indAllCovs], columns=DataWriter.lBetaSE)
             dfVarGLS0 = pd.DataFrame(mVarGLS0, index=[indAllPhenos,indAllCovs], columns=[indAllPhenos,indAllCovs])
             dfVarGLSA = pd.DataFrame(mVarGLSA, index=[indAllPhenos,indAllCovs], columns=[indAllPhenos,indAllCovs])
             # set output names
@@ -281,8 +284,9 @@ class DataWriter:
             # get GLS estimates
             vBetaGLS = self.estimates.mgreml_model.vBetaGLS
             mVarGLS = self.estimates.mgreml_model.mVarGLS
+            vBetaGLSSE = np.power(np.diag(mVarGLS),0.5)
             # construct dataframes
-            dfBetaGLS = pd.DataFrame(vBetaGLS, index=[indAllPhenos,indAllCovs])
+            dfBetaGLS = pd.DataFrame(np.stack((vBetaGLS,vBetaGLSSE)).T, index=[indAllPhenos,indAllCovs], columns=DataWriter.lBetaSE)
             dfVarGLS = pd.DataFrame(mVarGLS, index=[indAllPhenos,indAllCovs], columns=[indAllPhenos,indAllCovs])
             # set output names
             sBetaGLS = self.sPrefix + DataWriter.sGLSest + DataWriter.sExtension
