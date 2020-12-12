@@ -13,7 +13,6 @@ class DataWriter:
     sHA = 'alt.'
     sSE = 'SE.'
     sLL = 'loglik.'
-    sLRT = 'LRT.'
     sGLSest = 'GLS.est.'
     sGLSvar = 'GLS.var.'
     sCoeff = 'coeff.'
@@ -101,11 +100,11 @@ class DataWriter:
         if not(self.bNested):
             raise TypeError('Trying to write results for likelihood-ratio test, while no nested model has been estimated')
         # set filename
-        sLRTfile = self.sPrefix + DataWriter.sLRT + DataWriter.sExtension
-        with open(sLRTfile, 'w') as oLRTfile:
+        sLL = self.sPrefix + DataWriter.sLL + DataWriter.sExtension
+        with open(sLL, 'a') as oLRTfile:
             oLRTfile.write('Results of likelihood-ratio test with ' + str(self.estimates.iDF) + ' degrees of freedom:\n')
             oLRTfile.write('Chi-square test statistic is ' + str(self.estimates.dTestStat) + '\n')
-            oLRTfile.write('with P-value = ' + str(self.estimates.dPval) + '\n')
+            oLRTfile.write('with P-value = ' + str(self.estimates.dPval) + '\n\n')
     
     def WriteModelCoefficients(self):
         if self.bNested:
@@ -186,27 +185,26 @@ class DataWriter:
     
     def WriteLogLik(self):
         if self.bNested:
-            # set filenames
-            sLL0 = self.sPrefix + DataWriter.sLL + DataWriter.sH0 + DataWriter.sExtension
-            sLLA = self.sPrefix + DataWriter.sLL + DataWriter.sHA + DataWriter.sExtension
-            with open(sLL0, 'w') as oLLfile:
+            # set filename
+            sLL = self.sPrefix + DataWriter.sLL + DataWriter.sExtension
+            with open(sLL, 'w') as oLLfile:
                 oLLfile.write('Log-likelihood of nested model (null hypothesis) = ' + str(self.estimates.estimator0.dLogL) + ',\n')
                 oLLfile.write('based on data on ' + str(self.estimates.estimator0.mgreml_model.data.iT) + ' traits and ' + str(self.estimates.estimator0.mgreml_model.data.iN) + ' observations,\n')
                 oLLfile.write('with a model consisting of ' + str(self.estimates.estimator0.mgreml_model.model.genmod.iF) + ' genetic factors and ' + str(self.estimates.estimator0.mgreml_model.model.envmod.iF) + ' environment factors,\n')
                 oLLfile.write('comprising ' + str(self.estimates.estimator0.mgreml_model.model.iParamsG) + ' free genetic factor coefficients and ' + str(self.estimates.estimator0.mgreml_model.model.iParamsE) + ' free environment factor coefficients in turn.\n')
                 if self.estimates.estimator0.bBFGS:
-                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator0.iIter) + ' BFGS iterations \n')
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator0.iIter) + ' BFGS iterations \n\n')
                 else:
-                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator0.iIter) + ' Newton iterations \n')
-            with open(sLLA, 'w') as oLLfile:
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator0.iIter) + ' Newton iterations \n\n')
+            with open(sLL, 'a') as oLLfile:
                 oLLfile.write('Log-likelihood of parent model (alternative hypothesis) = ' + str(self.estimates.estimatorA.dLogL) + ',\n')
                 oLLfile.write('based on data on ' + str(self.estimates.estimatorA.mgreml_model.data.iT) + ' traits and ' + str(self.estimates.estimatorA.mgreml_model.data.iN) + ' observations,\n')
                 oLLfile.write('with a model consisting of ' + str(self.estimates.estimatorA.mgreml_model.model.genmod.iF) + ' genetic factors and ' + str(self.estimates.estimatorA.mgreml_model.model.envmod.iF) + ' environment factors,\n')
                 oLLfile.write('comprising ' + str(self.estimates.estimatorA.mgreml_model.model.iParamsG) + ' free genetic factor coefficients and ' + str(self.estimates.estimatorA.mgreml_model.model.iParamsE) + ' free environment factor coefficients in turn.\n')
                 if self.estimates.estimatorA.bBFGS:
-                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimatorA.iIter) + ' BFGS iterations \n')
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimatorA.iIter) + ' BFGS iterations \n\n')
                 else:
-                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimatorA.iIter) + ' Newton iterations \n')
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimatorA.iIter) + ' Newton iterations \n\n')
         else:
             # set filenames
             sLL = self.sPrefix + DataWriter.sLL + DataWriter.sExtension
