@@ -40,7 +40,6 @@ class MgremlData:
         self.lPhenos = dfY.columns.tolist()
         # finalise Mgreml data using canonical transformation
         self.FinaliseData(dfY, dfA, dfX, dfBinXY, iDropLeadPCs, iDropTrailPCs)
-        
         self.logger.info('3. STORING ALL MGREML SETTINGS')
         # store whether we have a nested model
         self.bNested = mReader.bNested
