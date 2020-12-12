@@ -478,7 +478,7 @@ class MgremlModel:
                 # compute contribution of second trace term to grad
                 mTrG2 = np.matmul(np.matmul(mKronCGTFiota,np.multiply(mGrandBG,mJ)),mKronFTiota)
                 mTrE2 = np.matmul(np.matmul(mKronCETFiota,np.multiply(mGrandBE,mJ)),mKronFTiota)
-            # only store precision matrix of GLS estimates
+            # only store the variance of GLS estimates
             # if we have estimated the model for the current
             # set of params, rather than a try-out in vNew
             if not(isinstance(vNew, np.ndarray)):
