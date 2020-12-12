@@ -44,7 +44,7 @@ def main():
             logger.info('mgreml_prepare.py -h describes options')
     except Exception:
         # print the traceback
-        logger.error(traceback.print_exc())
+        logger.error(traceback.format_exc())
         # wrap up with final error message
         logger.error('Error: MGREML did not exit properly. Please inspect the log file.')
     finally:
