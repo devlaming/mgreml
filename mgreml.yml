@@ -1,0 +1,14 @@
+name: mgreml
+dependencies:
+- numpy
+- pandas
+- logging
+- time
+- argparse
+- traceback
+- scipy
+- pickle
+- math
+- tqdm
+- os
+- functools
