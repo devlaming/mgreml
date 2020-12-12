@@ -201,6 +201,12 @@ class MgremlReader:
         # if no --out option has not been specified
         # use generic name for log-file and so on
         if self.args.out is not None:
+            # get directory name if present within prefix
+            sDir = os.path.dirname(self.args.out)
+            # check if output holds directory name at all, and if so whether it doesn't exist
+            if not(sDir == '') and not(os.path.isdir(sDir)):
+                # if so, raise an error
+                raise ValueError('prefix specified using --out may start with a directory name; this directory must exist however. ' + sDir + ' is not a directory.')
             self.sPrefix = self.args.out + '.'
             sFileOut = self.sPrefix + 'log'
         else:
