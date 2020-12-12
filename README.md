@@ -3,7 +3,7 @@
 
 `mgreml` is a command-line tool for rapid estimation of SNP-based heritability and genetic correlations for (nearly) balanced data on many traits in a single analysis using a genomic-relatedness matrix (GRM). `mgreml` can easily handle estimation of the full genetic correlation matrix for up to 100 traits observed in 20,000 individuals. `mgreml` allows users to specify structural models and test hypotheses regarding nested models (e.g. no genetic correlations). In addition, the tool can handle a considerable amount of fixed-effect covariates and a very minor degree of phenotypic missingness. Finally, `mgreml` has options to return e.g. the full set of factor coefficients and their sampling covariance matrix.
 
-## Getting Started
+## Installation
 
 In order to download `mgreml`, please clone this repository using the following commands
 ```  
@@ -27,7 +27,9 @@ to print a list of all command-line options. If these commands fail something ha
 
 ## Tutorial
 
-A short tutorial describing the basic functions of `mgreml` will be described here in due course.
+In this short tutorial we will go over the basic functions of `mgreml`. First go over the steps in Installation.
+
+Now, having cloned the `mgreml` repository, the main directory should contain a subdirectory called `tutorial`. This directory in turn contains several files, including `pheno.txt` and `covar.txt`. Let's first inspect the `pheno.txt` file. This file contains data on ten phenotypes observed in a set of 5,000 individuals.
 
 ## Updating `mgreml`
 
