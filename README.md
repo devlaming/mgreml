@@ -29,7 +29,16 @@ to print a list of all command-line options. If these commands fail something ha
 
 In this short tutorial we will go over the basic functions of `mgreml`. First go over the steps in Installation.
 
-Now, having cloned the `mgreml` repository, the main directory should contain a subdirectory called `tutorial`. This directory in turn contains several files, including `pheno.txt` and `covar.txt`. Let's first inspect the `pheno.txt` file. This file contains data on ten phenotypes observed in a set of 5,000 individuals.
+Now, having cloned the `mgreml` repository, the main directory should contain a subdirectory called `tutorial`. This directory in turn contains several files, including `pheno.txt` and `covar.txt`. Let's first inspect the `pheno.txt` file. This file contains data in tab-separated format on ten phenotypes observed in a set of 5,000 individuals. The first few columns and rows of this file look as follows:
+
+|FID | IID | Some pheno 101 | Some pheno 102 | Some pheno 103 | ... |
+| --- | --- | --- | --- | --- | --- |
+|FID 1 | IID 5001 | 6.497170179688521 | -6.01868220214391 | -3.4631680901536512 | ... |
+|FID 2 | IID 5002 | 0.13024006147209066 | 0.16292001661407396 | 1.2128925956866816 | ... |
+|FID 3 | IID 5003 | -2.681371184995354 | 0.16258496770617525 | -3.0624632416938935 | ... |
+|FID 4 | IID 5004 | 1.6194526928930257 | -2.0202273150035266 | 0.5181602837960307 | ... |
+|FID 5 | IID 5005 | 6.975860581713028 | -6.119102476053191 | -4.788694474107947 | ... |
+
 
 ## Updating `mgreml`
 
