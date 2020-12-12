@@ -14,14 +14,14 @@ cd mgreml
 In order to install the Python dependencies, you will need the [Anaconda](https://store.continuum.io/cshop/anaconda/) Python distribution and package manager. After installing Anaconda, run the following commands to create an environment with `mgreml`'s dependencies:
 
 ```
-conda env create --file environment.yml
-source activate mgreml
+conda env create --file mgreml.yml
+conda activate mgreml
 ```
 
 Once the above has completed, you can run:
 
 ```
-./mgreml -h
+python ./mgreml -h
 ```
 to print a list of all command-line options. If these commands fail with an error, something has gone wrong during the installation process. 
 
