@@ -457,7 +457,8 @@ class MgremlReader:
         self.bNested = (self.args.restricted_genetic_model is not None) \
                     or (self.args.restricted_environment_model is not None) \
                     or (self.args.restricted_rho_genetic is not None) \
-                    or (self.args.restricted_rho_environment is not None)
+                    or (self.args.restricted_rho_environment is not None) \
+                    or (self.args.restricted_reinitialise is not None)
         if self.bNested:
             self.logger.info('You specified two models for comparison. Results will include a likelihood-ratio test comparing the restricted model (null hypothesis) to the main model (alternative hypothesis).')
         else:
