@@ -237,6 +237,10 @@ class CombinedModel:
         self.iParamsE = self.envmod.vParam.shape[0]
         self.iParams  = self.iParamsG + self.iParamsE
         self.iParamCombos = int(((self.iParams+1)*self.iParams)/2)
+        # store initial dataframes with model specification as attributes
+        # needed for reinitialisation estimator and comparison module
+        self.dfGenBinFY = dfGenBinFY
+        self.dfEnvBinFY = dfEnvBinFY
     
     def SplitNewParameters(self, vNew):
         if isinstance(vNew, np.ndarray):
