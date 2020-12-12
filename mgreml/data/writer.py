@@ -18,6 +18,8 @@ class DataWriter:
     sGLSvar = 'GLS.var.'
     sCoeff = 'coeff.'
     sCoeffvar = 'coeff.var.'
+    lHsqSE = ['heritability', 'standard error']
+    lHsq = ['heritability']
     
     def __init__(self, estimates, data):
         self.logger = data.logger
@@ -57,50 +59,42 @@ class DataWriter:
             vHSqA = self.estimates.estimatorA.vHSq
             # get trait labels
             lPhenos = self.estimates.estimatorA.mgreml_model.data.lPhenos
-            # set dataframes
-            dfHSq0 = pd.DataFrame(vHSq0,index=lPhenos)
-            dfHSqA = pd.DataFrame(vHSqA,index=lPhenos)
             # set filenames
             sHSq0 = self.sPrefix + DataWriter.sH2 + DataWriter.sH0 + DataWriter.sExtension
             sHSqA = self.sPrefix + DataWriter.sH2 + DataWriter.sHA + DataWriter.sExtension
-            # write dataframes
-            dfHSq0.to_csv(sHSq0, sep='\t')
-            dfHSqA.to_csv(sHSqA, sep='\t')
-            # if SEs are desired, store them
+            # if SEs are desired, store them together with heritabilities
             if (self.bSEs):
                 # get heritability standard errors 
                 vHSq0SE = self.estimates.estimator0.vHSqSE
                 vHSqASE = self.estimates.estimatorA.vHSqSE
                 # set dataframes
-                dfHSq0SE = pd.DataFrame(vHSq0SE,index=lPhenos)
-                dfHSqASE = pd.DataFrame(vHSqASE,index=lPhenos)
-                # set filenames
-                sHSq0SE = self.sPrefix + DataWriter.sH2 + DataWriter.sH0 + DataWriter.sSE + DataWriter.sExtension
-                sHSqASE = self.sPrefix + DataWriter.sH2 + DataWriter.sHA + DataWriter.sSE + DataWriter.sExtension
-                # write dataframes
-                dfHSq0SE.to_csv(sHSq0SE, sep='\t')
-                dfHSqASE.to_csv(sHSqASE, sep='\t')
+                dfHSq0 = pd.DataFrame(np.stack((vHSq0,vHSq0SE)),index=lPhenos,columns=DataWriter.lHsqSE)
+                dfHSqA = pd.DataFrame(np.stack((vHSqA,vHSqASE)),index=lPhenos,columns=DataWriter.lHsqSE)
+            else:
+                # set dataframes
+                dfHSq0 = pd.DataFrame(vHSq0,index=lPhenos,columns=DataWriter.lHsq)
+                dfHSqA = pd.DataFrame(vHSqA,index=lPhenos,columns=DataWriter.lHsq)
+            # write dataframes
+            dfHSq0.to_csv(sHSq0, sep='\t')
+            dfHSqA.to_csv(sHSqA, sep='\t')
         else:
             # get heritability
             vHSq = self.estimates.vHSq
             # get trait labels
             lPhenos = self.estimates.mgreml_model.data.lPhenos
-            # set dataframe
-            dfHSq = pd.DataFrame(vHSq,index=lPhenos)
             # set filename
             sHSq = self.sPrefix + DataWriter.sH2 + DataWriter.sExtension
-            # write dataframe
-            dfHSq.to_csv(sHSq, sep='\t')
-            # if SEs are desired, store them
+            # if SEs are desired, store them together with heritabilities
             if (self.bSEs):
                 # get heritability standard errors 
                 vHSqSE = self.estimates.vHSqSE
                 # set dataframe
-                dfHSqSE = pd.DataFrame(vHSqSE,index=lPhenos)
-                # set filenames
-                sHSqSE = self.sPrefix + DataWriter.sH2 + DataWriter.sSE + DataWriter.sExtension
-                # write dataframes
-                dfHSqSE.to_csv(sHSqSE, sep='\t')
+                dfHSq = pd.DataFrame(np.stack((vHSq,vHSqSE)),index=lPhenos,columns=DataWriter.lHsqSE)
+            else:
+                # set dataframe
+                dfHSq = pd.DataFrame(vHSq,index=lPhenos,columns=DataWriter.lHsq)
+            # write dataframe
+            dfHSq.to_csv(sHSq, sep='\t')
 
     def WriteLRT(self):
         if not(self.bNested):
