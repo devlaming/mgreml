@@ -11,7 +11,7 @@ git clone https://github.com/devlaming/mgreml.git
 cd mgreml
 ```
 
-In order to install the Python dependencies, you will need the [Anaconda](https://store.continuum.io/cshop/anaconda/) Python distribution and package manager. After installing Anaconda, run the following commands to create an environment with `mgreml`'s dependencies:
+In order to install the Python dependencies, you will need the [Anaconda](https://www.anaconda.com/) Python distribution and package manager. After installing Anaconda, run the following commands to create an environment with `mgreml`'s dependencies:
 
 ```
 conda env create --file mgreml.yml
@@ -23,5 +23,43 @@ Once the above has completed, you can run:
 ```
 python ./mgreml -h
 ```
-to print a list of all command-line options. If these commands fail with an error, something has gone wrong during the installation process. 
+to print a list of all command-line options. If these commands fail something has gone wrong during the installation process.
+
+## Tutorial
+
+A short tutorial describing the basic functions of `mgreml` will be described here in due course.
+
+## Updating `mgreml`
+
+You can update to the newest version of `mgreml` using `git`. First, navigate to your `mgreml` directory (e.g. `cd mgreml`), then run
+```
+git pull
+```
+If `mgreml` is up to date, you will see 
+```
+Already up to date.
+```
+otherwise, you will see `git` output similar to 
+```
+remote: Enumerating objects: 5, done.
+remote: Counting objects: 100% (5/5), done.
+remote: Compressing objects: 100% (1/1), done.
+remote: Total 3 (delta 2), reused 3 (delta 2), pack-reused 0
+Unpacking objects: 100% (3/3), 304 bytes | 13.00 KiB/s, done.
+From https://github.com/devlaming/mgreml
+   5b4ca9a..b18a8cc  master     -> origin/master
+Updating 5b4ca9a..b18a8cc
+Fast-forward
+ README.md | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+ ```
+which tells you which files were changed. If you have modified the `mgreml` source code, `git pull` may fail with an error such as `error: Your local changes to the following files would be overwritten by merge:`. 
+
+In case the Python dependencies have changed, you can update the `mgreml` environment with
+
+```
+conda env update --file mgreml.yml
+```
+
+
 
