@@ -1,7 +1,7 @@
 
 # MGREML (Multivariate Genomic-relatedness matrix REstricted Maximum Likelihood) `VERSION 0.01`
 
-`mgreml` is a command-line tool for rapid estimation of SNP-based heritability and genetic correlations for many traits at once using a genomic-relatedness matrix (GRM).
+`mgreml` is a command-line tool for rapid estimation of SNP-based heritability and genetic correlations for (nearly) balanced data on many traits at once using a genomic-relatedness matrix (GRM). `mgreml` can easily handle data on up to 100 traits for 20,000 individuals. `mgreml` allows users to specify structural models and test hypothesis regarding nested models (e.g. no genetic correlations). Moreover, the tool has options to return e.g. the full set of factor coefficients and their sampling covariance matrix.
 
 ## Getting Started
 
