@@ -31,7 +31,10 @@ def main():
                 myEstimator = comparison.NestedEstimators(myMgremlData)
             else:
                 # initialise estimator of the main model
-                logger.info('4. INTIALISING MGREML ESTIMATOR FOR MAIN MODEL')
+                if myMgremlData.bReinitialise:
+                    logger.info('4. REINITIALISING MGREML ESTIMATOR FOR MAIN MODEL') 
+                else:
+                    logger.info('4. INTIALISING MGREML ESTIMATOR FOR MAIN MODEL')
                 myEstimator = estimator.MgremlEstimator(myMgremlData)
             logger.info('5. PERFORMING MGREML ESIMATION')
             myEstimator.PerformEstimation()

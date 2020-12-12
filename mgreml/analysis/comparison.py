@@ -8,10 +8,16 @@ class NestedEstimators:
     def __init__(self, mdData):
         # store the logger
         self.logger = mdData.logger
-        self.logger.info('INITIALSING RESTRICTED MODEL (NULL HYPOTHESIS)')
+        if mdData.bReinitialise0:
+            self.logger.info('REINITIALISING RESTRICTED MODEL (NULL HYPOTHESIS)') 
+        else:
+            self.logger.info('INITIALISING RESTRICTED MODEL (NULL HYPOTHESIS)')
         self.estimator0 = estimator.MgremlEstimator(mdData, bNested = True)
-        self.logger.info('INITIALSING ALTERNATIVE MODEL')
-        self.estimatorA = estimator.MgremlEstimator(mdData, bNested = False)
+        if mdData.bReinitialise:
+            self.logger.info('REINITIALISING ALTERNATIVE MODEL')
+        else:
+            self.logger.info('INITIALISING ALTERNATIVE MODEL')
+        self.estimatorA = estimator.MgremlEstimator(mdData)
         # initialisation of StructuralModel instances using
         # same mdData guarantees that the these StructuralModels
         # consider the same set of traits, in the same order
