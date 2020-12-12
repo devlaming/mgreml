@@ -63,5 +63,29 @@ In case the Python dependencies have changed, you can update the `mgreml` enviro
 conda env update --file mgreml.yml
 ```
 
+## Support
+
+Before contacting us, please try the following:
+
+1. Go over the tutorial in this `README.md`; this tutorial is quite self-contained
+2. The method is described in detail in the supplementary information of the paper (citation below)
+
+If that doesn't work, you can get in touch with us via the [google group](...).
+
+## Citation
+
+If you use the software, please cite
+
+[]()
+
+## License
+
+This project is licensed under GNU GPL v3.
+
+## Authors
+
+Ronald de Vlaming (Vrije Universiteit Amsterdam)
+
+Eric Slob (University of Cambridge)
 
 
