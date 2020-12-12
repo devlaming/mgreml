@@ -39,7 +39,7 @@ class MgremlEstimator:
         # store the logger
         self.logger = mdData.logger
         # initialise mgreml model
-        self.mgreml_model = model.MgremlModel(mdData, dfGenBinFY, dfEnvBinFY)
+        self.mgreml_model = model.MgremlModel(mdData, dfGenBinFY, dfEnvBinFY, bNested)
         # set iteration counter
         self.iIter = 0
         # indicate convergence has not occurred yet

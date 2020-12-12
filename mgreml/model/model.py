@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import math
+import pickle
 from numpy.matlib import repmat
 from tqdm import tqdm
 pd.options.mode.chained_assignment = None
@@ -237,10 +238,6 @@ class CombinedModel:
         self.iParamsE = self.envmod.vParam.shape[0]
         self.iParams  = self.iParamsG + self.iParamsE
         self.iParamCombos = int(((self.iParams+1)*self.iParams)/2)
-        # store initial dataframes with model specification as attributes
-        # needed for reinitialisation estimator and comparison module
-        self.dfGenBinFY = dfGenBinFY
-        self.dfEnvBinFY = dfEnvBinFY
     
     def SplitNewParameters(self, vNew):
         if isinstance(vNew, np.ndarray):
@@ -289,10 +286,23 @@ class MgremlModel:
     # set lowest eigenvalue permitted in VE matrix without aborting
     dMinEigVal = 1E-12
     
-    def __init__(self, mdData, dfGenBinFY = None, dfEnvBinFY = None):
+    def __init__(self, mdData, dfGenBinFY = None, dfEnvBinFY = None, bNested = False):
         self.logger = mdData.logger
-        self.model = CombinedModel(mdData, dfGenBinFY, dfEnvBinFY)
-        self.data  = mdData
+        if bNested:
+            if mdData.bReinitialise0:
+                with open(mdData.sInitValsFile0, 'rb') as handle:
+                    dictIter = pickle.load(handle)
+                self.model = dictIter['currentCombinedModel']
+            else:
+                self.model = CombinedModel(mdData, dfGenBinFY, dfEnvBinFY)
+        else:
+            if mdData.bReinitialise:
+                with open(mdData.sInitValsFile, 'rb') as handle:
+                    dictIter = pickle.load(handle)
+                self.model = dictIter['currentCombinedModel']
+            else:
+                self.model = CombinedModel(mdData, dfGenBinFY, dfEnvBinFY)
+        self.data = mdData
         self.vBetaGLS = None
         self.mVarGLS = None
     
