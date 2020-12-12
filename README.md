@@ -53,7 +53,9 @@ Fast-forward
  README.md | 6 +++---
  1 file changed, 3 insertions(+), 3 deletions(-)
  ```
-which tells you which files were changed. If you have modified the `mgreml` source code, `git pull` may fail with an error such as `error: Your local changes to the following files would be overwritten by merge:`. 
+which tells you which files were changed.
+
+If you have modified the `mgreml` source code yourself, `git pull` may fail with an error such as `Your local changes to the following files would be overwritten by merge`. 
 
 In case the Python dependencies have changed, you can update the `mgreml` environment with
 
