@@ -1,5 +1,7 @@
 name: mgreml
 dependencies:
+  - python=3.*
+  - pip
   - pip:
     - numpy
     - pandas
