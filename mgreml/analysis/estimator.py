@@ -236,7 +236,7 @@ class MgremlEstimator:
             if self.bNotConverged:
                 if self.bEstimatesChanged: # if the estimates have changed do Newton
                     # compute pseudo inverse of unconstrained part
-                    (mInvInfo,_) = MgremlEstimator.PseudoInvertSymmetricMat(self.mInfo,dMinEigVal)
+                    (mInvInfo,_) = self.PseudoInvertSymmetricMat(self.mInfo,dMinEigVal)
                     # compute suggested new parameters
                     vNew = self.mgreml_model.model.GetParams() + np.array(np.matmul(mInvInfo,self.vGrad)).ravel()
                 else: # if the estimates have not changed do gradient descent
@@ -317,8 +317,7 @@ class MgremlEstimator:
         else:
             self.vGrad = None
 
-    @staticmethod
-    def PseudoInvertSymmetricMat(mA, dMinEigVal):
+    def PseudoInvertSymmetricMat(self, mA, dMinEigVal):
         """
         Author     : Ronald de Vlaming
         Date       : December 3, 2020
@@ -391,7 +390,7 @@ class MgremlEstimator:
         self.mRhoG = np.multiply(mVG,mOneOverSqrtVG)
         self.mRhoE = np.multiply(mVE,mOneOverSqrtVE)
         if self.bSEs or self.bAllCoeffs:
-            # set lowest eigenvalue permitted in info matrix per N to 1E-9
+            # set lowest eigenvalue permitted in info matrix per N to 1E-18
             dMinEigValPerN = 1E-18
             # scale back to normal scale
             dMinEigVal = dMinEigValPerN*self.mgreml_model.data.iN
@@ -406,7 +405,7 @@ class MgremlEstimator:
                 self.dLogL = self.dLogL*self.mgreml_model.data.iN
                 self.vGrad = self.vGrad*self.mgreml_model.data.iN
             # invert the information matrix
-            (self.mSamplingV,_) = MgremlEstimator.PseudoInvertSymmetricMat(self.mInfo, dMinEigVal)
+            (self.mSamplingV,_) = self.PseudoInvertSymmetricMat(self.mInfo, dMinEigVal)
         # if SEs are required
         if self.bSEs:
             # get indices and parameters
