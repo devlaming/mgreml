@@ -68,8 +68,8 @@ class DataWriter:
                 vHSq0SE = self.estimates.estimator0.vHSqSE
                 vHSqASE = self.estimates.estimatorA.vHSqSE
                 # set dataframes
-                dfHSq0 = pd.DataFrame(np.stack((vHSq0,vHSq0SE)),index=lPhenos,columns=DataWriter.lHsqSE)
-                dfHSqA = pd.DataFrame(np.stack((vHSqA,vHSqASE)),index=lPhenos,columns=DataWriter.lHsqSE)
+                dfHSq0 = pd.DataFrame(np.stack((vHSq0,vHSq0SE)).T,index=lPhenos,columns=DataWriter.lHsqSE)
+                dfHSqA = pd.DataFrame(np.stack((vHSqA,vHSqASE)).T,index=lPhenos,columns=DataWriter.lHsqSE)
             else:
                 # set dataframes
                 dfHSq0 = pd.DataFrame(vHSq0,index=lPhenos,columns=DataWriter.lHsq)
@@ -89,7 +89,7 @@ class DataWriter:
                 # get heritability standard errors 
                 vHSqSE = self.estimates.vHSqSE
                 # set dataframe
-                dfHSq = pd.DataFrame(np.stack((vHSq,vHSqSE)),index=lPhenos,columns=DataWriter.lHsqSE)
+                dfHSq = pd.DataFrame(np.stack((vHSq,vHSqSE)).T,index=lPhenos,columns=DataWriter.lHsqSE)
             else:
                 # set dataframe
                 dfHSq = pd.DataFrame(vHSq,index=lPhenos,columns=DataWriter.lHsq)

@@ -329,7 +329,7 @@ class MgremlReader:
         # indicate data is being read
         self.logger.info('Reading ' + sData + ' file {f}'.format(f=lArgs[0]))
         # read data
-        dfData = pd.read_csv(lArgs[0], index_col = MgremlReader.lIndFID_IID, header = iHeader, sep = "\s+|\t+|,",engine='python')
+        dfData = pd.read_csv(lArgs[0], index_col = MgremlReader.lIndFID_IID, header = iHeader, sep = None, engine='python')
         # force missings to NaN
         dfData.apply(pd.to_numeric, errors='coerce')
         # get number of observations and traits, and report
@@ -437,7 +437,7 @@ class MgremlReader:
             raise TypeError('specified file for the ' + sData + ' does not exist')
         self.logger.info('Reading {S} file {f}'.format(S=sData,f=lArgs[0]))
         # read the file
-        dfBin = pd.read_csv(lArgs[0], header = iHeadRow, sep = "\s+|\t+|,", engine = 'python', index_col = iIndCol)
+        dfBin = pd.read_csv(lArgs[0], header = iHeadRow, sep = None, engine = 'python', index_col = iIndCol)
         # set missings to NaN
         dfBin = dfBin.apply(pd.to_numeric, errors='coerce')
         # get the number of traits and factors/covariates involved and report
