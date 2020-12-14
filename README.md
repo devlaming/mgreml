@@ -43,7 +43,53 @@ Let's first inspect the `pheno.txt` file. This file contains data in tab-separat
 
 For the same set of individuals, you have a binary genomic-relatedness matrix (a.k.a. GRM) e.g. computed using [PLINK](https://www.cog-genomics.org/plink/) or [GCTA](https://cnsgenomics.com/software/gcta/). In this case, the set of binary GRM files comprises `data.grm.bin`, `data.grm.N.bin`, and `data.grm.id`. We refer to this set of binary GRM files by its prefix, i.e. `data`.
 
+The simplest command for running an `mgreml` analysis on this data is as follows:
 
+```
+python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt --out ./tutorial/nocovs
+```
+
+Upon carrying out this command, `mgreml` will first report the follow command will be carried out:
+
+```
+Call:
+mgreml \
+--grm ./tutorial/data \
+--pheno ./tutorial/pheno.txt \
+--out ./tutorial/nocovs
+```
+
+After a few hundred BFGS iterations, `mgreml` will have finished, and have written e.g. heritability estimates to `./tutorial/nocovs.HSq.out` and genetic correlation estimates to `./tutorial/nocovs.RhoG.out`.
+
+The estimated heritabilities are as follows:
+
+| trait | heritability | standard error |
+| --- | --- | --- |
+| Some pheno 101 | 0.052012142 | 0.029377156 |
+| Some pheno 102 | 0.001615452 | 0.031020903 |
+| Some pheno 103 | 0.015868615 | 0.029401385 |
+| Some pheno 104 | 0.013322251 | 0.029342585 | 
+| Some pheno 105 | 0.037358512 | 0.029760677 |
+| Some pheno 106 | 0.171444942 | 0.028955814 |
+| Some pheno 107 | 0.004249289 | 0.029571263 |
+| Some pheno 108 | 0.001346727 | 0.029682721 |
+| Some pheno 109 | 0.016323737 | 0.031897206 |
+| Some pheno 110 | 0.156523063 | 0.029363308 | 
+
+Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, printed below, we see that our estimates are seemingly biased downwards/
+
+| trait | heritability |
+| --- | --- |
+| Some pheno 101 | 0.47230192893158857 |
+| Some pheno 102 | 0.0070794955805743845 |
+| Some pheno 103 | 0.034581822843263034 |
+| Some pheno 104 | 0.055009566001384846 |
+| Some pheno 105 | 0.4667172940834852 |
+| Some pheno 106 | 0.4999339124049756 |
+| Some pheno 107 | 0.02222839567470805 |
+| Some pheno 108 | 0.03412011302653774 |
+| Some pheno 109 | 0.16608084405020662 |
+| Some pheno 110 | 0.7421233484196411 |
 
 
 
