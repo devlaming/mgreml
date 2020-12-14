@@ -98,7 +98,20 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --covar ./tutorial/covar.txt --out ./tutorial/covs
 ```
 
+When we compare the new estimates of heritability (see below) to the true values, we notice any evidence of bias in our estimates is gone.
 
+| trait | heritability | standard error |
+| --- | --- | --- |
+| Some pheno 101 | 0.449949558 | 0.025379594 |
+| Some pheno 102 | 0.014902772 | 0.029610792 |
+| Some pheno 103 | 0.031537671 | 0.028705274 |
+| Some pheno 104 | 0.043928235 | 0.029429108 |
+| Some pheno 105 | 0.481418117 | 0.024593709 |
+| Some pheno 106 | 0.487289667 | 0.024525843 |
+| Some pheno 107 | 0.036227795 | 0.028984128 |
+| Some pheno 108 | 0.016881014 | 0.028562744 |
+| Some pheno 109 | 0.165447283 | 0.028834262 |
+| Some pheno 110 | 0.742442814 | 0.019310151 |
 
 ## Updating `mgreml`
 
