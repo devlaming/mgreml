@@ -142,6 +142,19 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --out ./tutorial/custom_model
 ```
 
+The estimates in the resulting file, `custom_model.RhoG.out`, reveal that all genetic correlations are estimated at either zero or one, as expected under this model:
+
+|  | Some pheno 101 | Some pheno 102 | Some pheno 103 | ...  | Some pheno 108 | Some pheno 109 | Some pheno 110 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Some pheno 101 | 1 | -1 | 1 | ...  | -1 | -1 | -1 |
+| Some pheno 102 | -1 | 1 | -1 | ...  | 1 | 1 | 1 |
+| Some pheno 103 | 1 | -1 | 1 | ...  | -1 | -1 | -1 |
+| ...  | ...  | ...  | ...  | ...  | ...  | ...  | ... |
+| Some pheno 108 | -1 | 1 | -1 | ...  | 1 | 1 | 1 |
+| Some pheno 109 | -1 | 1 | -1 | ...  | 1 | 1 | 1 |
+| Some pheno 110 | -1 | 1 | -1 | ...  | 1 | 1 | 1 |
+
+
 
 
 
