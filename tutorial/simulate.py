@@ -85,7 +85,7 @@ def SimulateData():
     dfY.to_csv(sFileY, sep='\t')
     # compute heritabilities and store
     vHSq = mLiabG.var(axis=0) / ((mLiabG+mLiabE).var(axis=0))
-    dfHSq = pd.DataFrame(vHSq,index=lPheno,columns=['phenotype'])
+    dfHSq = pd.DataFrame(vHSq,index=lPheno,columns=['heritability'])
     sHSq = 'true.HSq.txt'
     dfHSq.to_csv(sHSq, sep='\t')
     # compute correlations and store
