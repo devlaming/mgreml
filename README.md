@@ -76,7 +76,7 @@ The estimated heritabilities are as follows:
 | Some pheno 109 | 0.016323737 | 0.031897206 |
 | Some pheno 110 | 0.156523063 | 0.029363308 | 
 
-Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, printed below, we see that our estimates are seemingly biased downwards/
+Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, printed below, we see that our estimates seem to be biased downwards.
 
 | trait | heritability |
 | --- | --- |
@@ -90,6 +90,12 @@ Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, print
 | Some pheno 108 | 0.03412011302653774 |
 | Some pheno 109 | 0.16608084405020662 |
 | Some pheno 110 | 0.7421233484196411 |
+
+The reason for this bias, is that we did not control for our fixed-effect covariates, in `./tutorial/covar.txt`, which affect the traits of interest. So we need to use the `--covar` option to specify our fixed-effect covariates. This boils down to the following `mgreml` command:
+
+```
+python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt --covar ./tutorial/pheno.txt --out ./tutorial/covs
+```
 
 
 
