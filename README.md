@@ -129,7 +129,7 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 
 Similarly, users can also specify which genetic factor affects which trait and which environment factor affects which trait. Such specifications can be passed to `mgreml` using the `--genetic-model` and `--environment-model` options. Note, that any such user-specified structural model must be identified. Moreover, for the factor specification of the environment, `mgreml` requires as many factors as there are traits.
 
-For example, we could impose a factor structure, where there is only one genetic factor, and where there are *T=10* environment factors, each affecting a different trait. Effectively, this boils down to a model with genetic correlations all equal to one and environment correlations all equal to zero. These factor structures are shown in the files `gen_model.txt` and `env_model.txt` both found in the `tutorial` folder. Both files contain a binary table, with elements equal to one, where a given factor is permitted to affect the given phenotype, and equal to zero otherwise.
+For example, we could impose a factor structure, where there is only one genetic factor, and where there are *T*=10 environment factors, each affecting a different trait. Effectively, this boils down to a model with genetic correlations all equal to one and environment correlations all equal to zero. These factor structures are shown in the files `gen_model.txt` and `env_model.txt` both found in the `tutorial` folder. Both files contain a binary table, with elements equal to one, where a given factor is permitted to affect the given phenotype, and equal to zero otherwise.
 
 To estimate this structural model, we can simply carry out the following command:
 
@@ -234,7 +234,7 @@ Chi-square test statistic is 19222.36723726752
 with P-value = 0.0
 ```
 
-Notice that `--genetic-model` and `--environment-model` have their restricted counterparts, i.e. `--restricted-genetic-model` and `--restricted-environment-model`. Thus, we could have also carried out the preceding comparison of the two models using the following command:
+Notice that `--genetic-model` and `--environment-model` also have their restricted counterparts, i.e. `--restricted-genetic-model` and `--restricted-environment-model`. This means we could have also carried out the preceding comparison of the two models using the following command:
 
 ```
 python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
@@ -243,6 +243,8 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --restricted-environment-model ./tutorial/env_model.txt \
                 --out ./tutorial/restricted_custom_model
 ```
+
+Other commands: `--store-iter`, `--reinitialise`, `--restricted-reinitialise`, `--grad-tol`, `--newton`, `--rel-cutoff`, `--drop-missings`, `--ignore-pcs`
 
 ## Updating `mgreml`
 
