@@ -98,42 +98,10 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --covar ./tutorial/covar.txt --out ./tutorial/covs
 ```
 
-If we compare the new estimates of heritability (see below) to the true values, taking the standard errors of the estimates into account, we see that any evidence of bias in our estimates is gone.
+In addition to reporting the heritabilities and their standard errors, `mgreml` also automatically reports genetic and environment correlations, as well as their standard errors.
 
-| trait | heritability | standard error |
-| --- | --- | --- |
-| Some pheno 101 | 0.449949558 | 0.025379594 |
-| Some pheno 102 | 0.014902772 | 0.029610792 |
-| Some pheno 103 | 0.031537671 | 0.028705274 |
-| Some pheno 104 | 0.043928235 | 0.029429108 |
-| Some pheno 105 | 0.481418117 | 0.024593709 |
-| Some pheno 106 | 0.487289667 | 0.024525843 |
-| Some pheno 107 | 0.036227795 | 0.028984128 |
-| Some pheno 108 | 0.016881014 | 0.028562744 |
-| Some pheno 109 | 0.165447283 | 0.028834262 |
-| Some pheno 110 | 0.742442814 | 0.019310151 |
+In case you do not care about standard errors, you can use the `--no-se` option. Especially for a large number of trait, computing the standard errors is computationally demanding, as this requires calculating the average information matrix, which has a computational complexity of the order *NT*<sup>4</sup>, where *T* denotes the number of traits and *N* the number of observations.
 
-Also, for the genetic correlations, we can see the estimates are much in line with the true valus. Estimates:
-
-| estimates rhoG | Some pheno 101 | Some pheno 102 | Some pheno 103 | ... | Some pheno 108 | Some pheno 109 | Some pheno 110 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Some pheno 101 | 1.000 | 0.607 | 0.854 | ... | 0.128 | 0.020 | -0.009 |
-| Some pheno 102 | 0.607 | 1.000 | 0.235 | ... | -0.071 | 0.104 | 0.006 |
-| Some pheno 103 | 0.854 | 0.235 | 1.000 | ... | 0.244 | 0.022 | -0.088 |
-| ...| ... | ... | ... | ... | ... | ... | ... |
-| Some pheno 108 | 0.128 | -0.071 | 0.244 | ... | 1.000 | -0.674 | 0.801 |
-| Some pheno 109 | 0.020 | 0.104 | 0.022 | ... | -0.674 | 1.000 | -0.878 |
-| Some pheno 110 | -0.009 | 0.006 | -0.088 | ... | 0.801 | -0.878 | 1.000 |
-
-| true value rhoG | Some pheno 101 | Some pheno 102 | Some pheno 103 | ... | Some pheno 108 | Some pheno 109 | Some pheno 110 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Some pheno 101 | 1 | 0.887434574 | 0.906336948 | ... | 0 | 0 | 0 |
-| Some pheno 102 | 0.887434574 | 1 | 0.827534988 | ... | 0 | 0 | 0 |
-| Some pheno 103 | 0.906336948 | 0.827534988 | 1 | ... | 0 | 0 | 0 |
-| ... | ... | ... | ... | ... | ... | ... | ... |
-| Some pheno 108 | 0 | 0 | 0 | ... |  1 | -0.497887233 | 0.579709755 |
-| Some pheno 109 | 0 | 0 | 0 | ... | -0.497887233 | 1 | -0.83703699 |
-| Some pheno 110 | 0 | 0 | 0 | ... | 0.579709755 | -0.83703699 | 1 |
 
 ## Updating `mgreml`
 
