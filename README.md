@@ -154,10 +154,31 @@ The estimates in the resulting file, `custom_model.RhoG.out`, reveal that all ge
 | Some pheno 109 | -1 | 1 | -1 | ...  | 1 | 1 | 1 |
 | Some pheno 110 | -1 | 1 | -1 | ...  | 1 | 1 | 1 |
 
+Similarly, the estimate of environment correlations in `custom_model.RhoE`, reveal these are all estimated at zero, also as expected under this model.
 
+Notice that in `mgreml`, specifying `--genetic-model` does not require you to also specify `--environment-model` (nor the other way around).
 
+For the specific cases of genetic correlations all equal to one or all equal to zero, and environment correlations all equal to zero, `mgreml` has two custom options that can be used for such cases instead of `--genetic-model` and `--environment-model`, namely `--rho-genetic 0` or  `--rho-genetic 1` and  `--rho-environment 0`.
 
+So, effectively, we could have also estimated the last model using the following command:
 
+```
+python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                --covar ./tutorial/covar.txt \
+                --rho-genetic 1 \
+                --rho-environment 0 \
+                --out ./tutorial/rhoG1_rhoE0
+```
+
+Inspection of the log-likelihoods in `custom_model.loglik.out` and `rhoG1_rhoE0.loglik.out` indeed reveal that these models yield an identical fit to the data:
+
+```
+Log-likelihood of model = -76460.81732177232,
+based on data on 10 traits and 4980 observations,
+with a model consisting of 1 genetic factors and 10 environment factors,
+comprising 10 free genetic factor coefficients and 10 free environment factor coefficients in turn.
+Estimates converged after 37 BFGS iterations 
+```
 
 ## Updating `mgreml`
 
