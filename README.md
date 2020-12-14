@@ -98,7 +98,7 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --covar ./tutorial/covar.txt --out ./tutorial/covs
 ```
 
-When we compare the new estimates of heritability (see below) to the true values, we notice any evidence of bias in our estimates is gone.
+If we compare the new estimates of heritability (see below) to the true values, taking the standard errors of the estimates into account, we see that any evidence of bias in our estimates is gone.
 
 | trait | heritability | standard error |
 | --- | --- | --- |
