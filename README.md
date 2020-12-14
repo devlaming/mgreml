@@ -113,6 +113,28 @@ If we compare the new estimates of heritability (see below) to the true values, 
 | Some pheno 109 | 0.165447283 | 0.028834262 |
 | Some pheno 110 | 0.742442814 | 0.019310151 |
 
+Also, for the genetic correlations, we can see the estimates are much in line with the true valus. Estimates:
+
+| estimates rhoG | Some pheno 101 | Some pheno 102 | Some pheno 103 | ... | Some pheno 108 | Some pheno 109 | Some pheno 110 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Some pheno 101 | 1.000 | 0.607 | 0.854 | ... | 0.128 | 0.020 | -0.009 |
+| Some pheno 102 | 0.607 | 1.000 | 0.235 | ... | -0.071 | 0.104 | 0.006 |
+| Some pheno 103 | 0.854 | 0.235 | 1.000 | ... | 0.244 | 0.022 | -0.088 |
+| ...| ... | ... | ... | ... | ... | ... | ... |
+| Some pheno 108 | 0.128 | -0.071 | 0.244 | ... | 1.000 | -0.674 | 0.801 |
+| Some pheno 109 | 0.020 | 0.104 | 0.022 | ... | -0.674 | 1.000 | -0.878 |
+| Some pheno 110 | -0.009 | 0.006 | -0.088 | ... | 0.801 | -0.878 | 1.000 |
+
+| true value rhoG | Some pheno 101 | Some pheno 102 | Some pheno 103 | ... | Some pheno 108 | Some pheno 109 | Some pheno 110 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Some pheno 101 | 1 | 0.887434574 | 0.906336948 | ... | 0 | 0 | 0 |
+| Some pheno 102 | 0.887434574 | 1 | 0.827534988 | ... | 0 | 0 | 0 |
+| Some pheno 103 | 0.906336948 | 0.827534988 | 1 | ... | 0 | 0 | 0 |
+| ... | ... | ... | ... | ... | ... | ... | ... |
+| Some pheno 108 | 0 | 0 | 0 | ... |  1 | -0.497887233 | 0.579709755 |
+| Some pheno 109 | 0 | 0 | 0 | ... | -0.497887233 | 1 | -0.83703699 |
+| Some pheno 110 | 0 | 0 | 0 | ... | 0.579709755 | -0.83703699 | 1 |
+
 ## Updating `mgreml`
 
 You can update to the newest version of `mgreml` using `git`. First, navigate to your `mgreml` directory (e.g. `cd mgreml`), then run
