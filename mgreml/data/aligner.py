@@ -400,6 +400,8 @@ class MgremlData:
         self.vDSq = vD**2
         # apply canonical transform to phenotypes and store
         self.mY = mPT@mY
+        # for computational reasons, also store its transpose
+        self.mYT = self.mY.T
         # count sample size and number of phenotypes, and store
         self.iN = self.mY.shape[0]
         self.iT = self.mY.shape[1]
