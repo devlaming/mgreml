@@ -1,4 +1,4 @@
-	factor A
+	factor 0
 Some pheno 101	1
 Some pheno 102	1
 Some pheno 103	1

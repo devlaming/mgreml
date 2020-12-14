@@ -133,7 +133,6 @@ For example, we could impose a factor structure, where there is only one genetic
 
 To estimate this structural model, we can simply carry out the following command:
 
-
 ```
 python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --covar ./tutorial/covar.txt \
