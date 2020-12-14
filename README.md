@@ -205,7 +205,45 @@ Some pheno 110 | environment factor 9 | 0.361 |
 
 The file `full.coeff.var.out` contains a 110-by-110 matrix representing the sampling covariance matrix of those estimates. 
 
+`mgreml` can also be used to specify two models at once, to compare them using a likelihood-ratio test, provided the null model is nested with respect to the alternative. E.g. one can use the following command to compare the saturated model to the previously considered model assuming perfect genetic correlations and no environment correlations at all:
 
+```
+python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                --covar ./tutorial/covar.txt \
+                --restricted-rho-genetic 1 \
+                --restricted-rho-environment 0 \
+                --out ./tutorial/restricted_rhoG1_rhoE0
+```
+
+Inspection of `restricted_rhoG1_rhoE0.loglik.out` reveals that the saturated model fits the data significantly better than this restricted model:
+
+```
+Log-likelihood of nested model (null hypothesis) = -76460.81732177232,
+based on data on 10 traits and 4980 observations,
+with a model consisting of 1 genetic factors and 10 environment factors,
+comprising 10 free genetic factor coefficients and 10 free environment factor coefficients in turn.
+Estimates converged after 37 BFGS iterations 
+
+Log-likelihood of parent model (alternative hypothesis) = -66849.63370313856,
+based on data on 10 traits and 4980 observations,
+with a model consisting of 10 genetic factors and 10 environment factors,
+comprising 55 free genetic factor coefficients and 55 free environment factor coefficients in turn.
+Estimates converged after 351 BFGS iterations 
+
+Results of likelihood-ratio test with 90 degrees of freedom:
+Chi-square test statistic is 19222.36723726752
+with P-value = 0.0
+```
+
+Notice that `--genetic-model` and `--environment-model` have their restricted counterparts, i.e. `--restricted-genetic-model` and `--restricted-environment-model`. Thus, we could have also carried out the preceding comparison of the two models using the following command:
+
+```
+python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                --covar ./tutorial/covar.txt \
+                --restricted-genetic-model ./tutorial/gen_model.txt \
+                --restricted-environment-model ./tutorial/env_model.txt \
+                --out ./tutorial/restricted_custom_model
+```
 
 ## Updating `mgreml`
 
