@@ -1,6 +1,7 @@
 **__pycache__**
-**.exe**
+**.exe
 **.log**
+**.out
 temp/**
 input/**
 output/**
