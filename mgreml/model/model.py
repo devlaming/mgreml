@@ -9,7 +9,7 @@ pd.options.mode.chained_assignment = None
 class StructuralModel:
     
     # regularisation constant initialisation variance matrix
-    dLambdaInit = 1E-3
+    dLambdaInit = 1E-6
     # set minimum required squared sum of coefficients for each factor
     # when diagnosing issues
     dSSTOL = 1E-4
@@ -111,7 +111,7 @@ class StructuralModel:
 
     def InitialiseV(self, mdData):
         # get regularised phenotypic covariance matrix
-        mV = (1-StructuralModel.dLambdaInit)*np.cov(mdData.mYT) + StructuralModel.dLambdaInit*np.eye(self.iT)
+        mV = (1-StructuralModel.dLambdaInit)*np.cov(mdData.mY.T) + StructuralModel.dLambdaInit*np.eye(self.iT)
         return mV
     
     def InitialiseIndicesSaturated(self):
@@ -284,7 +284,7 @@ class CombinedModel:
 class MgremlModel:
     
     # set lowest eigenvalue permitted in VE matrix without aborting
-    dMinEigVal = 1E-9
+    dMinEigVal = 1E-12
     
     def __init__(self, mdData, dfGenBinFY = None, dfEnvBinFY = None, bNested = False):
         self.logger = mdData.logger
@@ -552,10 +552,7 @@ class MgremlModel:
             # set YjTilde as residual
             mR = mYjTilde
         # compute SSR in one go
-        dSSR = np.multiply(mR,self.data.mYT).sum()
-        # if SSR negative: precision issue; raise error
-        if dSSR < 0:
-            raise ValueError('Negative quadratic term in log-likelihood; problem with numerical precision of MGREML; please contant the developers')
+        dSSR = np.multiply(mR,self.data.mY.T).sum()
         # compute log-likelihood per observation
         dLogL = (-0.5*(dCons + dLogDetV + dLogDetZ - self.data.dLogDetXTX + dSSR))/iN
         if bGrad: # if gradient is desired
