@@ -29,7 +29,9 @@ to print a list of all command-line options. If these commands fail something ha
 
 In this short tutorial we will go over the basic functions of `mgreml`. First go over the steps in Installation.
 
-Now, having cloned the `mgreml` repository, the main directory should contain a subdirectory called `tutorial`. This directory in turn contains several files, including `pheno.txt` and `covar.txt`. Let's first inspect the `pheno.txt` file. This file contains data in tab-separated format on ten phenotypes observed in a set of 5,000 individuals. The first few columns and rows of this file look as follows:
+Now, having cloned the `mgreml` repository, the main directory should contain a subdirectory called `tutorial`. This directory in turn contains several files, including `pheno.txt` and `covar.txt`. Details on how this dataset has been generated using simulation can be found in the python script in `./tutorial/simulate.py`
+
+Let's first inspect the `pheno.txt` file. This file contains data in tab-separated format on ten phenotypes observed in a set of 5,000 individuals. The first few columns and rows of this file look as follows:
 
 |FID | IID | Some pheno 101 | Some pheno 102 | Some pheno 103 | ... |
 | --- | --- | --- | --- | --- | --- |
@@ -39,7 +41,11 @@ Now, having cloned the `mgreml` repository, the main directory should contain a 
 | FID 4 | IID 5004 | 3.236244118718508 | 1.3410024876651214 | 2.642661382564801 | ... |
 | ... | ... | ... | ... | ... | ... |
 
-Details on how this dataset has been generated using simulation can be found in the python script in `./tutorial/simulate.py`
+For the same set of individuals, you have a binary genomic-relatedness matrix (a.k.a. GRM) e.g. computed using [PLINK](https://www.cog-genomics.org/plink/) or [GCTA](https://cnsgenomics.com/software/gcta/). In this case, the set of binary GRM files comprises `data.grm.bin`, `data.grm.N.bin`, and `data.grm.id`. We refer to this set of binary GRM files by its prefix, i.e. `data`.
+
+
+
+
 
 ## Updating `mgreml`
 
