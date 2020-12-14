@@ -1,0 +1,11 @@
+	factor A
+Some pheno 101	1
+Some pheno 102	1
+Some pheno 103	1
+Some pheno 104	1
+Some pheno 105	1
+Some pheno 106	1
+Some pheno 107	1
+Some pheno 108	1
+Some pheno 109	1
+Some pheno 110	1
