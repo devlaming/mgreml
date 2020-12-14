@@ -104,7 +104,7 @@ In case you do not care about standard errors, you can use the `--no-se` option.
 
 `mgreml` also automatically report the fixed-effect estimates (a.k.a. GLS estimates), including the sampling covariance matrix of those estimates, and their standard errors.
 
-Now, suppose each trait has a different set of covariates, `mgreml` can easily handle this using the `--covar-model` option. This option should be followed by a filename which contains a binary table, indicating which covariate affects which phenotype. E.g. the `tutorial` folder contains `covar_model.txt`, of which a few rows and columns are shown below:
+Now, suppose each trait has a different set of covariates, `mgreml` can easily handle this using the `--covar-model` option. This option should be followed by a filename which contains a binary table, indicating which covariate affects which phenotype. E.g. the `tutorial` folder contains `covar_model.txt`, of which the content is shown below:
 
 |  | intercept | my covar 301 | my covar 302 | my covar 303 | my covar 304 | my covar 305 | my covar 306 | my covar 307 | my covar 308 | my covar 309 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -119,7 +119,13 @@ Now, suppose each trait has a different set of covariates, `mgreml` can easily h
 | Some pheno 109 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
 | Some pheno 110 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 
-Clearly, this file implies that the intercept is a covariate that applies to all phenotypes, whereas all other covariates all affect different traits.
+Clearly, this file implies that the intercept is a covariate that applies to all phenotypes, whereas all other covariates all affect different traits. We can now perform `mgreml` estimation under this model for the fixed effects using the following command:
+
+```
+python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                --covar ./tutorial/covar.txt  --covar-model ./tutorial/covar_model.txt \
+                --out ./tutorial/covs
+```
 
 
 
