@@ -182,6 +182,31 @@ Estimates converged after 37 BFGS iterations
 
 In case you have estimated a model, either according to some structural model e.g. using `--genetic-model`, or just the saturated model we started with, you can make `mgreml` report the factor coefficients (i.e. the effect of each factor on each trait) by using the `--all-coefficients` option. Using this option not only reports the estimated factor coefficients, but also the sampling covariance matrix of those estimates. This sampling covariance matrix may grow very large for large *T*.
 
+E.g. the command
+
+```
+python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                --covar ./tutorial/covar.txt \
+                --all-coefficients \
+                --out ./tutorial/full
+```
+
+generates, amongst others, the file `full.coeff.out`, which contains 110 estimated factor coefficients in this case, of which a few lines are shown below:
+
+| trait | factor | coefficient |
+| --- | --- | --- |
+| Some pheno 101 | genetic factor 0 | 0.993 |
+| Some pheno 102 | genetic factor 0 | 0.081 |
+| Some pheno 103 | genetic factor 0 | 0.203 |
+| ... | ... | ... |
+Some pheno 109 | environment factor 8 | 0.226 |
+Some pheno 110 | environment factor 8 | -0.415 |
+Some pheno 110 | environment factor 9 | 0.361 |
+
+The file `full.coeff.var.out` contains a 110-by-110 matrix representing the sampling covariance matrix of those estimates. 
+
+
+
 ## Updating `mgreml`
 
 You can update to the newest version of `mgreml` using `git`. First, navigate to your `mgreml` directory (e.g. `cd mgreml`), then run
