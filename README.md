@@ -180,6 +180,8 @@ comprising 10 free genetic factor coefficients and 10 free environment factor co
 Estimates converged after 37 BFGS iterations 
 ```
 
+In case you have estimated a model, either according to some structural model e.g. using `--genetic-model`, or just the saturated model we started with, you can make `mgreml` report the factor coefficients (i.e. the effect of each factor on each trait) by using the `--all-coefficients` option. Using this option not only reports the estimated factor coefficients, but also the sampling covariance matrix of those estimates. This sampling covariance matrix may grow very large for large *T*.
+
 ## Updating `mgreml`
 
 You can update to the newest version of `mgreml` using `git`. First, navigate to your `mgreml` directory (e.g. `cd mgreml`), then run
