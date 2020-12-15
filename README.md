@@ -98,11 +98,26 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --covar ./tutorial/covar.txt --out ./tutorial/covs
 ```
 
+If we compare the new estimates of heritability (see below) to the true values, taking the standard errors of the estimates into account, we see that any evidence of bias in our estimates is gone.
+
+|  | heritability | standard error |
+| --- | --- | --- |
+| Some pheno 101 | 0.450 | 0.025 |
+| Some pheno 102 | 0.015 | 0.030 |
+| Some pheno 103 | 0.032 | 0.029 |
+| Some pheno 104 | 0.044 | 0.029 |
+| Some pheno 105 | 0.481 | 0.025 |
+| Some pheno 106 | 0.487 | 0.025 |
+| Some pheno 107 | 0.036 | 0.029 |
+| Some pheno 108 | 0.017 | 0.029 |
+| Some pheno 109 | 0.165 | 0.029 |
+| Some pheno 110 | 0.742 | 0.019 |
+
 In addition to reporting the heritabilities and their standard errors, `mgreml` also automatically reports genetic and environment correlations, as well as their standard errors.
 
 In case you do not care about standard errors, you can use the `--no-se` option. Especially for a large number of traits, computing the standard errors is computationally demanding, as this requires calculating the average information matrix, which has a computational complexity of the order *NT* <sup>4</sup>, where *T* denotes the number of traits and *N* the number of observations.
 
-`mgreml` also automatically report the fixed-effect estimates (a.k.a. GLS estimates), including the sampling covariance matrix of those estimates, and their standard errors.
+`mgreml` also automatically reports the fixed-effect estimates (a.k.a. GLS estimates), including the sampling covariance matrix of those estimates, and their standard errors.
 
 Now, suppose each trait has a different set of covariates, `mgreml` can easily handle this using the `--covar-model` option. This option should be followed by a filename which contains a binary table, indicating which covariate affects which phenotype. E.g. the `tutorial` folder contains `covar_model.txt`, of which the content is shown below:
 
