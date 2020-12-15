@@ -372,10 +372,10 @@ conda env update --file mgreml.yml
 
 Before contacting us, please try the following:
 
-1. Go over the tutorial in this `README.md`; this tutorial is quite self-contained
+1. Go over the tutorial in this `README.md` file; this tutorial is quite self-contained
 2. The method is described in detail in the supplementary information of the paper (citation below)
 
-If that doesn't work, you can get in touch with us via the [google group](...).
+If that doesn't work, you can get in touch with us via the [e.g. google group; to be decided](...).
 
 ## Citation
 
