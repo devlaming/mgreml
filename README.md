@@ -5,13 +5,21 @@
 
 ## Installation
 
-In order to download `mgreml`, please clone this repository using the following commands
+Before downloading `mgreml`, please make sure [Git](https://git-scm.com/downloads) and [Anaconda](https://www.anaconda.com/) are installed.
+
+In order to download `mgreml`, open a command-line interface (e.g. `bash` or `cmd`), navigate to your working directory, and clone the `mgreml` repository using the following command:
+
 ```  
 git clone https://github.com/devlaming/mgreml.git
+```
+
+Then enter the newly created `mgreml` directory using:
+
+```
 cd mgreml
 ```
 
-In order to install the Python dependencies, you will need the [Anaconda](https://www.anaconda.com/) Python distribution and package manager. After installing Anaconda, run the following commands to create an environment with `mgreml`'s dependencies:
+Then run the following commands to create a custom Python environment which has all of `mgreml`'s dependencies (i.e. an environment that has packages such as `numpy` and `pandas` pre-installed):
 
 ```
 conda env create --file mgreml.yml
