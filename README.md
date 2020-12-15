@@ -333,7 +333,7 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --restricted-reinitialise ./tutorial/restricted_rhoG1_rhoE0.estimates0.iter.30.bfgs.pkl \
                 --out ./tutorial/restricted_rhoG1_rhoE0_reinitialised
 ```
-reinitialises estimation for the null and alternative model from appropriate `.pkl` files. Notice that analogous to `--reinitialise`, the `--restricted-reinitialise` option cannot be combined with options such as `--restricted-environment-model` and `--restricted-rho-genetic`, as the `.pkl` already contain the full model specification.
+reinitialises estimation for the null and alternative model from appropriate `.pkl` files. Notice that analogous to `--reinitialise`, the `--restricted-reinitialise` option cannot be combined with options such as `--restricted-environment-model` and `--restricted-rho-genetic`, as the `.pkl` file already contains the full model specification.
 
 `mgreml` performs basic data management, e.g. in terms of figuring out for which individuals we have phenotypic as well as GRM data (and data on covariates, if applicable). In case `--covar-model` is used `mgreml` also tests if there are any covariates that affect no phenotype at all, and if so, excludes such covariates.
 
