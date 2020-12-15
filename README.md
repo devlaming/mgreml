@@ -289,7 +289,7 @@ Notice that as such `.pkl` files already implicitly contain the full model speci
 
 In case `--store-iter` is used when estimating a nested versus alternative model (i.e. in conjunction with one of the `--restricted-...` options), `--store-iter` stores two sets of `.pkl` files, namely one set with filenames containing `.estimates.` (denoting the alternative model) and the other containing `.estimates0.` (denoting the nested model).
 
-`.pkl` files can also be used to reinitialise a restricted model, using the `--reinitialise-restricted` option. E.g. the command
+`.pkl` files can also be used to reinitialise a restricted model, using the `--restricted-reinitialise` option. E.g. the command
 
 ```
 python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
