@@ -102,7 +102,7 @@ Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, print
 | Some pheno 109 | 0.166 |
 | Some pheno 110 | 0.742 |
 
-The reason for this bias, is that we did not control for our fixed-effect covariates, in `./tutorial/covar.txt`, which affect the traits of interest. So we need to use the `--covar` option to specify our fixed-effect covariates. This boils down to the following `mgreml` command:
+The simple reason for this bias is that we did not control for our fixed-effect covariates, in `./tutorial/covar.txt`, which affect the traits of interest. So we need to use the `--covar` option to specify our fixed-effect covariates. This boils down to the following `mgreml` command:
 
 ```
 python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
