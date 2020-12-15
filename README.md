@@ -157,7 +157,22 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --out ./tutorial/different_covs
 ```
 
-Similarly, users can also specify which genetic factor affects which trait and which environment factor affects which trait. Such specifications can be passed to `mgreml` using the `--genetic-model` and `--environment-model` options. Note, that any such user-specified structural model must be identified. Moreover, for the factor specification of the environment, `mgreml` requires as many factors as there are traits.
+Now, `different_covs.GLS.est.out`, in the folder `tutorial`, only shows fixed-effect estimates for covariates that affect the given trait according to `covar_model.txt`:
+
+| trait | covariate | beta hat | standard error |
+| --- | --- | --- | --- |
+| Some pheno 101 | intercept | -1.413 | 0.041 |
+| Some pheno 102 | intercept | -1.777 | 0.031 |
+| Some pheno 102 | my covar 301 | -1.432 | 0.017 |
+| ...  | ...  | ...  | ...  |
+| Some pheno 109 | intercept | 2.269 | 0.037 |
+| Some pheno 109 | my covar 308 | -1.282 | 0.014 |
+| Some pheno 110 | intercept | -0.397 | 0.057 |
+| Some pheno 110 | my covar 309 | 1.172 | 0.031 |
+
+E.g. `my covar 301` does not affect `Some pheno 101` in this case.
+
+Analogous to `--covar-model`, users can also specify which genetic factor affects which trait and which environment factor affects which trait. Such specifications can be passed to `mgreml` using the `--genetic-model` and `--environment-model` options. Note, that any such user-specified structural model must be identified. Moreover, for the factor specification of the environment, `mgreml` requires as many factors as there are traits.
 
 For example, we could impose a factor structure, where there is only one genetic factor, and where there are *T*=10 environment factors, each affecting a different trait. Effectively, this boils down to a model with genetic correlations all equal to one and environment correlations all equal to zero. These factor structures are shown in the files `gen_model.txt` and `env_model.txt` both found in the `tutorial` folder. Both files contain a binary table, with elements equal to one, where a given factor is permitted to affect the given phenotype, and equal to zero otherwise.
 
