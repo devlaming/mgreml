@@ -284,7 +284,7 @@ class CombinedModel:
 class MgremlModel:
     
     # set lowest eigenvalue permitted in VE matrix without aborting
-    dMinEigVal = 1E-9
+    dMinEigVal = 1E-6
     
     def __init__(self, mdData, dfGenBinFY = None, dfEnvBinFY = None, bNested = False):
         self.logger = mdData.logger
