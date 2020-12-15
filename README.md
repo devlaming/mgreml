@@ -26,7 +26,7 @@ conda env create --file mgreml.yml
 conda activate mgreml
 ```
 
-Once the above has completed, you can run:
+Once the above has completed, you can now run:
 
 ```
 python ./mgreml -h
@@ -35,9 +35,9 @@ to print a list of all command-line options. If these commands fail something ha
 
 ## Tutorial
 
-In this short tutorial we will go over the basic functions of `mgreml`. First go over the steps in Installation.
+In this short tutorial we will go over the basic functions of `mgreml`. First, go over the steps in Installation.
 
-Now, having cloned the `mgreml` repository, the main directory should contain a subdirectory called `tutorial`. This directory in turn contains several files, including `pheno.txt` and `covar.txt`. Details on how this dataset has been generated using simulation can be found in the python script in `./tutorial/simulate.py`
+Now that you have cloned the `mgreml` repository, and `mgreml` is up-and-running, the main directory of `mgreml` should contain a subdirectory called `tutorial`. This directory in turn contains several files, including `pheno.txt` and `covar.txt`. Details on how this dataset has been generated using simulation can be found in the python script in `./tutorial/simulate.py`
 
 Let's first inspect the `pheno.txt` file. This file contains data in tab-separated format on ten phenotypes observed in a set of 5,000 individuals. The first few columns and rows of this file look as follows:
 
