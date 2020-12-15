@@ -82,16 +82,16 @@ Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, print
 
 | trait | heritability |
 | --- | --- |
-| Some pheno 101 | 0.47230192893158857 |
-| Some pheno 102 | 0.0070794955805743845 |
-| Some pheno 103 | 0.034581822843263034 |
-| Some pheno 104 | 0.055009566001384846 |
-| Some pheno 105 | 0.4667172940834852 |
-| Some pheno 106 | 0.4999339124049756 |
-| Some pheno 107 | 0.02222839567470805 |
-| Some pheno 108 | 0.03412011302653774 |
-| Some pheno 109 | 0.16608084405020662 |
-| Some pheno 110 | 0.7421233484196411 |
+| Some pheno 101 | 0.472 |
+| Some pheno 102 | 0.007 |
+| Some pheno 103 | 0.035 |
+| Some pheno 104 | 0.055 |
+| Some pheno 105 | 0.467 |
+| Some pheno 106 | 0.500 |
+| Some pheno 107 | 0.022 |
+| Some pheno 108 | 0.034 |
+| Some pheno 109 | 0.166 |
+| Some pheno 110 | 0.742 |
 
 The reason for this bias, is that we did not control for our fixed-effect covariates, in `./tutorial/covar.txt`, which affect the traits of interest. So we need to use the `--covar` option to specify our fixed-effect covariates. This boils down to the following `mgreml` command:
 
