@@ -265,7 +265,61 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --out ./tutorial/restricted_custom_model
 ```
 
-Other commands: `--store-iter`, `--reinitialise`, `--restricted-reinitialise`, `--grad-tol`, `--newton`, `--rel-cutoff`, `--drop-missings`, `--ignore-pcs`
+By default, `mgreml` will not store any intermediate results. However, using the `--store-iter` option, users can specify every how many iterations they want the current parameter estimates to be stored. E.g. `--store-iter 10` will cause `mgreml` to store estimates every ten iterations. The estimates will be stored in a so-called `.pkl` with a prefix a set by the `--out` option. This `.pkl` file contains the model specification as well as the estimates of that model in a given iteration.
+
+Such a `.pkl` file can also be used to reinitialise `mgreml` e.g. if you accidentally switched off your computer halfway through an analysis. For instance
+
+```
+python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                --covar ./tutorial/covar.txt \
+                --store-iter 50 \
+                --out ./tutorial/covar
+```
+
+causes `mgreml` to store results every 50 iterations. Then, if the preceding analysis has reached e.g. just up until iteration 350 before a power outage, we could reinitialise later on using the following command:
+
+```
+python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                --covar ./tutorial/covar.txt \
+                --reinitialise ./tutorial/covar.estimates.iter.350.bfgs.pkl \
+                --out ./tutorial/covar_reinitialised
+```
+
+Notice that as such `.pkl` files already implicitly contain the full model specification, the option `--reinitialise` cannot be combined with options such as `--genetic-model`, `--rho-environment` and so on.
+
+In case `--store-iter` is used when estimating a nested versus alternative model (i.e. in conjunction with one of the `--restricted-...` options), `--store-iter` stores two sets of `.pkl` files, namely one set with filenames containing the `.estimates.`, denoting the alternative model, and the other containing `.estimates0.`, denoting the nested model.
+
+`.pkl` files can also be used to reinitialise a restricted model, using the `--reinitialise-restricted` option. E.g. the command
+
+```
+python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                --covar ./tutorial/covar.txt \
+                --restricted-rho-genetic 1 \
+                --restricted-rho-environment 0 \
+                --store-iter 10 \
+                --out ./tutorial/restricted_rhoG1_rhoE0
+```
+causes two sets of `.pkl` files to be stored (i.e. a file for every 10 iterations) and
+```
+python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                --covar ./tutorial/covar.txt \
+                --reinitialise ./tutorial/restricted_rhoG1_rhoE0.estimates.iter.350.bfgs.pkl \
+                --restricted-reinitialise ./tutorial/restricted_rhoG1_rhoE0.estimates0.iter.30.bfgs.pkl \
+                --out ./tutorial/restricted_rhoG1_rhoE0_reinitialised
+```
+reinitialises estimation for the null and alternative model from appropriate `.pkl` files. Notice that analogous to `--reinitialise`, the `--restricted-reinitialise` option cannot be combined with options such as `--restricted-environment-model` and `--restricted-rho-genetic`, as the `.pkl` already contain the full model specification.
+
+`mgreml` performs basic data management, e.g. in terms of figuring out for which individuals we have phenotypic as well as GRM data (and data on covariates, if applicable). In case `--covar-model` is used `mgreml` also tests if there are any covariates that affect no phenotype at all, and if so, excludes such covariates.
+
+`mgreml` also performs relatedness pruning using the `--rel-cutoff` option. E.g. `--rel-cutoff 0.025` selects a subset of individuals such that relatedness in the GRM is in excess of 0.025. `mgreml` follows the same algorithm for such pruning as [PLINK](https://www.cog-genomics.org/plink/). Importantly, `mgreml` does this pruning at such a stage, that sample size is maximised (e.g. we do not drop an individual in the GRM for whom we have phenotype data and keep an individual for whom we do not have any phenotype data).
+
+In general, `mgreml` simply tries to maximise sample size at each turn. E.g. if an individual has missing values only for a subset of the phenotypes, `mgreml` tries to preserve that observation, by introducing phenotype-individual-specific dummies (i.e. dummies that control for individual *i* having a missing value for trait *t*). Even when a covariate is missing, sometimes parts of that observation can still be salvaged (i.e. if the missing covariate does not affect all phenotypes according to `--covar-model`).
+
+However, introducing these dummies to control for gaps in the data can become computationally highly demanding. Controlling for fixed effect covariates has a computational complexity of the order *NT* <sup>2</sup> provided the number of unique covariates is of the order 1. However, if e.g. missingness in each trait is a proportion of sample size, then the total number of unique covariates to control for this missingness becomes of the order *NT*, and thereby the computational complexity of controling for this missingness of the order *N* <sup>2</sup> *T* <sup>3</sup>, which is prohibitively complex for large *N* and *T*.
+
+Therefore, `mgreml` has a `--drop-missings` option, whereby all individuals are dropped that have at least one missing phenotype or at least one missing covariate that is relevant (either because `--covar-model` has not been used, or because `--covar-model` indicate that covariate affects at least one trait).
+
+Finally, `mgreml` has a few advanced option regarding the estimation algorithm. First, `--newton` forces `mgreml` to use a Newton algorithm for solving the optimisation problem instead of BFGS. Although in theory this approach requires fewer iterations that BFGS, we strongly recommend sticking to BFGS: BFGS iterations are faster and BFGS is numerically much more stable, especially for large *T*. In addition, `mgreml` deems the model to have converged if the length, divided by the number of traits, of the gradient vector of the log-likelihoods per observation is below 10<sup>-5</sup>. The option `--grad-tol` can be used to specify a different treshold. We do recommend deviating from 10<sup>-5</sup> by more than one order of magnitude. E.g. you could use `--grad-tol 5E-5` or `--grad-tol 1e-6`. However, we de *NOT* recommend e.g. `--grad-tol 1E-9` as such a threshold requires a degree of convergence that is beyond numerical precision.
 
 ## Updating `mgreml`
 

@@ -2,6 +2,7 @@
 **.exe
 **.log**
 **.out
+**.pkl
 temp/**
 input/**
 output/**
