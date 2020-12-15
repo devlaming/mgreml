@@ -80,6 +80,8 @@ class MgremlReader:
         if self.bAnalyse:
             self.logger.info('1. READING IN ALL DATA, MODELS, AND INPUT OPTIONS')
             self.logger.info('READING OPTIONS')
+            # determine whether we will drop missings
+            self.DropMissings()
             # determine whether rel-cutoff has been used
             self.SetRelCutOff()
             # determine how many PCs to drop
@@ -171,6 +173,8 @@ class MgremlReader:
                             help = 'Optional flag followed by integer equal to zero, forcing all environment correlations in the restricted model to zero. This flag cannot be combined with --restricted-environment-model.')
         self.parser.add_argument('--ignore-pcs', metavar = '20 [0]', default = None, type = int, nargs = '+',
                             help = 'optional flag to specify how many leading principal components (PCs) to ignore (as method to control for population stratification) and how many trailing PCs to ignore (for computational efficiency); if just one non-negative integer is supplied this take as the number of leading PCs to ignore')
+        self.parser.add_argument('--drop-missings', action = 'store_true',
+                            help = 'optional flag to drop all observations from data with at least one missing phenotype or at least one missing covariate')
         self.parser.add_argument('--rel-cutoff', metavar = '0.025', default = None, type = float,
                             help = 'optional flag followed by a value above which overly related individuals are removed from the GRM using a greedy algorithm')
         self.parser.add_argument('--no-se', action = 'store_true',
@@ -510,7 +514,7 @@ class MgremlReader:
                 raise SyntaxError('--restricted-rho-environment cannot be combined with --restricted-reinitialise, as the .pkl file is used to set the restricted model')
             self.logger.info('Environment correlations in the null model all set to zero.')
             self.bNoRhoE0 = True
-
+    
     def DoBFGS(self):
         # if --newton option used
         if self.args.newton:
@@ -521,6 +525,16 @@ class MgremlReader:
         else:
             self.bBFGS = True
             self.logger.info('MGREML will use a BFGS algorithm for estimation')
+    
+    def DropMissings(self):
+        # if --drop-missings option used
+        if self.args.drop_missings:
+            # do so
+            self.bDropMissings = True
+            self.logger.info('Observations with any missing data will be dropped from analysis')
+        else:
+            self.bDropMissings = False
+            self.logger.info('MGREML will construct phenotype-specific dummies to control for missing data')
     
     def SetGradTol(self):
         if self.args.grad_tol is not None:

@@ -17,6 +17,7 @@ class MgremlData:
         dfBinXY = mReader.dfBinXY
         iDropLeadPCs = mReader.iDropLeadPCs
         iDropTrailPCs = mReader.iDropTrailPCs
+        bDropAnyMissing = mReader.bDropMissings
         self.logger.info('2. CLEANING YOUR DATA')
         # find out if we have covariates
         self.DetermineIfCovsAreGiven(dfX, dfBinXY)
@@ -28,8 +29,8 @@ class MgremlData:
         self.CheckDuplicatesAndRank(dfY, dfA, dfX, dfBinXY)
         # find overlapping individuals and sort data
         (dfY, dfA, dfX, dfBinXY) = self.FindOverlapAndSort(dfY, dfA, dfX, dfBinXY)
-        # drop observations where missingness affects all traits
-        (dfY, dfA, dfX) = self.DropMissings(dfY, dfA, dfX, dfBinXY)
+        # drop observations where missingness affects all traits or any trait
+        (dfY, dfA, dfX) = self.DropMissings(dfY, dfA, dfX, dfBinXY, bDropAnyMissing)
         # apply relatedness pruning if desired
         if mReader.bRelCutoff:
             (dfY, dfA, dfX) = self.PruneByRelatedness(dfY, dfA, dfX, mReader.dRelCutoff)
@@ -246,7 +247,7 @@ class MgremlData:
                     raise ValueError('your specification which covariates applies to which phenotype cannot be properly lined up with the covariates')
         return dfY, dfA, dfX, dfBinXY
     
-    def DropMissings(self, dfY, dfA, dfX, dfBinXY):
+    def DropMissings(self, dfY, dfA, dfX, dfBinXY, bDropAnyMissing):
         self.logger.info('DROPPING PROBLEMATIC INDIVIDUALS BECAUSE OF MISSING PHENOTYPES AND/OR COVARIATES')
         # if we have covariates
         if self.bCovs:
@@ -288,11 +289,19 @@ class MgremlData:
         # count the number of traits and observations in dfY
         iT = dfY.shape[1]
         iN = dfY.shape[0]
-        # count number of observations to be dropped i.e. with all phenos missing
-        iM = ((dfY.isnull() | dfY.isna()).sum(axis=1) == iT).sum()
-        self.logger.info('Dropping ' + str(iM) + ' out of ' + str(iN) + ' individuals from data for whom all phenotypes are now missing')
-        # keep only observations that have at least one pheno non-missing
-        dfY = dfY[((dfY.isnull() | dfY.isna()).sum(axis=1) < iT)]
+        # count number of observations to be dropped
+        if bDropAnyMissing:
+            # i.e. with any pheno missing
+            iM = ((dfY.isnull() | dfY.isna()).sum(axis=1) >= 1).sum()
+            self.logger.info('Dropping ' + str(iM) + ' out of ' + str(iN) + ' individuals from data for whom at least one phenotype is now missing')
+            # keep only observations that have no missing phenotypes
+            dfY = dfY[((dfY.isnull() | dfY.isna()).sum(axis=1) < 1)]
+        else:
+            # i.e. with all pheno missing
+            iM = ((dfY.isnull() | dfY.isna()).sum(axis=1) == iT).sum()
+            self.logger.info('Dropping ' + str(iM) + ' out of ' + str(iN) + ' individuals from data for whom all phenotypes are now missing')
+            # keep only observations that have at least one pheno non-missing
+            dfY = dfY[((dfY.isnull() | dfY.isna()).sum(axis=1) < iT)]
         # get list of individuals that remain
         miIDs = dfY.index
         # keep only those individuals in GRM
