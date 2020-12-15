@@ -245,9 +245,9 @@ generates, amongst others, the file `full.coeff.out`, which contains 110 estimat
 | Some pheno 102 | genetic factor 0 | 0.081 |
 | Some pheno 103 | genetic factor 0 | 0.203 |
 | ... | ... | ... |
-Some pheno 109 | environment factor 8 | 0.226 |
-Some pheno 110 | environment factor 8 | -0.415 |
-Some pheno 110 | environment factor 9 | 0.361 |
+Some pheno 109 | environment factor 8 | 0.227 |
+Some pheno 110 | environment factor 8 | -0.416 |
+Some pheno 110 | environment factor 9 | 0.360 |
 
 The file `full.coeff.var.out` contains a 110-by-110 matrix representing the sampling covariance matrix of those estimates. 
 
