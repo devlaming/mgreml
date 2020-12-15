@@ -321,7 +321,7 @@ Therefore, `mgreml` has a `--drop-missings` option, whereby all individuals are 
 
 Finally, `mgreml` has a few advanced option regarding the estimation algorithm. First, `--newton` forces `mgreml` to use a Newton algorithm for solving the optimisation problem instead of BFGS. Although in theory this approach requires fewer iterations that BFGS, we strongly recommend sticking to BFGS: BFGS iterations are faster and BFGS is numerically much more stable, especially for large *T*.
 
-In addition, `mgreml` deems the model to have converged if the length divided by the number of traits, of the gradient vector of the log-likelihoods per observation, is below 10<sup>-5</sup>. The option `--grad-tol` can be used to specify a different treshold. We do recommend deviating from 10<sup>-5</sup> by more than one order of magnitude. E.g. you could use `--grad-tol 5E-5` or `--grad-tol 1e-6`. However, we de *NOT* recommend e.g. `--grad-tol 1E-9` as such a threshold requires a degree of convergence that is beyond numerical precision.
+In addition, `mgreml` deems the model to have converged if the length divided by the number of traits, of the gradient vector of the log-likelihoods per observation, is below 10<sup>-5</sup>. The option `--grad-tol` can be used to specify a different treshold. We do **NOT** recommend deviating from 10<sup>-5</sup> by more than one order of magnitude. E.g. you could use `--grad-tol 5E-5` or `--grad-tol 1e-6`. However, we de **NOT** recommend e.g. `--grad-tol 1E-9`, as such a threshold requires a degree of convergence that is beyond numerical precision, nor do we commend e.g. `--grad-tol 0.01`, as this is simply too lenient; `mgreml` simply has not converged when that convergence condition is met.
 
 ## Updating `mgreml`
 
