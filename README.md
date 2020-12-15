@@ -360,7 +360,7 @@ Fast-forward
  ```
 which tells you which files were changed.
 
-If you have modified the `mgreml` source code yourself, `git pull` may fail with an error such as `Your local changes to the following files would be overwritten by merge`. 
+If you have modified the `mgreml` source code yourself, `git pull` may fail with an error such as `error: Your local changes [...] would be overwritten by merge`. 
 
 In case the Python dependencies have changed, you can update the `mgreml` environment with
 
