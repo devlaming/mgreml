@@ -76,7 +76,7 @@ The estimated heritabilities are as follows:
 | Some pheno 109 | 0.016323737 | 0.031897206 |
 | Some pheno 110 | 0.156523063 | 0.029363308 | 
 
-Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, printed below, we see that our estimates seem to be biased downwards.
+Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, printed below, we see that our estimates seem to be strongly downwards biased.
 
 | trait | heritability |
 | --- | --- |
@@ -98,7 +98,7 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --covar ./tutorial/covar.txt --out ./tutorial/covs
 ```
 
-If we compare the new estimates of heritability (see below) to the true values, taking the standard errors of the estimates into account, we see that any evidence of bias in our estimates is gone.
+If we compare the new estimates of heritability (see below) to the true values, taking the standard errors of the estimates into account, we see the massive downwards bias is gone.
 
 |  | heritability | standard error |
 | --- | --- | --- |
