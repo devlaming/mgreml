@@ -115,9 +115,9 @@ If we compare the new estimates of heritability (see below) to the true values, 
 
 Importantly, the file with covariates should **NEVER** contain principal components (PCs) from your genetic data. `mgreml` removes the effects of population stratification in the so-called canonical transformation. In essence, within this transformation `mgreml` automatically corrects for the 20 leading PCs your genetic data.
 
-For advanced users, the `--ignore-pcs` option can also be followed by a second number, indicating the number of trailing eigenvectors from your GRM to ignore. E.g. `--ignore-pcs 100 1000` controls for 100 leading eigenvectors from your GRM and 1000 trailing eigenvectors. By default no trailing eigenvectors are ignored. However, if the trailing eigenvalues are sufficiently small, a considerable number of trailing eigenvectors may be ignored, boosting CPU time without diminishing statistical efficiency of your analysis too much.
-
 In case you want to change the number of PCs you control for, do **NOT** add them manually your file with covariate data. Instead, use the `--ignore-pcs` option, followed by the total number of leading PCs you want to control for. E.g. `--ignore-pcs 20` is equivalent to the default setting, `--ignore-pcs 40` controls for the 40 leadings PCs, and `--ignore-pcs 0` controls for no PCs at all (not recommended).
+
+For advanced users, the `--ignore-pcs` option can also be followed by a second number, indicating the number of trailing eigenvectors from your GRM to ignore. E.g. `--ignore-pcs 100 1000` controls for 100 leading eigenvectors from your GRM and 1000 trailing eigenvectors. By default no trailing eigenvectors are ignored. However, if the trailing eigenvalues are sufficiently small, a considerable number of trailing eigenvectors may be ignored, boosting CPU time without diminishing statistical efficiency of your analysis too much.
 
 In addition to reporting the heritabilities and their standard errors, `mgreml` also automatically reports genetic and environment correlations, as well as their standard errors.
 
