@@ -113,7 +113,7 @@ If we compare the new estimates of heritability (see below) to the true values, 
 | Some pheno 109 | 0.165 | 0.029 |
 | Some pheno 110 | 0.742 | 0.019 |
 
-Importantly, the file with covariates should never contain principal components (PCs) from your genetic data. `mgreml` removes the effects of population stratification in the so-called canonical transformation. In essence, within this transformation `mgreml` automatically corrects for the 20 leading PCs your genetic data.
+Importantly, the file with covariates should **NEVER** contain principal components (PCs) from your genetic data. `mgreml` removes the effects of population stratification in the so-called canonical transformation. In essence, within this transformation `mgreml` automatically corrects for the 20 leading PCs your genetic data.
 
 In case you want to change the number of PCs you control for, do **NOT** add them manually your file with covariate data. Instead, use the `--ignore-pcs` option, followed by the total number of leading PCs you want to control for. E.g. `--ignore-pcs 20` is equivalent to the default setting, `--ignore-pcs 40` controls for the 40 leadings PCs, and `--ignore-pcs 0` controls for no PCs at all (not recommended).
 
