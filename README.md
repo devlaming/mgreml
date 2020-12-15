@@ -67,16 +67,16 @@ The estimated heritabilities are as follows:
 
 | trait | heritability | standard error |
 | --- | --- | --- |
-| Some pheno 101 | 0.052012142 | 0.029377156 |
-| Some pheno 102 | 0.001615452 | 0.031020903 |
-| Some pheno 103 | 0.015868615 | 0.029401385 |
-| Some pheno 104 | 0.013322251 | 0.029342585 | 
-| Some pheno 105 | 0.037358512 | 0.029760677 |
-| Some pheno 106 | 0.171444942 | 0.028955814 |
-| Some pheno 107 | 0.004249289 | 0.029571263 |
-| Some pheno 108 | 0.001346727 | 0.029682721 |
-| Some pheno 109 | 0.016323737 | 0.031897206 |
-| Some pheno 110 | 0.156523063 | 0.029363308 | 
+| Some pheno 101 | 0.052 | 0.029 |
+| Some pheno 102 | 0.002 | 0.031 |
+| Some pheno 103 | 0.016 | 0.029 |
+| Some pheno 104 | 0.013 | 0.029 |
+| Some pheno 105 | 0.037 | 0.030 |
+| Some pheno 106 | 0.171 | 0.029 |
+| Some pheno 107 | 0.004 | 0.030 |
+| Some pheno 108 | 0.001 | 0.030 |
+| Some pheno 109 | 0.016 | 0.032 |
+| Some pheno 110 | 0.157 | 0.029 |
 
 Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, printed below, we see that our estimates seem to be strongly downwards biased.
 
@@ -100,7 +100,7 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --covar ./tutorial/covar.txt --out ./tutorial/covs
 ```
 
-If we compare the new estimates of heritability (see below) to the true values, taking the standard errors of the estimates into account, we see the massive downwards bias is gone.
+If we compare the new estimates of heritability (see below) to the true values, taking the standard errors of the estimates into account, we see the strong downwards bias is gone.
 
 |  | heritability | standard error |
 | --- | --- | --- |
