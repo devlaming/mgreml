@@ -38,13 +38,12 @@ def main():
                 myEstimator = estimator.MgremlEstimator(myMgremlData)
             logger.info('5. PERFORMING MGREML ESIMATION')
             myEstimator.PerformEstimation()
-            logger.info('6. WRITING MGREML RESULTS')
             myMgremlWriter = writer.DataWriter(myEstimator, myMgremlData)
             myMgremlWriter.WriteResults()
             logger.info('MGREML HAS FINISHED.')
         else:
             logger.warning('No MGREML analysis will be carried out.')
-            logger.info('mgreml_prepare.py -h describes options')
+            logger.info('python ./mgreml -h shows all options')
     except Exception:
         # print the traceback
         logger.error(traceback.format_exc())

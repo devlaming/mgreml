@@ -31,6 +31,7 @@ class DataWriter:
         self.estimates = estimates
     
     def WriteResults(self):
+        self.logger.info('6. WRITING MGREML RESULTS')
         if not(self.estimates.IsConverged()):
             raise RuntimeError('Trying to write output results while estimates have not converged')
         if not(self.estimates.IsDone()):
