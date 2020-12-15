@@ -287,7 +287,7 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 
 Notice that as such `.pkl` files already implicitly contain the full model specification, the option `--reinitialise` cannot be combined with options such as `--genetic-model`, `--rho-environment` and so on.
 
-In case `--store-iter` is used when estimating a nested versus alternative model (i.e. in conjunction with one of the `--restricted-...` options), `--store-iter` stores two sets of `.pkl` files, namely one set with filenames containing the `.estimates.`, denoting the alternative model, and the other containing `.estimates0.`, denoting the nested model.
+In case `--store-iter` is used when estimating a nested versus alternative model (i.e. in conjunction with one of the `--restricted-...` options), `--store-iter` stores two sets of `.pkl` files, namely one set with filenames containing `.estimates.` (denoting the alternative model) and the other containing `.estimates0.` (denoting the nested model).
 
 `.pkl` files can also be used to reinitialise a restricted model, using the `--reinitialise-restricted` option. E.g. the command
 
