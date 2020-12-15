@@ -33,13 +33,15 @@ Now, having cloned the `mgreml` repository, the main directory should contain a 
 
 Let's first inspect the `pheno.txt` file. This file contains data in tab-separated format on ten phenotypes observed in a set of 5,000 individuals. The first few columns and rows of this file look as follows:
 
-|FID | IID | Some pheno 101 | Some pheno 102 | Some pheno 103 | ... |
-| --- | --- | --- | --- | --- | --- |
-| FID 1 | IID 5001 | -2.0716069263263246 | -3.6759090311303346 | -2.745781585038478 | ... |
-| FID 2 | IID 5002 | -1.4715012582461549 | -1.4667468932126324 | -1.4061486757142365 | ... | 
-| FID 3 | IID 5003 | -3.3915982459245417 | -7.2773361819872 | -0.5107286051290811 | ... |
-| FID 4 | IID 5004 | 3.236244118718508 | 1.3410024876651214 | 2.642661382564801 | ... |
-| ... | ... | ... | ... | ... | ... |
+| FID | IID | Some pheno 101 | Some pheno 102 | ...  | Some pheno 109 | Some pheno 110 |
+| --- | --- | --- | --- | --- | --- | --- |
+| FID 1 | IID 5001 | -2.072 | -3.676 | ...  | 4.641 | 7.931 |
+| FID 2 | IID 5002 | -1.472 | -1.467 | ...  | 6.098 | 3.570 |
+| FID 3 | IID 5003 | -3.392 | -7.277 | ...  | -0.832 | -5.750 |
+| ...  | ...  | ...  | ...  | ...  | ...  | ...  |
+| FID 4998 | IID 9998 | 2.575 | 2.740 | ...  | 3.328 | -6.982 |
+| FID 4999 | IID 9999 | -3.072 | -0.306 | ...  | 2.530 | -1.255 |
+| FID 5000 | IID 10000 | -4.220 | 1.117 | ...  | 2.806 | 3.159 |
 
 For the same set of individuals, you have a binary genomic-relatedness matrix (a.k.a. GRM) e.g. computed using [PLINK](https://www.cog-genomics.org/plink/) or [GCTA](https://cnsgenomics.com/software/gcta/). In this case, the set of binary GRM files comprises `data.grm.bin`, `data.grm.N.bin`, and `data.grm.id`. We refer to this set of binary GRM files by its prefix, i.e. `data`.
 
