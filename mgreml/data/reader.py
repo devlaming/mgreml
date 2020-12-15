@@ -21,12 +21,11 @@ MASTHEAD += "██                                                             
 MASTHEAD += "██                                                                    ██\n"
 MASTHEAD += "████████████████████████████████████████████████████████████████████████\n"
 MASTHEAD += "██                                                                    ██\n"
-MASTHEAD += "██  VERSION {V}                                                      ██\n".format(V=__version__)
+MASTHEAD += "██  BETA VERSION {V}                                                 ██\n".format(V=__version__)
 MASTHEAD += "██                                                                    ██\n"
-MASTHEAD += "██  (C) 2020 Ronald de Vlaming, Eric Slob, Philip Jansen,             ██\n"
-MASTHEAD += "██  Philipp Koellinger, Patrick Groenen, Niels Rietveld               ██\n"
+MASTHEAD += "██  (C) 2020 Ronald de Vlaming and Eric Slob                          ██\n"
 MASTHEAD += "██                                                                    ██\n"
-MASTHEAD += "██  Vrije Universiteit Amsterdam and Erasmus University Rotterdam     ██\n"
+MASTHEAD += "██  Vrije Universiteit Amsterdam and University of Cambridge          ██\n"
 MASTHEAD += "██  GNU General Public License v3                                     ██\n"
 MASTHEAD += "██                                                                    ██\n"
 MASTHEAD += "████████████████████████████████████████████████████████████████████████\n"
