@@ -174,7 +174,7 @@ The estimates in the resulting file, `custom_model.RhoG.out`, reveal that all ge
 | Some pheno 109 | -1 | 1 | -1 | ...  | 1 | 1 | 1 |
 | Some pheno 110 | -1 | 1 | -1 | ...  | 1 | 1 | 1 |
 
-Similarly, the estimate of environment correlations in `custom_model.RhoE`, reveal these are all estimated at zero, also as expected under this model.
+Similarly, the estimate of environment correlations in `custom_model.RhoE.out`, reveal these are all estimated at zero, also as expected under this model.
 
 Notice that in `mgreml`, specifying `--genetic-model` does not require you to also specify `--environment-model` (nor the other way around).
 
