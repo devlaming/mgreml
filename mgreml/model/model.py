@@ -110,8 +110,7 @@ class StructuralModel:
         self.lFactors = ['factor ' + str(x) for x in np.arange(self.iT)]
 
     def InitialiseV(self, mdData):
-        # get regularised phenotypic covariance matrix
-        mV = (1-StructuralModel.dLambdaInit)*np.cov(mdData.mYT) + StructuralModel.dLambdaInit*np.eye(self.iT)
+        mV = (1-StructuralModel.dLambdaInit)*mdData.mCovY + StructuralModel.dLambdaInit*np.diag(np.diag(mdData.mCovY))
         return mV
     
     def InitialiseIndicesSaturated(self):
@@ -283,8 +282,10 @@ class CombinedModel:
 
 class MgremlModel:
     
-    # set lowest eigenvalue permitted in VE matrix without aborting
-    dMinEigVal = 1E-6
+    # set lowest eigenvalue permitted in VE matrix without
+    # 1 aborting in case of Newton/BFGS step
+    # 2 returning dLogL = -infinity in case of golden section step
+    dMinEigVal = 1E-9
     
     def __init__(self, mdData, dfGenBinFY = None, dfEnvBinFY = None, bNested = False):
         self.logger = mdData.logger

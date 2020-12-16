@@ -446,8 +446,12 @@ class MgremlData:
                     raise ValueError('your covariates are rank deficient after the canonical transformation (i.e. perfectly multicollinear). Likely reason: you specified principal components (PCs) from your genetic data as fixed-effect covariates. MGREML already controls for population stratification in the canonical transformation. Please do not control for PCs manually as well. Rather, use --ignore-pcs INTEGER, to indicate for how many PCs you want to control via the canonical transformation.')
                 # compute log|X'X| and store
                 self.dLogDetXTX = (self.iT)*np.log(vThetaXTX).sum()
+                # compute OLS residual of Y w.r.t. X
+                mR = self.mY - (self.mX@(np.linalg.inv(mXTX)@(self.mXT@self.mY)))
             # if not same across traits
             else:
+                # initialise matrix of OLS residuals of Y w.r.t. X
+                mR = np.zeros((self.iN,self.iT))
                 # get indices of these covariates in terms of Z matrix
                 self.vIndCovs = np.array(np.where(np.array(self.mBinXY).ravel()==1)).ravel()
                 # count total number of covariates across traits
@@ -460,6 +464,8 @@ class MgremlData:
                     vBinaryX = self.mBinXY[it,:]
                     # find indices
                     vIndBinaryX = np.array(np.where(vBinaryX==1)).ravel()
+                    # compute OLS residual of Y w.r.t. X
+                    mR[:,it] = self.mY[:,it] - ((self.mX[:,vIndBinaryX])@(np.linalg.inv(mXTX[vIndBinaryX,:][:,vIndBinaryX])@((self.mXT[vIndBinaryX,:])@(self.mY[:,it]))))
                     # compute log|X'X| for given trait using EVD
                     (vThetaXTX,_) = np.linalg.eigh(mXTX[vIndBinaryX,:][:,vIndBinaryX])
                     # if any eigenvalue is too close to zero or negative
@@ -470,8 +476,13 @@ class MgremlData:
                     dLogDetXTX = dLogDetXTX + np.log(vThetaXTX).sum()
                 # store log|X'X|
                 self.dLogDetXTX = dLogDetXTX
+            # use residuals to initialise empirical covariance of Y
+            self.mCovY = (mR.T@mR)/self.iN
         # otherwise set log|X'X| to zero
         else:
+            # initialise empirical covariance of Y
+            self.mCovY = (self.mYT@self.mY)/self.iN
+            # set log|X'X| to zero
             self.dLogDetXTX = 0
         self.logger.info('Sample size after the canonical transformation is ' + str(self.iN)) 
         self.logger.info('Final sample size, N = ' + str(self.iN))
