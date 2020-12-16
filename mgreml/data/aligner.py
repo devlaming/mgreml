@@ -384,7 +384,7 @@ class MgremlData:
         mA = np.array(dfA)
         # re-scale phenotypes
         self.logger.info('Rescaling phenotypes for numerical stability')
-        # square root of something in between mean squared sum and variance; works best
+        # rescale by square root of something in between mean squared sum and variance; works best
         self.vScaleY = (0.5*(mY.var(axis=0) + (mY**2).mean(axis=0)))**0.5
         mY = np.multiply(mY,repmat(self.vScaleY**(-1),mY.shape[0],1))
         # if we have covariates
@@ -393,7 +393,7 @@ class MgremlData:
             mX = np.array(dfX)
             # re-scale covariates
             self.logger.info('Rescaling covariates for numerical stability')
-            # square root of something in between mean squared sum and variance; works best
+            # rescale by square root of something in between mean squared sum and variance; works best
             self.vScaleX = (0.5*(mX.var(axis=0) + (mX**2).mean(axis=0)))**0.5
             mX = np.multiply(mX,repmat(self.vScaleX**(-1),mX.shape[0],1))
             # if we do not have same covariates across traits
