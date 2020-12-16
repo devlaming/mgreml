@@ -384,7 +384,7 @@ class MgremlData:
         # re-scale phenotypes
         self.logger.info('Rescaling phenotypes for numerical stability')
         self.vScaleY = ((mY**2).mean(axis=0))**0.5
-        mY = np.multiply(mY,repmat(self.vScaleY**(-1),self.mY.shape[0],1))
+        mY = np.multiply(mY,repmat(self.vScaleY**(-1),mY.shape[0],1))
         # if we have covariates
         if self.bCovs:
             # also convert the set of covariates to numpy array
@@ -392,7 +392,7 @@ class MgremlData:
             # re-scale covariates
             self.logger.info('Rescaling covariates for numerical stability')
             self.vScaleX = ((mX**2).mean(axis=0))**0.5
-            mX = np.multiply(mX,repmat(self.vScaleX**(-1),self.mX.shape[0],1))
+            mX = np.multiply(mX,repmat(self.vScaleX**(-1),mX.shape[0],1))
             # if we do not have same covariates across traits
             if not(self.bSameCovs):
                 # also convert appropriate dataframe to numpy array
