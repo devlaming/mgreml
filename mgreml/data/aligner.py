@@ -38,7 +38,8 @@ class MgremlData:
         # contruct pheno-specific dummies to address remaining missingness
         (dfY, dfX, dfBinXY) = self.CreateDummies(dfY, dfX, dfBinXY)
         # store variable names
-        self.lCovs = dfX.columns.tolist()
+        if self.bCovs:
+            self.lCovs = dfX.columns.tolist()
         self.lPhenos = dfY.columns.tolist()
         # finalise Mgreml data using canonical transformation
         self.FinaliseData(dfY, dfA, dfX, dfBinXY, iDropLeadPCs, iDropTrailPCs)
@@ -326,7 +327,7 @@ class MgremlData:
         
     def CreateDummies(self, dfY, dfX, dfBinXY):
         # if there are any missings at all
-        if any(dfY.isnull() | dfY.isna()):
+        if ((dfY.isnull() | dfY.isna()).sum()[0] > 0):
             self.logger.info('CREATING PHENOTYPE-SPECIFIC DUMMY VARIABLES TO CONTROL FOR REMAINING MISSINGNESS')
             # if there are no covariates yet
             if not(self.bCovs):

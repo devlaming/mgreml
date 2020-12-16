@@ -335,6 +335,8 @@ class MgremlModel:
         if bCovs: # if we have covariates
             # get number of covariates
             iK = self.data.iK
+        else:
+            iK = 0
         # convert parameters to variance components
         (mVG,mCG,mVE,mCE) = self.model.GetVandC(vNew)
         # stabilize mVE and mVG
