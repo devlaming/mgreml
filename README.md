@@ -27,12 +27,21 @@ conda env create --file mgreml.yml
 conda activate mgreml
 ```
 
-Once the above has completed, you can now run:
+In case you cannot create a customised conda environment (e.g. because of insufficient user rights) or simply prefer to use Anaconda Navigator or `pip` to install packages e.g. in your base environment rather than a custom environment, please note that `mgreml` only requires Python 3.x with the packages `numpy`, `pandas`, `scipy`, and `tqdm` installed.
+
+Once the above has completed, you can now run
 
 ```
 python ./mgreml -h
 ```
-to print a list of all command-line options. If these commands fail something has gone wrong during the installation process.
+
+to print a list of all command-line options. If this command fails, something has gone wrong during installation.
+
+*Windows users*: in case the preceding command fails, try replacing slashes (i.e. `/`) in all your `mgreml` commands by backslashes (i.e. `\`), so e.g. try
+
+```
+python .\mgreml -h
+```
 
 ## Tutorial
 
@@ -87,7 +96,7 @@ The estimated heritabilities are as follows:
 | Some pheno 109 | 0.016 | 0.032 |
 | Some pheno 110 | 0.157 | 0.029 |
 
-Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, printed below, we see that our estimates seem to be strongly downwards biased.
+Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, printed below, we see that our estimates seem to be biased.
 
 | trait | heritability |
 | --- | --- |
@@ -109,7 +118,7 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --covar ./tutorial/covar.txt --out ./tutorial/covs
 ```
 
-If we compare the new estimates of heritability (see below) to the true values, taking the standard errors of the estimates into account, we see the strong downwards bias is gone.
+If we compare the new estimates of heritability (see below) to the true values, taking the standard errors of the estimates into account, we see the strong bias is gone.
 
 |  | heritability | standard error |
 | --- | --- | --- |
@@ -124,9 +133,9 @@ If we compare the new estimates of heritability (see below) to the true values, 
 | Some pheno 109 | 0.165 | 0.029 |
 | Some pheno 110 | 0.742 | 0.019 |
 
-Importantly, the file with covariates should **NEVER** contain principal components (PCs) from your genetic data. `mgreml` removes the effects of population stratification in the so-called canonical transformation. In essence, within this transformation `mgreml` automatically corrects for the 20 leading PCs your genetic data. This transformation causes a reduction of your sample size by 20 (that is, in the data after the canonical transformation, 20 transformed rows are ignored).
+Importantly, the file with covariates should **NEVER** contain principal components (PCs) from your genetic data. `mgreml` removes the effects of population stratification in the so-called canonical transformation. By default, `mgreml` removes the effects of 20 leading PCs from your genetic data. The effective sample size is reduced by 20 as a result of this correction for PCs.
 
-In case you want to change the number of PCs you control for, do **NOT** add them manually your file with covariate data. Instead, use the `--ignore-pcs` option, followed by the total number of leading PCs you want to control for. E.g. `--ignore-pcs 20` is equivalent to the default setting, `--ignore-pcs 40` controls for the 40 leadings PCs, and `--ignore-pcs 0` controls for no PCs at all (not recommended). In these three cases, the sample size is reduced by 20, 40, and zero respectively.
+In case you want to change the number of PCs you control for, do **NOT** add these PCs to your file with covariate data. Instead, use the `--ignore-pcs` option, followed by the total number of leading PCs you want to control for. E.g. `--ignore-pcs 20` is equivalent to the default setting, `--ignore-pcs 40` controls for the 40 leadings PCs, and `--ignore-pcs 0` controls for no PCs at all (not recommended). In these three cases, the sample size is reduced by 20, 40, and zero respectively.
 
 For advanced users, the `--ignore-pcs` option can also be followed by a second number, indicating the number of trailing eigenvectors from your GRM to ignore. E.g. `--ignore-pcs 100 1000` controls for 100 leading eigenvectors from your GRM and 1000 trailing eigenvectors. Doing this decreases the overall sample size by 100 + 1000 = 1100. By default no trailing eigenvectors are ignored. However, if the trailing eigenvalues are sufficiently small, a considerable number of trailing eigenvectors may be ignored, boosting CPU time (as the sample size becomes smaller) without diminishing statistical efficiency of your analysis too much (as effectively only less informative bits of data are ignored).
 
@@ -347,7 +356,7 @@ Therefore, `mgreml` has a `--drop-missings` option, whereby all individuals are 
 
 Note that `mgreml` has a few advanced options regarding the estimation algorithm. First, `--newton` forces `mgreml` to use a Newton algorithm for solving the optimisation problem instead of BFGS. Although in theory this approach requires fewer iterations that BFGS, we strongly recommend sticking to BFGS: BFGS iterations are faster and BFGS is numerically much more stable, especially for large *T*.
 
-In addition, `mgreml` considers the estimates to have converged if the length of the gradient vector of the log-likelihood per observation divided by the square root of the number of parameters, is below 10<sup>&minus;5</sup>. The option `--grad-tol` can be used to specify a different treshold. We do **NOT** recommend deviating from 10<sup>&minus;5</sup> by more than one order of magnitude. E.g. you could use `--grad-tol 5E-5` or `--grad-tol 1e-6`. However, we de **NOT** recommend e.g. `--grad-tol 1E-9`, as such a threshold requires a degree of convergence that is beyond numerical precision, nor do we commend e.g. `--grad-tol 0.01`, as this is too lenient; `mgreml` simply has not converged when the latter convergence criterion is met.
+In addition, `mgreml` considers the estimates to have converged if the length of the gradient vector of the log-likelihood per observation divided by the square root of the number of parameters, is below 10<sup>&minus;5</sup>. The option `--grad-tol` can be used to specify a different treshold. We do **NOT** recommend deviating from 10<sup>&minus;5</sup> by more than one order of magnitude. E.g. you could use `--grad-tol 5E-5` or `--grad-tol 1e-6`. However, we de **NOT** recommend e.g. `--grad-tol 1E-9`, as such a threshold requires a degree of convergence that is beyond numerical precision, nor do we commend e.g. `--grad-tol 0.01`, as this is too lenient; the optimisation procedure simply has not converged when the latter convergence criterion is met.
 
 Finally, input files following the options `--pheno`,  `--covar`,  `--covar-model`, `--genetic-model`, `--environment-model`, `--restricted-genetic-model`, `--restricted-environment-model` can be comma, tab, or space-separated. Just make sure to be consistent within each file. Also, (1) when your labels (e.g. phenotype labels or FID and IIDs) contain spaces, make sure the file is not space-separated and (2) when those labels contain commas, make sure the file is not comma-separated. As a final remark, note that the command `python ./mgreml -h` shows that these options all have modifiers, such as `nolabelpheno`, to indicate when headers (e.g. phenotype labels) are absent using (e.g. using the option `--pheno my_pheno_file.txt nolabelpheno`). However, we recommend always providing headers to `mgreml`, so everything is labelled in terms of input as well as output.
 
@@ -389,8 +398,8 @@ conda env update --file mgreml.yml
 
 Before contacting us, please try the following:
 
-1. Go over the tutorial in this `README.md` file; this tutorial is quite self-contained
-2. The method is described in detail in the supplementary information of the paper (citation below)
+1. Go over the tutorial in this `README.md` file
+2. Go over the method, described in detail in the supplementary information of the paper (citation below)
 
 If that doesn't work, you can get in touch with us via the [e.g. google group; to be decided](...).
 
