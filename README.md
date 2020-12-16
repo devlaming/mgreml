@@ -133,7 +133,11 @@ If we compare the new estimates of heritability (see below) to the true values, 
 | Some pheno 109 | 0.165 | 0.029 |
 | Some pheno 110 | 0.742 | 0.019 |
 
-Importantly, the file with covariates should **NEVER** contain principal components (PCs) from your genetic data. `mgreml` removes the effects of population stratification in the so-called canonical transformation. By default, `mgreml` removes the effects of 20 leading PCs from your genetic data. The effective sample size is reduced by 20 as a result of this correction for PCs.
+Notice upon inspection of `covar.txt` that it does include the intercept but does not include any principal components (PCs) from the genetic data.
+
+First, if you want to control for the intercept, it **MUST** be included in your covariate file, as `mgreml` assumes the intercept is absent by default (opposed e.g. to `gcta`).
+
+Second, the file with covariates should **NEVER** contain PCs from your genetic data, as `mgreml` already removes the effects of population stratification in the so-called canonical transformation. By default, `mgreml` removes the effects of 20 leading PCs from your genetic data. The effective sample size is reduced by 20 as a result of this correction for PCs.
 
 In case you want to change the number of PCs you control for, do **NOT** add these PCs to your file with covariate data. Instead, use the `--ignore-pcs` option, followed by the total number of leading PCs you want to control for. E.g. `--ignore-pcs 20` is equivalent to the default setting, `--ignore-pcs 40` controls for the 40 leadings PCs, and `--ignore-pcs 0` controls for no PCs at all (not recommended). In these three cases, the sample size is reduced by 20, 40, and zero respectively.
 
