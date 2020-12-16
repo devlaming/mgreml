@@ -347,7 +347,7 @@ class MgremlReader:
             dfData.index.names = MgremlReader.lLabelsFID_IID
             # set labels of trait/covariates to phenotype/covariate 1,
             # phenotype/covariate 2, etc.
-            dfData.columns = [sData + str(x) for x in range(0,iT)]
+            dfData.columns = [sData + ' ' + str(x) for x in range(0,iT)]
         # store data as appropriate attribute of MgremlReader instance
         if sType == MgremlReader.sPhe:
             self.dfY = dfData
@@ -365,11 +365,13 @@ class MgremlReader:
             sNoLabelHeader = 'nolabelcovar'
             sData = 'covariate model'
             sDescr = 'covariates'
+            sDescrShort = 'covariate'
             sOption = '--covar-model'
             lArgs = self.args.covar_model
         elif sType == MgremlReader.sGen:
             sNoLabelHeader = 'nolabelfactor'
             sDescr = 'genetic factors'
+            sDescrShort = 'factor'
             if bNull:
                 sData = 'restricted genetic model'
                 sOption = '--restricted-genetic-model'
@@ -381,6 +383,7 @@ class MgremlReader:
         elif sType == MgremlReader.sEnv:
             sNoLabelHeader = 'nolabelfactor'
             sDescr = 'environment factors'
+            sDescrShort = 'factor'
             if bNull:
                 sData = 'restricted environment model'
                 sOption = '--restricted-environment-model'
@@ -446,6 +449,12 @@ class MgremlReader:
         # get the number of traits and factors/covariates involved and report
         (iT,iK) = dfBin.shape
         self.logger.info('Found a ' + sData + ' on ' + str(iT) + ' phenotypes and ' + str(iK) + ' ' + sDescr + '.')
+        # if no index provided
+        if not(bIndex):
+            dfBin.index = ['phenotype ' + str(x) for x in range(0,iT)]
+        # if no header provided
+        if not(bHeader):
+            dfBin.columns = [sDescrShort + ' ' + str(x) for x in range(0,iK)]
         # store dataframe as appropriate attribute of MgremlReader
         if sType == MgremlReader.sCov:
             self.dfBinXY = dfBin
