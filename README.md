@@ -135,7 +135,7 @@ If we compare the new estimates of heritability (see below) to the true values, 
 
 Notice upon inspection of `covar.txt` that it does include the intercept but does not include any principal components (PCs) from the genetic data.
 
-First, if you want to control for the intercept, it **MUST** be included in your covariate file, as `mgreml` assumes the intercept is absent by default (opposed e.g. to `gcta`).
+First, if you want to control for the intercept, the intercept **MUST** be included as a separate covariate in your covariate file (i.e. as a vector of ones), as `mgreml` assumes the intercept is absent by default (opposed e.g. to `gcta`).
 
 Second, the file with covariates should **NEVER** contain PCs from your genetic data, as `mgreml` already removes the effects of population stratification in the so-called canonical transformation. By default, `mgreml` removes the effects of 20 leading PCs from your genetic data. The effective sample size is reduced by 20 as a result of this correction for PCs.
 
