@@ -601,7 +601,7 @@ class MgremlReader:
                     raise ValueError('--adjust-pcs should be followed by one or two non-negative integers')
                 self.iDropLeadPCs = self.args.adjust_pcs[0]
                 self.iDropTrailPCs = self.args.adjust_pcs[1]
-                self.logger.info('Adjusting for ' + str(self.iDropTrailPCs) + ' trailings eigenvectors from GRM to improve computational efficiency')
+                self.logger.info('Adjusting for ' + str(self.iDropTrailPCs) + ' trailing eigenvectors from GRM to improve computational efficiency')
             else:
                 raise SyntaxError('--adjust-pcs should be followed by one or two non-negative integers')
         else:

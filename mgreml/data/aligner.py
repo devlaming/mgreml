@@ -399,13 +399,28 @@ class MgremlData:
         (vD,mP) = np.linalg.eigh(mA)
         self.logger.info('Applying the canonical transformation to your data')
         self.logger.info('Sample size prior to the canonical transformation is ' + str(mY.shape[0]))
-        self.logger.info('Ignoring ' + str(iDropLeadPCs) + ' leading eigenvectors to control for population stratification')
+        self.logger.info('Adjusting for ' + str(iDropLeadPCs) + ' leading eigenvectors to control for population stratification')
         if iDropTrailPCs > 0:
-            self.logger.info('Ignoring ' + str(iDropTrailPCs) + ' trailing eigenvectors to improve computational efficiency')
-        # ignore trailing columns and leading columns from eigenvector matrix
-        mPT = (mP[:,iDropTrailPCs:-iDropLeadPCs]).T
-        # ignore trailing and leading values from eigenvalue vector
-        vD  = vD[iDropTrailPCs:-iDropLeadPCs]
+            self.logger.info('Adjusting for ' + str(iDropTrailPCs) + ' trailing eigenvectors to improve computational efficiency')
+        if iDropLeadPCs == 0:
+            if iDropTrailPCs == 0:
+                mPT = mP.T
+            else:
+                # ignore trailing columns and leading columns from eigenvector matrix
+                mPT = (mP[:,iDropTrailPCs:]).T
+                # ignore trailing and leading values from eigenvalue vector
+                vD = vD[iDropTrailPCs:]
+        else:
+            if iDropTrailPCs == 0:
+                # ignore trailing columns and leading columns from eigenvector matrix
+                mPT = (mP[:,:-iDropLeadPCs]).T
+                # ignore trailing and leading values from eigenvalue vector
+                vD = vD[:-iDropLeadPCs]
+            else:
+                # ignore trailing columns and leading columns from eigenvector matrix
+                mPT = (mP[:,iDropTrailPCs:-iDropLeadPCs]).T
+                # ignore trailing and leading values from eigenvalue vector
+                vD = vD[iDropTrailPCs:-iDropLeadPCs]
         # store eigenvalues and squared eigenvalues
         self.vD = vD
         self.vDSq = vD**2
@@ -433,7 +448,7 @@ class MgremlData:
                 # if any eigenvalue is too close to zero or negative
                 if any(vThetaXTX < abs(np.finfo(float).eps)):
                     # raise an error with a proper explanation of the likely cause
-                    raise ValueError('your covariates are rank deficient after the canonical transformation (i.e. perfectly multicollinear). Likely reason: you specified principal components (PCs) from your genetic data as fixed-effect covariates. MGREML already controls for population stratification in the canonical transformation. Please do not control for PCs manually as well. Rather, use --ignore-pcs INTEGER, to indicate for how many PCs you want to control via the canonical transformation.')
+                    raise ValueError('your covariates are rank deficient after the canonical transformation (i.e. perfectly multicollinear). Likely reason: you specified principal components (PCs) from your genetic data as fixed-effect covariates. MGREML already controls for population stratification in the canonical transformation. Please do not control for PCs manually as well. Rather, use --adjust-pcs INTEGER, to indicate for how many PCs you want to control via the canonical transformation.')
                 # compute log|X'X| and store
                 self.dLogDetXTX = (self.iT)*np.log(vThetaXTX).sum()
                 # compute OLS residual of Y w.r.t. X
@@ -461,7 +476,7 @@ class MgremlData:
                     # if any eigenvalue is too close to zero or negative
                     if any(vThetaXTX < abs(np.finfo(float).eps)):
                         # raise an error with a proper explanation of the likely cause
-                        raise ValueError('Your covariates are rank deficient after the canonical transformation (i.e. perfectly multicollinear). Likely reason: you specified principal components (PCs) from your genetic data as fixed-effect covariates. MGREML already controls for population stratification in the canonical transformation. Please do not control for PCs manually as well. Rather, use --ignore-pcs INTEGER, to indicate for how many PCs you want to control via the canonical transformation.')
+                        raise ValueError('Your covariates are rank deficient after the canonical transformation (i.e. perfectly multicollinear). Likely reason: you specified principal components (PCs) from your genetic data as fixed-effect covariates. MGREML already controls for population stratification in the canonical transformation. Please do not control for PCs manually as well. Rather, use --adjust-pcs INTEGER, to indicate for how many PCs you want to control via the canonical transformation.')
                     # compute log|X'X| and add to grand total
                     dLogDetXTX = dLogDetXTX + np.log(vThetaXTX).sum()
                 # store log|X'X|
