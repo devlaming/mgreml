@@ -151,7 +151,7 @@ class MgremlReader:
         self.parser.add_argument('--pheno', metavar = 'myphen.txt [nolabelpheno]', default = None, type = str, nargs = '+',
                             help = 'Name of your phenotype file. Possible to add the flags nolabelpheno e.g. --pheno mypheno.txt nolabelpheno; not recommended, please label your phenotypes! File should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per phenotype.')
         self.parser.add_argument('--covar', metavar = 'mycov.txt [nolabelcovar]', default = None, type = str, nargs = '+',
-                            help = 'Optional flag naming your covariate file. Possible to add the flags nolabelcovar e.g. --covar mycovar.txt nolabelcovar; not recommended, please label your covariates! File should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per covariate. WARNING: do not include principal components from your genetic data as covariates. MGREML automatically controls for 20 principal components using the canonical transformation. If you want to control for more or fewer principal components, use the --ignore-pcs option instead.')
+                            help = 'Optional flag naming your covariate file. Possible to add the flags nolabelcovar e.g. --covar mycovar.txt nolabelcovar; not recommended, please label your covariates! File should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per covariate. WARNING: do not include principal components from your genetic data as covariates. MGREML automatically controls for 20 principal components using the canonical transformation. If you want to control for more or fewer principal components, use the --adjust-pcs option instead.')
         self.parser.add_argument('--covar-model', metavar = 'mycovmodel.txt [nolabelpheno] [nolabelcovar]', default = None, type = str, nargs = '+',
                             help = 'Optional flag naming the file that specifies which covariates (columns) apply to which phenotypes (rows). Possible to add the flags nolabelpheno and/or nolabelcovar; not recommended, please label your phenotypes and covariates! If no file is specified, all covariates are assumed to apply to all traits.')
         groupGenetic.add_argument('--genetic-model', metavar = 'mygenmodel.txt [nolabelpheno] [nolabelfactor]', default = None, type = str, nargs = '+',
@@ -170,8 +170,8 @@ class MgremlReader:
                             help = 'Name of a file that specifies for a restricted model which environment factors (columns) affect which phenotypes (row). Possible to add the flags nolabelpheno and/or nolabelfactor; not recommended, always name things.')
         groupRestrictedEnvironment.add_argument('--restricted-rho-environment', choices = [0], default = None, type = int,
                             help = 'Optional flag followed by integer equal to zero, forcing all environment correlations in the restricted model to zero. This flag cannot be combined with --restricted-environment-model.')
-        self.parser.add_argument('--ignore-pcs', metavar = '20 [0]', default = None, type = int, nargs = '+',
-                            help = 'optional flag to specify how many leading principal components (PCs) to ignore (as method to control for population stratification) and how many trailing PCs to ignore (for computational efficiency); if just one non-negative integer is supplied this take as the number of leading PCs to ignore')
+        self.parser.add_argument('--adjust-pcs', metavar = '20 [0]', default = None, type = int, nargs = '+',
+                            help = 'optional flag to specify for how many leading principal components (PCs) to adjust (as method to control for population stratification) and for how many trailing PCs to adjust (for computational efficiency); if just one non-negative integer is specified this is taken as the number of leading PCs to adjust for')
         self.parser.add_argument('--drop-missings', action = 'store_true',
                             help = 'optional flag to drop all observations from data with at least one missing phenotype or at least one missing covariate')
         self.parser.add_argument('--rel-cutoff', metavar = '0.025', default = None, type = float,
@@ -590,24 +590,24 @@ class MgremlReader:
 
     def SetNumberOfPCs(self):
         # if no. of PCs specified
-        if self.args.ignore_pcs is not None:
-            if len(self.args.ignore_pcs)==1:
-                if (self.args.ignore_pcs[0] < 0):
-                    raise ValueError('--ignore-pcs should be followed by one or two non-negative integers')
-                self.iDropLeadPCs = self.args.ignore_pcs[0]
+        if self.args.adjust_pcs is not None:
+            if len(self.args.adjust_pcs)==1:
+                if (self.args.adjust_pcs[0] < 0):
+                    raise ValueError('--adjust-pcs should be followed by one or two non-negative integers')
+                self.iDropLeadPCs = self.args.adjust_pcs[0]
                 self.iDropTrailPCs = MgremlReader.iDropTrailPCsDefault
-            elif len(self.args.ignore_pcs)==2:
-                if (self.args.ignore_pcs[0] < 0) or (self.args.ignore_pcs[1] < 0):
-                    raise ValueError('--ignore-pcs should be followed by one or two non-negative integers')
-                self.iDropLeadPCs = self.args.ignore_pcs[0]
-                self.iDropTrailPCs = self.args.ignore_pcs[1]
-                self.logger.info('Ignoring ' + str(self.iDropTrailPCs) + ' trailings eigenvectors from GRM to improve computational efficiency')
+            elif len(self.args.adjust_pcs)==2:
+                if (self.args.adjust_pcs[0] < 0) or (self.args.adjust_pcs[1] < 0):
+                    raise ValueError('--adjust-pcs should be followed by one or two non-negative integers')
+                self.iDropLeadPCs = self.args.adjust_pcs[0]
+                self.iDropTrailPCs = self.args.adjust_pcs[1]
+                self.logger.info('Adjusting for ' + str(self.iDropTrailPCs) + ' trailings eigenvectors from GRM to improve computational efficiency')
             else:
-                raise SyntaxError('--ignore-pcs should be followed by one or two non-negative integers')
+                raise SyntaxError('--adjust-pcs should be followed by one or two non-negative integers')
         else:
             self.iDropLeadPCs = MgremlReader.iDropLeadPCsDefault
             self.iDropTrailPCs = MgremlReader.iDropTrailPCsDefault
-        self.logger.info('Ignoring ' + str(self.iDropLeadPCs) + ' leading eigenvectors from GRM to control for population stratification')
+        self.logger.info('Adjusting for ' + str(self.iDropLeadPCs) + ' leading eigenvectors from GRM to control for population stratification')
         
     def SetIterStoreFreq(self):
         if self.args.store_iter is not None:
