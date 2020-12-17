@@ -27,6 +27,8 @@ conda env create --file mgreml.yml
 conda activate mgreml
 ```
 
+(or `activate mgreml` instead of `conda activate mgreml` on some machines)
+
 In case you cannot create a customised conda environment (e.g. because of insufficient user rights) or simply prefer to use Anaconda Navigator or `pip` to install packages e.g. in your base environment rather than a custom environment, please note that `mgreml` only requires Python 3.x with the packages `numpy`, `pandas`, `scipy`, and `tqdm` installed.
 
 Once the above has completed, you can now run
