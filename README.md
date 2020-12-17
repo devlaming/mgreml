@@ -337,15 +337,15 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --covar ./tutorial/covar.txt \
                 --restricted-rho-genetic 1 \
                 --restricted-rho-environment 0 \
-                --store-iter 10 \
+                --store-iter 5 \
                 --out ./tutorial/restricted_rhoG1_rhoE0
 ```
-causes two sets of `.pkl` files to be stored (i.e. a file for every 10 iterations of both the restricted and alternative model) and
+causes two sets of `.pkl` files to be stored (i.e. a file for every 5 iterations of both the restricted and alternative model) and
 ```
 python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --covar ./tutorial/covar.txt \
-                --reinitialise ./tutorial/restricted_rhoG1_rhoE0.estimates.iter.250.bfgs.pkl \
-                --restricted-reinitialise ./tutorial/restricted_rhoG1_rhoE0.estimates0.iter.30.bfgs.pkl \
+                --reinitialise ./tutorial/restricted_rhoG1_rhoE0.estimates.iter.265.bfgs.pkl \
+                --restricted-reinitialise ./tutorial/restricted_rhoG1_rhoE0.estimates0.iter.25.bfgs.pkl \
                 --out ./tutorial/restricted_rhoG1_rhoE0_reinitialised
 ```
 reinitialises estimation for the null and alternative model from appropriate `.pkl` files. Notice that analogous to `--reinitialise`, the `--restricted-reinitialise` option cannot be combined with options such as `--restricted-environment-model` and `--restricted-rho-genetic`, as the `.pkl` file already contains the full model specification.
