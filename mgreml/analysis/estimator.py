@@ -75,6 +75,11 @@ class MgremlEstimator:
         # compute statistics
         self.ComputeStatistics()
         self.logger.info('Model estimation complete\n')
+    
+    def ComputeGradLength(self):
+        vIndT = self.mgreml_model.model.GetTraitIndices()
+        vGradRescaled = self.vGrad.ravel()*((np.diag(self.mgreml_model.data.mCovY)**0.5)[vIndT])
+        self.dGradLengthPerParam = np.sqrt(np.power(vGradRescaled,2).mean())
         
     def PerformBFGS(self):
         # determine whether we need info matrix at end
@@ -88,7 +93,7 @@ class MgremlEstimator:
         # compute logL and gradient for current estimates
         (self.dLogL, self.vGrad) = self.mgreml_model.ComputeLogLik(MgremlEstimator.bGradBFGS)
         # computer value of convergence criterion
-        self.dGradLengthPerParam = np.sqrt(np.power(self.vGrad.ravel(),2).mean())
+        self.ComputeGradLength()
         # assess convergence
         self.bNotConverged = self.dGradLengthPerParam > self.dGradTol
         # initialise approx. inverse Hessian as -I, so 1st step is gradient descent
@@ -121,7 +126,7 @@ class MgremlEstimator:
             # perform golden section to obtain new parameter estimates
             self.GoldenSection(vNew, MgremlEstimator.bGradBFGS)
             # computer value of convergence criterion
-            self.dGradLengthPerParam = np.sqrt(np.power(self.vGrad.ravel(),2).mean())
+            self.ComputeGradLength()
             # assess convergence
             self.bNotConverged = self.dGradLengthPerParam > self.dGradTol
             # if not converged: update inverse Hessian
@@ -195,7 +200,7 @@ class MgremlEstimator:
                 # compute the log likelihoodper observation etc.
                 (self.dLogL, self.vGrad, self.mInfo) = self.mgreml_model.ComputeLogLik(MgremlEstimator.bGradNewton,MgremlEstimator.bInfoNewton,bSilent = MgremlEstimator.bSilentNewton)
                 # computer value of convergence criterion
-                self.dGradLengthPerParam = np.sqrt(np.power(self.vGrad.ravel(),2).mean())
+                self.ComputeGradLength()
                 # assess convergence
                 self.bNotConverged = self.dGradLengthPerParam > self.dGradTol
                 # if results are stored in each iteration

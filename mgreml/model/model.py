@@ -197,6 +197,9 @@ class StructuralModel:
             
     def GetParamsAndIndices(self):
         return self.vIndT, self.vIndF, self.vParam
+        
+    def GetTraitIndices(self):
+        return self.vIndT
 
 class GeneticModel(StructuralModel):
     
@@ -262,6 +265,12 @@ class CombinedModel:
         vParam[self.iParamsG:]  = self.envmod.vParam
         return vParam
     
+    def GetTraitIndices(self):
+        vIndTG = self.genmod.GetTraitIndices()
+        vIndTE = self.envmod.GetTraitIndices()
+        vIndT = np.hstack((vIndTG.ravel(),vIndTE.ravel()))
+        return vIndT
+        
     def GetSplitParamsAndIndices(self):
         (vIndTG, vIndFG, vParamG) = self.genmod.GetParamsAndIndices()
         (vIndTE, vIndFE, vParamE) = self.envmod.GetParamsAndIndices()
