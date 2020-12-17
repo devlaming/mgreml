@@ -29,6 +29,9 @@ class DataWriter:
         self.bAllCoeffs = data.bAllCoeffs
         self.bCovs = data.bCovs
         self.estimates = estimates
+        self.vScaleY = data.vScaleY
+        if self.bCovs:
+            self.vScaleX = data.vScaleX
     
     def WriteResults(self):
         self.logger.info('6. WRITING MGREML RESULTS')
