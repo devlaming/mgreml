@@ -103,7 +103,8 @@ class MgremlReader:
             self.NeedToReinitialise(bNull = False)
             self.NeedToReinitialise(bNull = True)
             # determine whether any correlations are fixed to zero or one
-            self.FindFixedRho()
+            # or if genetic variances are fixed to zero
+            self.FindFixedRhoVar()
             self.logger.info('READING MODELS')
             # if covar model has been specified: read
             if self.args.covar_model is not None:
@@ -160,10 +161,14 @@ class MgremlReader:
                             help = 'Optional flag naming the file that specifies which genetic factors (columns) affect which phenotypes (rows). Possible to add the flags nolabelpheno and/or nolabelfactor; not recommended, please label your phenotypes and genetic factors!')
         groupGenetic.add_argument('--rho-genetic', choices = [0, 1], default = None, type = int,
                             help = 'Optional flag followed by integer equal to zero or one, forcing all genetic correlations to take on the specified value. This flag cannot be combined with --genetic-model.')
+        groupGenetic.add_argument('--no-var-genetic', action = 'store_true',
+                            help = 'Optional flag, forcing all genetic variances to be equal to zero. This flag cannot be combined with --genetic-model and/or --rho-genetic.')
         groupRestrictedGenetic.add_argument('--restricted-genetic-model', metavar = 'mygenmodel0.txt [nolabelpheno] [nolabelfactor]', default = None, type = str, nargs = '+',
                             help = 'Optional flag naming the file that specifies for a restricted model which genetic factors (columns) affect which phenotypes (row). Possible to add the flags nolabelpheno and/or nolabelfactor; not recommended, please label your phenotypes and genetic factors!')
         groupRestrictedGenetic.add_argument('--restricted-rho-genetic', choices = [0, 1], default = None, type = int,
                             help = 'Optional flag followed by integer equal to zero or one, forcing all genetic correlations in the restricted model to take on the specified value. This flag cannot be combined with --restricted-genetic-model.')
+        groupRestrictedGenetic.add_argument('--restricted-no-var-genetic', action = 'store_true',
+                            help = 'Optional flag, forcing all genetic variances in the restricted model to be equal to zero. This flag cannot be combined with --restricted-genetic-model and/or --restricted-rho-genetic.')
         groupEnvironment.add_argument('--environment-model', metavar = 'myenvmodel.txt [nolabelpheno] [nolabelfactor]', default = None, type = str, nargs = '+',
                             help = 'Name of a file that specifies which environment factors (columns) affect which phenotypes (rows). Possible to add the flags nolabelpheno and/or nolabelfactor; not recommended, always name things.')
         groupEnvironment.add_argument('--rho-environment', choices = [0], default = None, type = int,
@@ -480,13 +485,14 @@ class MgremlReader:
                     or (self.args.restricted_environment_model is not None) \
                     or (self.args.restricted_rho_genetic is not None) \
                     or (self.args.restricted_rho_environment is not None) \
+                    or (self.args.restricted_no_var_genetic) \
                     or (self.args.restricted_reinitialise is not None)
         if self.bNested:
             self.logger.info('You specified two models for comparison. Results will include a likelihood-ratio test comparing the restricted model (null hypothesis) to the main model (alternative hypothesis).')
         else:
             self.logger.info('You specified only the main model. No likelihood-ratio test will be performed.')
     
-    def FindFixedRho(self):
+    def FindFixedRhoVar(self):
         # set all booleans for fixed rhoG and rhoE to False
         self.bPerfectRhoG = False
         self.bNoRhoG = False
@@ -494,6 +500,9 @@ class MgremlReader:
         self.bNoRhoG0 = False
         self.bNoRhoE = False
         self.bNoRhoE0 = False
+        # set booleans for varG fixed to zero to False
+        self.bNoVarG = False
+        self.bNoVarG0 = False
         # assess whether rhoG is perfect or zero
         if self.args.rho_genetic is not None:
             if self.bReinitialise:
@@ -526,6 +535,18 @@ class MgremlReader:
                 raise SyntaxError('--restricted-rho-environment cannot be combined with --restricted-reinitialise, as the .pkl file is used to set the restricted model')
             self.logger.info('Environment correlations in the null model all set to zero.')
             self.bNoRhoE0 = True
+        # assess whether genetic variance is zero
+        if self.args.no_var_genetic:
+            if self.bReinitialise:
+                raise SyntaxError('--no-var-genetic cannot be combined with --reinitialise, as the .pkl file is used to set the model')
+            self.logger.info('Genetic variance in the main model set to zero.')
+            self.bNoVarG = True
+        # assess whether genetic variance is zero in the restricted model
+        if self.args.restricted_no_var_genetic:
+            if self.bReinitialise0:
+                raise SyntaxError('--restricted-no-var-genetic cannot be combined with --restricted-reinitialise, as the .pkl file is used to set the restricted model')
+            self.logger.info('Genetic variance in the null model set to zero.')
+            self.bNoVarG0 = True
     
     def DoBFGS(self):
         # if --newton option used
