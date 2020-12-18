@@ -77,8 +77,8 @@ class StructuralModel:
         self.lFactors = dfBinFY.columns.tolist()
         # read out structural model as numpy as array
         mB = np.array(dfBinFY)
-        # if rank falls below self.iF: abort
-        if np.linalg.matrix_rank(mB) < self.iF:
+        # if rank falls below self.iF and self.iF > 1 (i.e. not a model with only zeros) : abort
+        if (np.linalg.matrix_rank(mB) < self.iF) and (self.iF > 1):
             raise ValueError('Your structural model is rank deficient. Please change your specification.')
         # get trait and factor indices based on mB
         (self.vIndT,self.vIndF) = np.where(mB==1)
@@ -229,6 +229,13 @@ class EnvironmentModel(StructuralModel):
         # if less environment factors than traits: crash, as this is incompatible with MGREML
         if self.iF < self.iT:
             raise ValueError('You have specified less environmental factors than traits. This is not permitted in MGREML.')
+        # if one trait
+        if (self.iT == 1):
+            # if binary matrix specified
+            if dfBinFY is not None:
+                # if only element that can be free is not free
+                if (dfBinFY.iloc[0,0]==0):
+                    raise ValueError('You have specified a model for 1 trait with 1 environmental factor, with a coefficient that is restricted to zero. This is not permitted in MGREML.')
 
 class CombinedModel:
     
