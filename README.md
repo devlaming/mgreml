@@ -260,11 +260,34 @@ generates, amongst others, the file `full.coeff.out`, which contains 110 estimat
 | Some pheno 102 | genetic factor 0 | 0.081 |
 | Some pheno 103 | genetic factor 0 | 0.203 |
 | ... | ... | ... |
-Some pheno 109 | environment factor 8 | 0.227 |
-Some pheno 110 | environment factor 8 | -0.416 |
-Some pheno 110 | environment factor 9 | 0.360 |
+| Some pheno 109 | environment factor 8 | 0.227 |
+| Some pheno 110 | environment factor 8 | -0.416 |
+| Some pheno 110 | environment factor 9 | 0.360 |
 
 The file `full.coeff.var.out` contains a 110-by-110 matrix representing the sampling covariance matrix of those estimates. 
+
+Similarly, `mgreml` can also return the estimated variance components (again either based on some structural model, or just the saturated model), including the sampling covariance matrix of those estimated variance components. To get these results, use the `--variance-components` option. E.g. the command
+
+```
+python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                --covar ./tutorial/covar.txt \
+                --variance-components \
+                --out ./tutorial/vcs
+```
+
+generates, amongst others, the file `vcs.VCs.out`, which contains 110 estimated covariance components in this case, of which a few lines are shown below:
+
+| component | first trait | second trait | estimate |
+| --- | --- | --- | --- |
+| genetic covariance | Some pheno 101 | Some pheno 101 | 0.987 |
+| genetic covariance | Some pheno 101 | Some pheno 102 | 0.081 |
+| genetic covariance | Some pheno 101 | Some pheno 103 | 0.202 |
+| ...  | ...  | ...  | ...  |
+| environment covariance | Some pheno 109 | Some pheno 109 | 0.646 |
+| environment covariance | Some pheno 109 | Some pheno 110 | 0.164 |
+| environment covariance | Some pheno 110 | Some pheno 110 | 0.960 |
+
+The file `vcs.VCs.var.out` contains a 110-by-110 matrix representing the sampling covariance matrix of those estimates. 
 
 `mgreml` can also be used to specify two models at once, to compare them using a likelihood-ratio test, provided the null model is nested with respect to the alternative. E.g. one can use the following command to compare the saturated model to the previously considered model assuming perfect genetic correlations and no environment correlations at all:
 
