@@ -89,6 +89,8 @@ class MgremlReader:
             self.NeedSEs()
             # determine whether all coeffs are desired
             self.NeedAllCoeffs()
+            # determine whether all variance components are desired
+            self.NeedVarianceComponents()
             # determine whether we do BFGS or Newton
             self.DoBFGS()
             # set convergence threshold
@@ -180,6 +182,8 @@ class MgremlReader:
                             help = 'optional flag to indicate calculation of standard errors should be skipped (e.g. when only interested in a likelihood-ratio test for a nested model)')
         self.parser.add_argument('--all-coefficients', action = 'store_true', 
                             help = 'optional flag to report the all factor coefficients (i.e. from each factor to each trait) including the sampling covariance of these estimates')
+        self.parser.add_argument('--variance-components', action = 'store_true', 
+                            help = 'optional flag to report all estimated variance components and the sampling covariance of those estimates')
         self.parser.add_argument('--newton', action = 'store_true',
                             help = 'optional flag to perform Newton instead of BFGS; not recommended, unless the model is well-identified and the number of traits is small')
         self.parser.add_argument('--grad-tol', metavar = '1E-5', default = None, type = float,
@@ -240,7 +244,7 @@ class MgremlReader:
             header += "\nCall: \n"
             header += 'mgreml \\\n'
             options = ['--'+x.replace('_','-')+' '+str(opts[x])+' \\' for x in non_defaults]
-            header += '\n'.join(options).replace('True','').replace('False','').replace("', \'", ' ').replace("']", '').replace("['", '').replace('[', '').replace(']', '').replace(', ', ' ')
+            header += '\n'.join(options).replace('True','').replace('False','').replace("', \'", ' ').replace("']", '').replace("['", '').replace('[', '').replace(']', '').replace(', ', ' ').replace('  ', ' ')
             header = header[0:-1]+'\n'
             self.logger.info(header)
         except Exception:
@@ -570,9 +574,20 @@ class MgremlReader:
             self.bAllCoeffs = True
             self.logger.info('Your results will include estimates of all factor coefficients and their sampling covariance')
             if self.bSEs == False:
-                self.logger.warning('Warning: as the sampling covariance matrix will be calculated, computing the standard errors will add little computational burden. Are you sure you want to use the --no-se option?')
+                self.logger.warning('Warning: as the sampling covariance matrix of factor coefficients will be calculated, computing the standard errors will add little computational burden. Are you sure you want to use the --no-se option?')
         else:
             self.bAllCoeffs = False
+    
+    def NeedVarianceComponents(self):
+        # if --variance-components option used
+        if self.args.variance_components:
+            # report them
+            self.bVarComp = True
+            self.logger.info('Your results will include estimates of all variance components and their sampling covariance')
+            if self.bSEs == False:
+                self.logger.warning('Warning: as the sampling covariance matrix of variance components will be calculated, computing the standard errors will add little computational burden. Are you sure you want to use the --no-se option?')
+        else:
+            self.bVarComp = False
             
     def SetRelCutOff(self):
         # if --rel-cutoff used
