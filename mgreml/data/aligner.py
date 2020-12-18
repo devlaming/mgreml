@@ -78,6 +78,7 @@ class MgremlData:
         self.dGradTol = mReader.dGradTol
         self.bSEs = mReader.bSEs
         self.bAllCoeffs = mReader.bAllCoeffs
+        self.bVarComp = mReader.bVarComp
         self.bStoreIter = mReader.bStoreIter
         self.iStoreIterFreq = mReader.iStoreIterFreq
         self.bReinitialise = mReader.bReinitialise
