@@ -51,9 +51,11 @@ class MgremlData:
         self.bPerfectRhoG = mReader.bPerfectRhoG
         self.bNoRhoG = mReader.bNoRhoG
         self.bNoRhoE = mReader.bNoRhoE
+        self.bNoVarG = mReader.bNoVarG
         self.bPerfectRhoG0 = mReader.bPerfectRhoG0
         self.bNoRhoG0 = mReader.bNoRhoG0
         self.bNoRhoE0 = mReader.bNoRhoE0
+        self.bNoVarG0 = mReader.bNoVarG0
         self.dfGenBinFY = mReader.dfGenBinFY
         self.dfGenBinFY0 = mReader.dfGenBinFY0
         self.dfEnvBinFY = mReader.dfEnvBinFY
@@ -65,6 +67,8 @@ class MgremlData:
             self.dfGenBinFY = MgremlData.SetNoRho(self.lPhenos, MgremlData.sF)
         if self.bNoRhoE:
             self.dfEnvBinFY = MgremlData.SetNoRho(self.lPhenos, MgremlData.sF)
+        if self.bNoVarG:
+            self.dfGenBinFY = MgremlData.SetNoVar(self.lPhenos, MgremlData.sF)
         if self.bNested:
             if self.bPerfectRhoG0:
                 self.dfGenBinFY0 = MgremlData.SetPerfectRho(self.lPhenos, MgremlData.sF)
@@ -72,6 +76,8 @@ class MgremlData:
                 self.dfGenBinFY0 = MgremlData.SetNoRho(self.lPhenos, MgremlData.sF)
             if self.bNoRhoE0:
                 self.dfEnvBinFY0 = MgremlData.SetNoRho(self.lPhenos, MgremlData.sF)
+            if self.bNoVarG0:
+                self.dfGenBinFY0 = MgremlData.SetNoVar(self.lPhenos, MgremlData.sF)
         # store all the other stuff
         self.sPrefix = mReader.sPrefix
         self.bBFGS = mReader.bBFGS
@@ -98,6 +104,12 @@ class MgremlData:
         iT = len(lLabels)
         lFactors = [sPrefix + str(x) for x in range(0,iT)]
         dfBinFY = pd.DataFrame(data=np.eye(iT), index=pd.Index(lLabels), columns=pd.Index(lFactors))
+        return dfBinFY
+        
+    @staticmethod
+    def SetNoVar(lLabels, sPrefix):
+        lFactorName = [sPrefix + str(0)]
+        dfBinFY = pd.DataFrame(data=0, index=pd.Index(lLabels), columns=pd.Index(lFactorName))
         return dfBinFY
         
     def DetermineIfCovsAreGiven(self, dfX, dfBinXY):
