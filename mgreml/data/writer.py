@@ -17,6 +17,8 @@ class DataWriter:
     sGLSvar = 'GLS.var.'
     sCoeff = 'coeff.'
     sCoeffvar = 'coeff.var.'
+    sVCs = 'VCs.'
+    sVCsvar = 'VCs.var.'
     lHsqSE = ['heritability', 'standard error']
     lHsq = ['heritability']
     lBetaSE = ['beta hat', 'standard error']
@@ -26,6 +28,7 @@ class DataWriter:
         self.sPrefix = data.sPrefix
         self.bNested = data.bNested
         self.bSEs = data.bSEs
+        self.bVarComp = data.bVarComp
         self.bAllCoeffs = data.bAllCoeffs
         self.bCovs = data.bCovs
         self.estimates = estimates
@@ -48,6 +51,9 @@ class DataWriter:
         if self.bAllCoeffs:
             self.logger.info('WRITING ALL FACTOR COEFFICIENTS')
             self.WriteModelCoefficients()
+        if self.bVarComp:
+            self.logger.info('WRITING ALL VARIANCE COMPONENTS')
+            self.WriteVarianceComponents()
         if self.bNested:
             self.logger.info('WRITING RESULTS LIKELIHOOD-RATIO TEST')
             self.WriteLRT()
@@ -184,6 +190,57 @@ class DataWriter:
             dfParams.to_csv(sParams, sep='\t')
             dfSamplingV.to_csv(sSamplingV, sep='\t')
     
+    def WriteVarianceComponents(self):
+        if self.bNested:
+            # get labels of the phenotypes
+            indPhenosA = pd.Index(self.estimates.estimatorA.mgreml_model.data.lPhenos)
+            indPhenos0 = pd.Index(self.estimates.estimator0.mgreml_model.data.lPhenos)
+            # get labels of the variance components
+            indComponentsA = pd.Index(self.estimates.estimatorA.lComponents)
+            indComponents0 = pd.Index(self.estimates.estimator0.lComponents)
+            # for each combination of phenotypes, find labels
+            indPhenosXA = indPhenosA[self.estimates.estimatorA.mVCs[:,0].astype(int)]
+            indPhenosYA = indPhenosA[self.estimates.estimatorA.mVCs[:,1].astype(int)]
+            indPhenosX0 = indPhenos0[self.estimates.estimator0.mVCs[:,0].astype(int)]
+            indPhenosY0 = indPhenos0[self.estimates.estimator0.mVCs[:,1].astype(int)]
+            # find variance components
+            vVCsA = self.estimates.estimatorA.mVCs[:,2]
+            vVCs0 = self.estimates.estimator0.mVCs[:,2]
+            # construct dataframes
+            dfVCsA = pd.DataFrame(vVCsA, index=[indComponentsA,indPhenosXA,indPhenosYA])
+            dfVCs0 = pd.DataFrame(vVCs0, index=[indComponents0,indPhenosX0,indPhenosY0])
+            dfSamplingVarVCsA = pd.DataFrame(self.estimates.estimatorA.mSamplingVarVCs, index=[indComponentsA,indPhenosXA,indPhenosYA], columns=[indComponentsA,indPhenosXA,indPhenosYA])
+            dfSamplingVarVCs0 = pd.DataFrame(self.estimates.estimator0.mSamplingVarVCs, index=[indComponents0,indPhenosX0,indPhenosY0], columns=[indComponents0,indPhenosX0,indPhenosY0])
+            # set output names
+            sVCs0 = self.sPrefix + DataWriter.sVCs + DataWriter.sH0 + DataWriter.sExtension
+            sVCsA = self.sPrefix + DataWriter.sVCs + DataWriter.sHA + DataWriter.sExtension
+            sSamplingVarVCs0 = self.sPrefix + DataWriter.sVCsvar + DataWriter.sH0 + DataWriter.sExtension
+            sSamplingVarVCsA = self.sPrefix + DataWriter.sVCsvar + DataWriter.sHA + DataWriter.sExtension
+            # write dataframes
+            dfVCsA.to_csv(sVCsA, sep='\t')
+            dfVCs0.to_csv(sVCs0, sep='\t')
+            dfSamplingVarVCsA.to_csv(sSamplingVarVCsA, sep='\t')
+            dfSamplingVarVCs0.to_csv(sSamplingVarVCs0, sep='\t')
+        else:
+            # get labels of the phenotypes
+            indPhenos = pd.Index(self.estimates.mgreml_model.data.lPhenos)
+            # get labels of the variance components
+            indComponents = pd.Index(self.estimates.lComponents)
+            # for each combination of phenotypes, find labels
+            indPhenosX = indPhenos[self.estimates.mVCs[:,0].astype(int)]
+            indPhenosY = indPhenos[self.estimates.mVCs[:,1].astype(int)]
+            # find variance components
+            vVCs = self.estimates.mVCs[:,2]
+            # construct dataframes
+            dfVCs = pd.DataFrame(vVCs, index=[indComponents,indPhenosX,indPhenosY])
+            dfSamplingVarVCs = pd.DataFrame(self.estimates.mSamplingVarVCs, index=[indComponents,indPhenosX,indPhenosY], columns=[indComponents,indPhenosX,indPhenosY])
+            # set output names
+            sVCs = self.sPrefix + DataWriter.sVCs + DataWriter.sExtension
+            sSamplingVarVCs = self.sPrefix + DataWriter.sVCsvar + DataWriter.sExtension
+            # write dataframes
+            dfVCs.to_csv(sVCs, sep='\t')
+            dfSamplingVarVCs.to_csv(sSamplingVarVCs, sep='\t')
+        
     def WriteLogLik(self):
         if self.bNested:
             # set filename
