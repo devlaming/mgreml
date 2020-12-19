@@ -283,6 +283,8 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --out ./tutorial/novarG
 ```
 
+yields heritability estimates all equal to zero, as expected, in `novarG.HSq.out`.
+
 Regarding specific factor models, `mgreml` also allows users to force all genetic variances to zero using `--no-var-genetic` and doing the same in the restricted model using `--restricted-no-var-genetic`. The option `--no-var-genetic` cannot be combined with `--rho-genetic` and/or  `--genetic-model`. Similarly, `--restricted-no-var-genetic` cannot be combined with `--restricted-rho-genetic` and/or  `--restricted-genetic-model`.
 
 In case you have estimated a model, either according to some structural model e.g. using `--genetic-model`, or just the saturated model we started with, you can make `mgreml` report the factor coefficients (i.e. the effect of each factor on each trait) by using the `--all-coefficients` option. Using this option not only reports the estimated factor coefficients, but also the covariance matrix of those estimates. This covariance matrix may grow very large for large *T*.
