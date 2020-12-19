@@ -67,7 +67,7 @@ Let's first inspect the `pheno.txt` file. This file contains data in tab-separat
 | FID 4999 | IID 9999 | -3.072 | -0.306 | ...  | 2.530 | -1.255 |
 | FID 5000 | IID 10000 | -4.220 | 1.117 | ...  | 2.806 | 3.159 |
 
-Although `mgreml` can handle phenotype data without header, using a modifier that we discuss later, we recommend always including headers in your data, so the `mgreml` output refers e.g. to specific phenotype names rather than ambiguous indices such as `1`, `2`, etc.
+Although `mgreml` in principle can handle phenotype data without header (using a modifier that we discuss later on), we recommend always including headers in your data, so e.g. your phenotypes are labelled, allowing `mgreml` output to refer to specific phenotype names rather than ambiguous indices such as `1`, `2`, `3` etc.
 
 For the same set of individuals, you have a binary genomic-relatedness matrix (a.k.a. GRM) e.g. computed using [PLINK](https://www.cog-genomics.org/plink/) or [GCTA](https://cnsgenomics.com/software/gcta/). In this case, the set of binary GRM files comprises `data.grm.bin`, `data.grm.N.bin`, and `data.grm.id`. We refer to this set of binary GRM files by its prefix, i.e. `data`.
 
