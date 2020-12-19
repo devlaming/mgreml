@@ -51,7 +51,7 @@ python .\mgreml -h
 
 ## Tutorial
 
-In this short tutorial we will go over the basic functions of `mgreml`. First, go over the steps in Installation.
+In this tutorial we will go over the basic functions of `mgreml`. First, go over the steps in Installation.
 
 Now that you have cloned the `mgreml` repository, and `mgreml` is up-and-running, the main directory of `mgreml` should contain a subdirectory called `tutorial`. This directory in turn contains several files, including `pheno.txt` and `covar.txt`. Details on how this dataset has been generated using simulation can be found in the python script in `./tutorial/simulate.py`
 
@@ -444,7 +444,7 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --store-iter 5 \
                 --out ./tutorial/restricted_rhoG1_rhoE0
 ```
-causes two sets of `.pkl` files to be stored (i.e. a file for every 5 iterations of both the restricted and alternative model) and
+causes two sets of `.pkl` files to be stored (i.e. a file for every 5 iterations, for both the restricted and alternative model) and
 ```
 python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --covar ./tutorial/covar.txt \
@@ -460,7 +460,7 @@ reinitialises estimation for the null and alternative model from appropriate `.p
 
 In general, `mgreml` simply tries to maximise sample size at each turn. E.g. if an individual has missing values only for a subset of the phenotypes, `mgreml` keeps that individual in the data, by introducing phenotype-by-individual-specific dummies (i.e. dummies that control for individual *i* having a missing value for trait *t*). Even when a covariate is missing, sometimes parts of that observation can still be salvaged (i.e. if the missing covariate does not affect all phenotypes according to `--covar-model`).
 
-However, introducing these dummies to control for gaps in the data can become computationally highly demanding. Controlling for fixed effect covariates has a computational complexity of the order *NT* <sup>2</sup> provided the number of unique covariates is of the order 1. However, if e.g. missingness in each trait is a proportion of sample size, then the total number of unique covariates to control for this missingness becomes of the order *NT*, and thereby the computational complexity of controling for this missingness of the order *N* <sup>2</sup> *T* <sup>3</sup>, which is prohibitively complex for large *N* and *T*.
+However, introducing these dummies to control for gaps in the data can become computationally highly demanding. Controlling for fixed-effect covariates has a computational complexity of the order *NT*<sup> 2</sup> provided the number of unique covariates is of the order 1. However, if e.g. missingness in each trait is a proportion of sample size, then the total number of unique covariates to control for this missingness becomes of the order *NT*, and thereby the computational complexity of controling for this missingness of the order *N*<sup> 2</sup>*T*<sup> 3</sup>, which is prohibitively complex for large *N* and *T*.
 
 Therefore, `mgreml` has a `--drop-missings` option, whereby all individuals are dropped that have at least one missing phenotype and/or at least one missing covariate that is relevant (either because `--covar-model` has not been used, or because the file following `--covar-model` indicates the covariate with a missing value for a given individual affects at least one trait).
 
