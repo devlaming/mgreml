@@ -95,14 +95,14 @@ The estimated heritabilities are as follows:
 | --- | --- | --- |
 | Some pheno 101 | 0.052 | 0.029 |
 | Some pheno 102 | 0.002 | 0.031 |
-| Some pheno 103 | 0.016 | 0.029 |
+| Some pheno 103 | 0.017 | 0.029 |
 | Some pheno 104 | 0.013 | 0.029 |
-| Some pheno 105 | 0.037 | 0.030 |
+| Some pheno 105 | 0.038 | 0.030 |
 | Some pheno 106 | 0.171 | 0.029 |
-| Some pheno 107 | 0.004 | 0.030 |
+| Some pheno 107 | 0.005 | 0.030 |
 | Some pheno 108 | 0.001 | 0.030 |
 | Some pheno 109 | 0.016 | 0.032 |
-| Some pheno 110 | 0.157 | 0.029 |
+| Some pheno 110 | 0.156 | 0.029 |
 
 Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, printed below, we see that our estimates seem to be biased.
 
