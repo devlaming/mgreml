@@ -214,7 +214,7 @@ Now, `different_covs.GLS.est.out`, in the folder `tutorial`, only shows fixed-ef
 | Some pheno 101 | intercept | -1.413 | 0.041 |
 | Some pheno 102 | intercept | -1.777 | 0.031 |
 | Some pheno 102 | my covar 301 | -1.432 | 0.017 |
-| ...  | ...  | ...  | ...  |
+| ... | ... | ... | ... |
 | Some pheno 109 | intercept | 2.269 | 0.037 |
 | Some pheno 109 | my covar 308 | -1.282 | 0.014 |
 | Some pheno 110 | intercept | -0.397 | 0.057 |
