@@ -274,6 +274,8 @@ comprising 10 free genetic factor coefficients and 10 free environment factor co
 Estimates converged after 25 BFGS iterations 
 ```
 
+Notice that the option `--rho-genetic` cannot be combined with `--genetic-model` and, similarly, that `--rho-environment` cannot be combined with `--environment-model`.
+
 In addition, for the specific case of no genetic variance at all, `mgreml` also has the custom option `--no-var-genetic`. This enforces genetic variance to be absent for all traits in your data. E.g. the following command
 
 ```
@@ -285,16 +287,16 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 
 yields heritability estimates all equal to zero, as expected, in `novarG.HSq.out`.
 
-Regarding specific factor models, `mgreml` also allows users to force all genetic variances to zero using `--no-var-genetic` and doing the same in the restricted model using `--restricted-no-var-genetic`. The option `--no-var-genetic` cannot be combined with `--rho-genetic` and/or  `--genetic-model`. Similarly, `--restricted-no-var-genetic` cannot be combined with `--restricted-rho-genetic` and/or  `--restricted-genetic-model`.
+Notice that the option `--no-var-genetic` cannot be combined with `--rho-genetic` and/or  `--genetic-model`.
 
-In case you have estimated a model, either according to some structural model e.g. using `--genetic-model`, or just the saturated model we started with, you can make `mgreml` report the factor coefficients (i.e. the effect of each factor on each trait) by using the `--all-coefficients` option. Using this option not only reports the estimated factor coefficients, but also the covariance matrix of those estimates. This covariance matrix may grow very large for large *T*.
+In case you have estimated a model, either according to some structural model e.g. using `--genetic-model`, or just the saturated model we started with, you can make `mgreml` report the factor coefficients (i.e. the effect of each factor on each trait) by using the `--factor-coefficients` option. Using this option not only reports the estimated factor coefficients, but also the covariance matrix of those estimates. This covariance matrix may grow very large for large *T*.
 
 E.g. the command
 
 ```
 python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --covar ./tutorial/covar.txt \
-                --all-coefficients \
+                --factor-coefficients \
                 --out ./tutorial/full
 ```
 
@@ -374,6 +376,8 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --restricted-environment-model ./tutorial/env_model.txt \
                 --out ./tutorial/restricted_custom_model
 ```
+
+As before, `--restricted-no-var-genetic`, `--restricted-rho-genetic`, and/or  `--restricted-genetic-model` cannot be combined with one another. Similarly, `--restricted-rho-environment` and  `--restricted-environment-model` cannot be combined with each other.
 
 By default, `mgreml` will not store any intermediate results. However, using the `--store-iter` option, users can specify every how many iterations they want the current parameter estimates to be stored. E.g. `--store-iter 10` will cause `mgreml` to store estimates every ten iterations. The estimates will be stored in a so-called `.pkl` with a prefix a set by the `--out` option. This `.pkl` file contains the model specification as well as the estimates of that model in a given iteration.
 
