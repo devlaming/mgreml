@@ -1,6 +1,6 @@
 # MGREML (Multivariate GREML) `BETA VERSION 0.01`
 
-`mgreml` is a command-line tool for rapid estimation of SNP-based heritability and genetic correlations for (nearly) balanced data on many traits in a single analysis using a genomic-relatedness matrix (GRM) using Python 3.x. `mgreml` can easily handle estimation of the full genetic correlation matrix for up to 100 traits observed in 20,000 individuals. `mgreml` allows users to specify structural models and test hypotheses regarding nested models (e.g. no genetic correlations). In addition, the tool can handle a considerable amount of fixed-effect covariates and a very minor degree of phenotypic missingness. Finally, `mgreml` has options to return e.g. the full set of factor coefficients and their sampling covariance matrix.
+`mgreml` is a command-line tool for rapid estimation of SNP-based heritability and genetic correlations for (nearly) balanced data on many traits in a single analysis using a genomic-relatedness matrix (GRM) using Python 3.x. `mgreml` can easily handle estimation of the full genetic correlation matrix for up to 100 traits observed in 20,000 individuals. `mgreml` allows users to specify structural models and test hypotheses regarding nested models (e.g. no genetic correlations). In addition, the tool can handle a considerable amount of fixed-effect covariates and a very minor degree of phenotypic missingness. Finally, `mgreml` has options to return e.g. the full set of factor coefficients and the full covariance matrix of those estimates.
 
 Please note that this is still a beta version.
 
@@ -147,9 +147,9 @@ For advanced users, the `--adjust-pcs` option can also be followed by a second n
 
 In addition to reporting the heritabilities and their standard errors, `mgreml` also automatically reports genetic and environment correlations, as well as their standard errors.
 
-In case you do not care about standard errors, you can use the `--no-se` option. Especially for a large number of traits, computing the standard errors is computationally demanding, as this requires calculating the average information matrix, which has a computational complexity of the order *NT* <sup>4</sup>, where *T* denotes the number of traits and *N* the number of observations.
+In case you care neither about standard errors nor the covariance matrix of estimates, you can use the `--no-se` option. Especially for a large number of traits, computing the standard errors is computationally demanding, as this requires calculating the average information matrix, which has a computational complexity of the order *NT*<sup> 4</sup>, where *T* denotes the number of traits and *N* the number of observations.
 
-`mgreml` also automatically reports the fixed-effect estimates (a.k.a. GLS estimates), including the sampling covariance matrix of those estimates, and their standard errors.
+`mgreml` also automatically reports the fixed-effect estimates (a.k.a. GLS estimates), including the covariance matrix of those estimates, and their standard errors.
 
 Now, suppose each trait has a different set of covariates, `mgreml` can easily handle this using the `--covar-model` option. This option should be followed by a filename which contains a binary table, indicating which covariate affects which phenotype. E.g. the `tutorial` folder contains `covar_model.txt`, of which the content is shown below:
 
@@ -243,7 +243,7 @@ Estimates converged after 37 BFGS iterations
 
 Regarding specific factor models, `mgreml` also allows users to force all genetic variances to zero using `--no-var-genetic` and doing the same in the restricted model using `--restricted-no-var-genetic`. The option `--no-var-genetic` cannot be combined with `--rho-genetic` and/or  `--genetic-model`. Similarly, `--restricted-no-var-genetic` cannot be combined with `--restricted-rho-genetic` and/or  `--restricted-genetic-model`.
 
-In case you have estimated a model, either according to some structural model e.g. using `--genetic-model`, or just the saturated model we started with, you can make `mgreml` report the factor coefficients (i.e. the effect of each factor on each trait) by using the `--all-coefficients` option. Using this option not only reports the estimated factor coefficients, but also the sampling covariance matrix of those estimates. This sampling covariance matrix may grow very large for large *T*.
+In case you have estimated a model, either according to some structural model e.g. using `--genetic-model`, or just the saturated model we started with, you can make `mgreml` report the factor coefficients (i.e. the effect of each factor on each trait) by using the `--all-coefficients` option. Using this option not only reports the estimated factor coefficients, but also the covariance matrix of those estimates. This covariance matrix may grow very large for large *T*.
 
 E.g. the command
 
@@ -266,9 +266,9 @@ generates, amongst others, the file `full.coeff.out`, which contains 110 estimat
 | Some pheno 110 | environment factor 8 | -0.416 |
 | Some pheno 110 | environment factor 9 | 0.360 |
 
-The file `full.coeff.var.out` contains a 110-by-110 matrix representing the sampling covariance matrix of those estimates. 
+The file `full.coeff.var.out` contains a 110-by-110 matrix representing the covariance matrix of those estimates. 
 
-Similarly, `mgreml` can also return the estimated variance components (again either based on some structural model, or just the saturated model), including the sampling covariance matrix of those estimated variance components. To get these results, use the `--variance-components` option. E.g. the command
+Similarly, `mgreml` can also return the estimated variance components (again either based on some structural model, or just the saturated model), including the covariance matrix of those estimated variance components. To get these results, use the `--variance-components` option. E.g. the command
 
 ```
 python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
@@ -289,7 +289,7 @@ generates, amongst others, the file `vcs.VCs.out`, which contains 110 estimated 
 | environment covariance | Some pheno 109 | Some pheno 110 | 0.164 |
 | environment covariance | Some pheno 110 | Some pheno 110 | 0.960 |
 
-The file `vcs.VCs.var.out` contains a 110-by-110 matrix representing the sampling covariance matrix of those estimates. 
+The file `vcs.VCs.var.out` contains a 110-by-110 matrix representing the covariance matrix of those estimates. 
 
 `mgreml` can also be used to specify two models at once, to compare them using a likelihood-ratio test, provided the null model is nested with respect to the alternative. E.g. one can use the following command to compare the saturated model to the previously considered model assuming perfect genetic correlations and no environment correlations at all:
 
