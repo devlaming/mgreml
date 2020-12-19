@@ -21,7 +21,10 @@ class DataWriter:
     sVCsvar = 'VCs.var.'
     lHsqSE = ['heritability', 'standard error']
     lHsq = ['heritability']
+    lBeta = ['beta hat']
     lBetaSE = ['beta hat', 'standard error']
+    lEstimateSE = ['estimate', 'standard error']
+    lEstimate = ['estimate']
     
     def __init__(self, estimates, data):
         self.logger = data.logger
@@ -146,21 +149,35 @@ class DataWriter:
             # concatenate estimates
             vParamA = np.hstack((vParamGA, vParamEA))
             vParam0 = np.hstack((vParamG0, vParamE0))
-            # construct dataframes
-            dfParamsA = pd.DataFrame(vParamA, index=[lAllPhenosA,lAllFA])
-            dfParams0 = pd.DataFrame(vParam0, index=[lAllPhenos0,lAllF0])
-            dfSamplingVA = pd.DataFrame(self.estimates.estimatorA.mSamplingV, index=[lAllPhenosA,lAllFA], columns=[lAllPhenosA,lAllFA])
-            dfSamplingV0 = pd.DataFrame(self.estimates.estimator0.mSamplingV, index=[lAllPhenos0,lAllF0], columns=[lAllPhenos0,lAllF0])
-            # set output names
+            # if SEs are desired
+            if self.bSEs:
+                # compute standard errors
+                vSEA = np.diag(self.estimates.estimatorA.mSamplingV)**0.5
+                vSE0 = np.diag(self.estimates.estimator0.mSamplingV)**0.5
+                # concatenate estimates and SEs
+                mParamA = np.stack((vParamA,vSEA)).T
+                mParam0 = np.stack((vParam0,vSE0)).T
+                # construct dataframes
+                dfParamsA = pd.DataFrame(mParamA, index=[lAllPhenosA,lAllFA], columns=DataWriter.lEstimateSE)
+                dfParams0 = pd.DataFrame(mParam0, index=[lAllPhenos0,lAllF0], columns=DataWriter.lEstimateSE)
+                dfSamplingVA = pd.DataFrame(self.estimates.estimatorA.mSamplingV, index=[lAllPhenosA,lAllFA], columns=[lAllPhenosA,lAllFA])
+                dfSamplingV0 = pd.DataFrame(self.estimates.estimator0.mSamplingV, index=[lAllPhenos0,lAllF0], columns=[lAllPhenos0,lAllF0])
+                # set output names for covariance of coefficients
+                sSamplingV0 = self.sPrefix + DataWriter.sCoeffvar + DataWriter.sH0 + DataWriter.sExtension
+                sSamplingVA = self.sPrefix + DataWriter.sCoeffvar + DataWriter.sHA + DataWriter.sExtension
+                # write dataframes
+                dfSamplingVA.to_csv(sSamplingVA, sep='\t')
+                dfSamplingV0.to_csv(sSamplingV0, sep='\t')
+            else:
+                # construct dataframes
+                dfParamsA = pd.DataFrame(vParamA, index=[lAllPhenosA,lAllFA], columns=DataWriter.lEstimate)
+                dfParams0 = pd.DataFrame(vParam0, index=[lAllPhenos0,lAllF0], columns=DataWriter.lEstimate)
+            # set output names coefficients
             sParams0 = self.sPrefix + DataWriter.sCoeff + DataWriter.sH0 + DataWriter.sExtension
             sParamsA = self.sPrefix + DataWriter.sCoeff + DataWriter.sHA + DataWriter.sExtension
-            sSamplingV0 = self.sPrefix + DataWriter.sCoeffvar + DataWriter.sH0 + DataWriter.sExtension
-            sSamplingVA = self.sPrefix + DataWriter.sCoeffvar + DataWriter.sHA + DataWriter.sExtension
             # write dataframes
             dfParamsA.to_csv(sParamsA, sep='\t')
             dfParams0.to_csv(sParams0, sep='\t')
-            dfSamplingVA.to_csv(sSamplingVA, sep='\t')
-            dfSamplingV0.to_csv(sSamplingV0, sep='\t')
         else:
             # get all parameter estimates, with indices of traits and factors
             (vIndTG, vIndFG, vParamG, vIndTE, vIndFE, vParamE) = self.estimates.mgreml_model.model.GetSplitParamsAndIndices()
@@ -180,15 +197,26 @@ class DataWriter:
             lAllF.extend(indAllFE.to_list())
             # concatenate estimates
             vParam = np.hstack((vParamG, vParamE))
-            # construct dataframes
-            dfParams = pd.DataFrame(vParam, index=[lAllPhenos,lAllF])
-            dfSamplingV = pd.DataFrame(self.estimates.mSamplingV, index=[lAllPhenos,lAllF], columns=[lAllPhenos,lAllF])
-            # set output names
+            # if SEs are desired
+            if self.bSEs:
+                # compute standard errors
+                vSE = np.diag(self.estimates.mSamplingV)**0.5
+                # concatenate estimates and SEs
+                mParam = np.stack((vParam,vSE)).T
+                # construct dataframes
+                dfParams = pd.DataFrame(mParam, index=[lAllPhenos,lAllF], columns=DataWriter.lEstimateSE)
+                dfSamplingV = pd.DataFrame(self.estimates.mSamplingV, index=[lAllPhenos,lAllF], columns=[lAllPhenos,lAllF])
+                # set output name for covariance of coefficients
+                sSamplingV = self.sPrefix + DataWriter.sCoeffvar + DataWriter.sExtension
+                # write dataframe
+                dfSamplingV.to_csv(sSamplingV, sep='\t')
+            else:
+                # construct dataframe
+                dfParams = pd.DataFrame(vParam, index=[lAllPhenos,lAllF], columns=DataWriter.lEstimate)
+            # set output name coefficients
             sParams = self.sPrefix + DataWriter.sCoeff + DataWriter.sExtension
-            sSamplingV = self.sPrefix + DataWriter.sCoeffvar + DataWriter.sExtension
-            # write dataframes
+            # write dataframe
             dfParams.to_csv(sParams, sep='\t')
-            dfSamplingV.to_csv(sSamplingV, sep='\t')
     
     def WriteVarianceComponents(self):
         if self.bNested:
@@ -203,24 +231,32 @@ class DataWriter:
             indPhenosYA = indPhenosA[self.estimates.estimatorA.mVCs[:,1].astype(int)]
             indPhenosX0 = indPhenos0[self.estimates.estimator0.mVCs[:,0].astype(int)]
             indPhenosY0 = indPhenos0[self.estimates.estimator0.mVCs[:,1].astype(int)]
-            # find variance components
-            vVCsA = self.estimates.estimatorA.mVCs[:,2]
-            vVCs0 = self.estimates.estimator0.mVCs[:,2]
-            # construct dataframes
-            dfVCsA = pd.DataFrame(vVCsA, index=[indComponentsA,indPhenosXA,indPhenosYA])
-            dfVCs0 = pd.DataFrame(vVCs0, index=[indComponents0,indPhenosX0,indPhenosY0])
-            dfSamplingVarVCsA = pd.DataFrame(self.estimates.estimatorA.mSamplingVarVCs, index=[indComponentsA,indPhenosXA,indPhenosYA], columns=[indComponentsA,indPhenosXA,indPhenosYA])
-            dfSamplingVarVCs0 = pd.DataFrame(self.estimates.estimator0.mSamplingVarVCs, index=[indComponents0,indPhenosX0,indPhenosY0], columns=[indComponents0,indPhenosX0,indPhenosY0])
+            # retrieve variance components (and their SEs, if applicable)
+            mVCsA = self.estimates.estimatorA.mVCs[:,2:]
+            mVCs0 = self.estimates.estimator0.mVCs[:,2:]
+            # if SEs are desired
+            if self.bSEs:
+                # construct dataframes
+                dfVCsA = pd.DataFrame(mVCsA, index=[indComponentsA,indPhenosXA,indPhenosYA], columns=DataWriter.lEstimateSE)
+                dfVCs0 = pd.DataFrame(mVCs0, index=[indComponents0,indPhenosX0,indPhenosY0], columns=DataWriter.lEstimateSE)
+                dfSamplingVarVCsA = pd.DataFrame(self.estimates.estimatorA.mSamplingVarVCs, index=[indComponentsA,indPhenosXA,indPhenosYA], columns=[indComponentsA,indPhenosXA,indPhenosYA])
+                dfSamplingVarVCs0 = pd.DataFrame(self.estimates.estimator0.mSamplingVarVCs, index=[indComponents0,indPhenosX0,indPhenosY0], columns=[indComponents0,indPhenosX0,indPhenosY0])
+                # set output names
+                sSamplingVarVCs0 = self.sPrefix + DataWriter.sVCsvar + DataWriter.sH0 + DataWriter.sExtension
+                sSamplingVarVCsA = self.sPrefix + DataWriter.sVCsvar + DataWriter.sHA + DataWriter.sExtension
+                # write dataframes
+                dfSamplingVarVCsA.to_csv(sSamplingVarVCsA, sep='\t')
+                dfSamplingVarVCs0.to_csv(sSamplingVarVCs0, sep='\t')
+            else:
+                # construct dataframes
+                dfVCsA = pd.DataFrame(mVCsA, index=[indComponentsA,indPhenosXA,indPhenosYA], columns=DataWriter.lEstimate)
+                dfVCs0 = pd.DataFrame(mVCs0, index=[indComponents0,indPhenosX0,indPhenosY0], columns=DataWriter.lEstimate)
             # set output names
             sVCs0 = self.sPrefix + DataWriter.sVCs + DataWriter.sH0 + DataWriter.sExtension
             sVCsA = self.sPrefix + DataWriter.sVCs + DataWriter.sHA + DataWriter.sExtension
-            sSamplingVarVCs0 = self.sPrefix + DataWriter.sVCsvar + DataWriter.sH0 + DataWriter.sExtension
-            sSamplingVarVCsA = self.sPrefix + DataWriter.sVCsvar + DataWriter.sHA + DataWriter.sExtension
             # write dataframes
             dfVCsA.to_csv(sVCsA, sep='\t')
             dfVCs0.to_csv(sVCs0, sep='\t')
-            dfSamplingVarVCsA.to_csv(sSamplingVarVCsA, sep='\t')
-            dfSamplingVarVCs0.to_csv(sSamplingVarVCs0, sep='\t')
         else:
             # get labels of the phenotypes
             indPhenos = pd.Index(self.estimates.mgreml_model.data.lPhenos)
@@ -229,17 +265,24 @@ class DataWriter:
             # for each combination of phenotypes, find labels
             indPhenosX = indPhenos[self.estimates.mVCs[:,0].astype(int)]
             indPhenosY = indPhenos[self.estimates.mVCs[:,1].astype(int)]
-            # find variance components
-            vVCs = self.estimates.mVCs[:,2]
-            # construct dataframes
-            dfVCs = pd.DataFrame(vVCs, index=[indComponents,indPhenosX,indPhenosY])
-            dfSamplingVarVCs = pd.DataFrame(self.estimates.mSamplingVarVCs, index=[indComponents,indPhenosX,indPhenosY], columns=[indComponents,indPhenosX,indPhenosY])
-            # set output names
+            # retrieve variance components (and their SEs, if applicable)
+            mVCs = self.estimates.mVCs[:,2:]
+            # if SEs are desired
+            if self.bSEs:
+                # construct dataframes
+                dfVCs = pd.DataFrame(mVCs, index=[indComponents,indPhenosX,indPhenosY], columns=DataWriter.lEstimateSE)
+                dfSamplingVarVCs = pd.DataFrame(self.estimates.mSamplingVarVCs, index=[indComponents,indPhenosX,indPhenosY], columns=[indComponents,indPhenosX,indPhenosY])
+                # set output name
+                sSamplingVarVCs = self.sPrefix + DataWriter.sVCsvar + DataWriter.sExtension
+                # write dataframe
+                dfSamplingVarVCs.to_csv(sSamplingVarVCs, sep='\t')
+            else:
+                # construct dataframe
+                dfVCs = pd.DataFrame(mVCs, index=[indComponents,indPhenosX,indPhenosY], columns=DataWriter.lEstimate)
+            # set output name
             sVCs = self.sPrefix + DataWriter.sVCs + DataWriter.sExtension
-            sSamplingVarVCs = self.sPrefix + DataWriter.sVCsvar + DataWriter.sExtension
-            # write dataframes
+            # write dataframe
             dfVCs.to_csv(sVCs, sep='\t')
-            dfSamplingVarVCs.to_csv(sSamplingVarVCs, sep='\t')
         
     def WriteLogLik(self):
         if self.bNested:
@@ -298,26 +341,35 @@ class DataWriter:
             indAllCovs = indCovs[vIndC]
             # get GLS estimates
             vBetaGLS0 = self.estimates.estimator0.mgreml_model.vBetaGLS
-            mVarGLS0 = self.estimates.estimator0.mgreml_model.mVarGLS
-            vBetaGLS0SE = np.power(np.diag(mVarGLS0),0.5)
             vBetaGLSA = self.estimates.estimatorA.mgreml_model.vBetaGLS
-            mVarGLSA = self.estimates.estimatorA.mgreml_model.mVarGLS
-            vBetaGLSASE = np.power(np.diag(mVarGLSA),0.5)
-            # construct dataframes
-            dfBetaGLS0 = pd.DataFrame(np.stack((vBetaGLS0,vBetaGLS0SE)).T, index=[indAllPhenos,indAllCovs], columns=DataWriter.lBetaSE)
-            dfBetaGLSA = pd.DataFrame(np.stack((vBetaGLSA,vBetaGLSASE)).T, index=[indAllPhenos,indAllCovs], columns=DataWriter.lBetaSE)
-            dfVarGLS0 = pd.DataFrame(mVarGLS0, index=[indAllPhenos,indAllCovs], columns=[indAllPhenos,indAllCovs])
-            dfVarGLSA = pd.DataFrame(mVarGLSA, index=[indAllPhenos,indAllCovs], columns=[indAllPhenos,indAllCovs])
+            # if SEs are desired
+            if self.bSEs:
+                # compute SEs and covariance of estimates
+                mVarGLS0 = self.estimates.estimator0.mgreml_model.mVarGLS
+                mVarGLSA = self.estimates.estimatorA.mgreml_model.mVarGLS
+                vBetaGLS0SE = np.power(np.diag(mVarGLS0),0.5)
+                vBetaGLSASE = np.power(np.diag(mVarGLSA),0.5)
+                # construct dataframes
+                dfBetaGLS0 = pd.DataFrame(np.stack((vBetaGLS0,vBetaGLS0SE)).T, index=[indAllPhenos,indAllCovs], columns=DataWriter.lBetaSE)
+                dfBetaGLSA = pd.DataFrame(np.stack((vBetaGLSA,vBetaGLSASE)).T, index=[indAllPhenos,indAllCovs], columns=DataWriter.lBetaSE)
+                dfVarGLS0 = pd.DataFrame(mVarGLS0, index=[indAllPhenos,indAllCovs], columns=[indAllPhenos,indAllCovs])
+                dfVarGLSA = pd.DataFrame(mVarGLSA, index=[indAllPhenos,indAllCovs], columns=[indAllPhenos,indAllCovs])
+                # set output names
+                sVarGLS0 = self.sPrefix + DataWriter.sGLSvar + DataWriter.sH0 + DataWriter.sExtension
+                sVarGLSA = self.sPrefix + DataWriter.sGLSvar + DataWriter.sHA + DataWriter.sExtension
+                # write dataframes
+                dfVarGLS0.to_csv(sVarGLS0, sep='\t')
+                dfVarGLSA.to_csv(sVarGLSA, sep='\t')
+            else:
+                # construct dataframes
+                dfBetaGLS0 = pd.DataFrame(vBetaGLS0, index=[indAllPhenos,indAllCovs], columns=DataWriter.lBeta)
+                dfBetaGLSA = pd.DataFrame(vBetaGLSA, index=[indAllPhenos,indAllCovs], columns=DataWriter.lBeta)
             # set output names
             sBetaGLS0 = self.sPrefix + DataWriter.sGLSest + DataWriter.sH0 + DataWriter.sExtension
             sBetaGLSA = self.sPrefix + DataWriter.sGLSest + DataWriter.sHA + DataWriter.sExtension
-            sVarGLS0 = self.sPrefix + DataWriter.sGLSvar + DataWriter.sH0 + DataWriter.sExtension
-            sVarGLSA = self.sPrefix + DataWriter.sGLSvar + DataWriter.sHA + DataWriter.sExtension
             # write dataframes
             dfBetaGLS0.to_csv(sBetaGLS0, sep='\t')
             dfBetaGLSA.to_csv(sBetaGLSA, sep='\t')
-            dfVarGLS0.to_csv(sVarGLS0, sep='\t')
-            dfVarGLSA.to_csv(sVarGLSA, sep='\t')
         else:
             # throw error if no covariates in model
             if not(self.estimates.mgreml_model.data.bCovs):
@@ -339,17 +391,25 @@ class DataWriter:
             indAllCovs = indCovs[vIndC]
             # get GLS estimates
             vBetaGLS = self.estimates.mgreml_model.vBetaGLS
-            mVarGLS = self.estimates.mgreml_model.mVarGLS
-            vBetaGLSSE = np.power(np.diag(mVarGLS),0.5)
-            # construct dataframes
-            dfBetaGLS = pd.DataFrame(np.stack((vBetaGLS,vBetaGLSSE)).T, index=[indAllPhenos,indAllCovs], columns=DataWriter.lBetaSE)
-            dfVarGLS = pd.DataFrame(mVarGLS, index=[indAllPhenos,indAllCovs], columns=[indAllPhenos,indAllCovs])
-            # set output names
+            # if SEs are desired
+            if self.bSEs:
+                # compute SEs and covariance of estimates
+                mVarGLS = self.estimates.mgreml_model.mVarGLS
+                vBetaGLSSE = np.power(np.diag(mVarGLS),0.5)
+                # construct dataframes
+                dfBetaGLS = pd.DataFrame(np.stack((vBetaGLS,vBetaGLSSE)).T, index=[indAllPhenos,indAllCovs], columns=DataWriter.lBetaSE)
+                dfVarGLS = pd.DataFrame(mVarGLS, index=[indAllPhenos,indAllCovs], columns=[indAllPhenos,indAllCovs])
+                # set output name
+                sVarGLS = self.sPrefix + DataWriter.sGLSvar + DataWriter.sExtension
+                # write dataframe
+                dfVarGLS.to_csv(sVarGLS, sep='\t')
+            else:
+                # construct dataframe
+                dfBetaGLS = pd.DataFrame(vBetaGLS, index=[indAllPhenos,indAllCovs], columns=DataWriter.lBeta)
+            # set output name
             sBetaGLS = self.sPrefix + DataWriter.sGLSest + DataWriter.sExtension
-            sVarGLS = self.sPrefix + DataWriter.sGLSvar + DataWriter.sExtension
-            # write dataframes
+            # write dataframe
             dfBetaGLS.to_csv(sBetaGLS, sep='\t')
-            dfVarGLS.to_csv(sVarGLS, sep='\t')
     
     def WriteRho(self):
         if self.bNested:

@@ -184,11 +184,11 @@ class MgremlReader:
         self.parser.add_argument('--rel-cutoff', metavar = '0.025', default = None, type = float,
                             help = 'optional flag followed by a value above which overly related individuals are removed from the GRM using a greedy algorithm')
         self.parser.add_argument('--no-se', action = 'store_true',
-                            help = 'optional flag to indicate calculation of standard errors should be skipped (e.g. when only interested in a likelihood-ratio test for a nested model)')
-        self.parser.add_argument('--all-coefficients', action = 'store_true', 
-                            help = 'optional flag to report the all factor coefficients (i.e. from each factor to each trait) including the sampling covariance of these estimates')
+                            help = 'optional flag to indicate calculation of standard errors and covariance matrix of estimates should be skipped (e.g. when only interested in a likelihood-ratio test for a nested model)')
+        self.parser.add_argument('--factor-coefficients', action = 'store_true', 
+                            help = 'optional flag to report all estimated factor coefficients')
         self.parser.add_argument('--variance-components', action = 'store_true', 
-                            help = 'optional flag to report all estimated variance components and the sampling covariance of those estimates')
+                            help = 'optional flag to report all estimated variance components')
         self.parser.add_argument('--newton', action = 'store_true',
                             help = 'optional flag to perform Newton instead of BFGS; not recommended, unless the model is well-identified and the number of traits is small')
         self.parser.add_argument('--grad-tol', metavar = '1E-5', default = None, type = float,
@@ -583,19 +583,17 @@ class MgremlReader:
         if self.args.no_se:
             # report no SEs
             self.bSEs = False
-            self.logger.info('Your results will not include any standard errors.')
+            self.logger.info('Your results will not include standard errors.')
         else:
             self.bSEs = True
             self.logger.info('Your results will include standard errors.')
             
     def NeedAllCoeffs(self):
-        # if --all-coefficients option used
-        if self.args.all_coefficients:
+        # if --factor-coefficients option used
+        if self.args.factor_coefficients:
             # report them
             self.bAllCoeffs = True
-            self.logger.info('Your results will include estimates of all factor coefficients and their sampling covariance')
-            if self.bSEs == False:
-                self.logger.warning('Warning: as the sampling covariance matrix of factor coefficients will be calculated, computing the standard errors will add little computational burden. Are you sure you want to use the --no-se option?')
+            self.logger.info('Your results will include estimates of all factor coefficients')
         else:
             self.bAllCoeffs = False
     
@@ -604,9 +602,7 @@ class MgremlReader:
         if self.args.variance_components:
             # report them
             self.bVarComp = True
-            self.logger.info('Your results will include estimates of all variance components and their sampling covariance')
-            if self.bSEs == False:
-                self.logger.warning('Warning: as the sampling covariance matrix of variance components will be calculated, computing the standard errors will add little computational burden. Are you sure you want to use the --no-se option?')
+            self.logger.info('Your results will include estimates of all variance components')
         else:
             self.bVarComp = False
             

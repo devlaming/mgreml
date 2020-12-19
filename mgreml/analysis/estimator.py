@@ -85,8 +85,6 @@ class MgremlEstimator:
         self.dGradLengthPerParam = np.sqrt(np.power(vGradRescaled,2).mean())
         
     def PerformBFGS(self):
-        # determine whether we need info matrix at end
-        bInfoAtEnd = (self.bSEs | self.bAllCoeffs | self.bVarComp)
         # use two strikes out system to reset inverse hessian to -I,
         # if two subsequent iterations produce to little change
         bStrike1 = False
@@ -176,12 +174,12 @@ class MgremlEstimator:
                     # set both strike booleans to False
                     bStrike1 = False
                     bStrike2 = False
-        if bInfoAtEnd:
+        if self.bSEs:
             # print update
-            self.logger.info("BFGS CONVERGED. NOW COMPUTING SAMPLING COVARIANCE MATRIX OF BFGS ESTIMATES.")
-            self.logger.warning("WARNING! THIS MAY TAKE HOURS FOR LARGE SAMPLE SIZE AND LARGE NUMBER OF TRAITS!")
+            self.logger.info("BFGS converged. Now computing covariance matrix of estimates.")
+            self.logger.warning("Warning! This may take hours for a large sample size and a large number of traits")
             # compute information matrix
-            (self.dLogL, self.vGrad, self.mInfo) = self.mgreml_model.ComputeLogLik(MgremlEstimator.bGradBFGS, bInfoAtEnd)
+            (self.dLogL, self.vGrad, self.mInfo) = self.mgreml_model.ComputeLogLik(MgremlEstimator.bGradBFGS, self.bSEs)
             # scale information matrix back to normal scale
             self.mInfo = self.mInfo*self.mgreml_model.data.iN
         # scale dLogL and vGrad back to normal scale
@@ -229,7 +227,7 @@ class MgremlEstimator:
                             sFileName = self.sPrefix + 'estimates0.iter.' + str(self.iIter) + '.grad_descent.pkl'
                         else:
                             sFileName = self.sPrefix + 'estimates.iter.' + str(self.iIter) + '.grad_descent.pkl'
-                self.logger.warning("WARNING: Estimates did not change in previous iteration, while gradient is too large")
+                self.logger.warning("Warning: Estimates did not change in previous iteration, while gradient is too large")
                 self.logger.info("Carrying out one gradient-descent step")
                 self.logger.info('Gradient-descent iteration  ' + str(self.iIter) + ': log-likelihood per observation = ' + str(self.dLogL) + ', length of gradient per parameter = ' + str(self.dGradLengthPerParam))
             # if results are stored in each iteration
@@ -354,11 +352,11 @@ class MgremlEstimator:
         bWarning = iDropped > 0
         if bWarning:
             # print warning
-            self.logger.warning('WARNING! ' + str(iDropped) + ' eigenvalues ignored in pseudo inverse of matrix')
+            self.logger.warning('Warning! ' + str(iDropped) + ' eigenvalues ignored in pseudo inverse of matrix')
             self.logger.info('Probably this is related to the AI matrix')
             self.logger.info('Phenotypes may be multicollinear or the current set of estimates may be poor')
             self.logger.info('Pay attention to whether this message persists up until the last iteration;')
-            self.logger.info('If so, be very cautious in interpreting sampling variance matrix and standard errors of estimates!')
+            self.logger.info('If so, be very cautious in interpreting standard errors and covariance matrix of estimates!')
         # set the eigenvalues of the pseudo inverse equal to eigenvalues of inverse
         vDinv = 1/vD
         # except for problematic ones; set those eigenvalues in inverse equal to zero
@@ -397,25 +395,13 @@ class MgremlEstimator:
         # compute correlations
         self.mRhoG = np.multiply(mVG,mOneOverSqrtVG)
         self.mRhoE = np.multiply(mVE,mOneOverSqrtVE)
-        if self.bSEs or self.bAllCoeffs or self.bVarComp:
+        if self.bSEs:
             # set lowest eigenvalue permitted in info matrix per N to 1E-18
             dMinEigValPerN = 1E-18
             # scale back to normal scale
             dMinEigVal = dMinEigValPerN*self.mgreml_model.data.iN
-            # if info matrix has not yet been computed: compute it
-            if not(isinstance(self.mInfo, np.ndarray)):
-                self.logger.info("COMPUTING SAMPLING COVARIANCE MATRIX OF ESTIMATES.")
-                self.logger.warning("WARNING! THIS MAY TAKE HOURS FOR LARGE SAMPLE SIZE AND LARGE NUMBER OF TRAITS!")
-                # compute information matrix
-                (self.dLogL, self.vGrad, self.mInfo) = self.mgreml_model.ComputeLogLik(MgremlEstimator.bGradNewton, MgremlEstimator.bInfoNewton)
-                # scale dLogL, vGrad and information matrix back to normal scale
-                self.mInfo = self.mInfo*self.mgreml_model.data.iN
-                self.dLogL = self.dLogL*self.mgreml_model.data.iN
-                self.vGrad = self.vGrad*self.mgreml_model.data.iN
             # invert the information matrix
             (self.mSamplingV,_) = self.PseudoInvertSymmetricMat(self.mInfo, dMinEigVal)
-        # if SEs are required
-        if self.bSEs:
             # get indices and parameters
             (vIndTG, vIndFG, vParamG, vIndTE, vIndFE, vParamE) = self.mgreml_model.model.GetSplitParamsAndIndices()
             # compute gradient of heritability w.r.t. each parameter
@@ -497,115 +483,138 @@ class MgremlEstimator:
         if self.bVarComp:
             # get indices and parameters
             (vIndTG, vIndFG, vParamG, vIndTE, vIndFE, vParamE) = self.mgreml_model.model.GetSplitParamsAndIndices()
-            # set matrix for sampling covariance of variance components
+            # compute how many VCs there are
             iSize = int(self.mgreml_model.data.iT*(self.mgreml_model.data.iT+1))
-            self.mSamplingVarVCs = np.zeros((iSize,iSize))
-            self.mVCs = np.zeros((iSize,3))
+            # set labels for genetic and environment components
             self.lComponents = ['genetic covariance'] * int(iSize/2) + ['environment covariance'] * int(iSize/2)
+            # if SEs are needed:
+            if self.bSEs:
+                # set matrices for covariance of variance components and VCs + SEs
+                self.mSamplingVarVCs = np.zeros((iSize,iSize))
+                self.mVCs = np.zeros((iSize,4))
+            else:
+                # set matrix for VCs
+                self.mVCs = np.zeros((iSize,3))
             # initialise row indices
             iRowG = 0
             iRowE = int(iSize/2)
-            # for each trait X1
+            # for each trait
             for i in range(0,self.mgreml_model.data.iT):
-                # find all parameter indices that correspond to current trait
-                vIndGX1 = np.array(np.where(vIndTG==i)).ravel()
-                vIndEX1 = np.array(np.where(vIndTE==i)).ravel()
-                # find all factors that affect X
-                vIndFGX1 = vIndFG[vIndGX1]
-                vIndFEX1 = vIndFE[vIndEX1]
-                # for each other trait Y1
+                # for each other trait
                 for j in range(i,self.mgreml_model.data.iT):
-                    # find all parameter indices that correspond to Y
-                    vIndGY1 = np.array(np.where(vIndTG==j)).ravel()
-                    vIndEY1 = np.array(np.where(vIndTE==j)).ravel()
-                    # find all factors that affect Y
-                    vIndFGY1 = vIndFG[vIndGY1]
-                    vIndFEY1 = vIndFE[vIndEY1]
-                    # for the factors affecting Y find corresponding parameters of X
-                    vGradGY1 = mCG[i,:][vIndFGY1]
-                    vGradEY1 = mCE[i,:][vIndFEY1]
-                    # for the factors affecting X find corresponding parameters of Y
-                    vGradGX1 = mCG[j,:][vIndFGX1]
-                    vGradEX1 = mCE[j,:][vIndFEX1]
-                    # store trait indices
+                    # store trait indices and variance components
                     self.mVCs[iRowG,0] = i
                     self.mVCs[iRowG,1] = j
                     self.mVCs[iRowG,2] = mVG[i,j]
                     self.mVCs[iRowE,0] = i
                     self.mVCs[iRowE,1] = j
                     self.mVCs[iRowE,2] = mVE[i,j]
-                    # initialise column indices
-                    iColG = iRowG
-                    iColE = iRowE
-                    # combined with each trait X2
-                    for k in range(i,self.mgreml_model.data.iT):
-                        # find all parameter indices that correspond to current trait
-                        vIndGX2 = np.array(np.where(vIndTG==k)).ravel()
-                        vIndEX2 = np.array(np.where(vIndTE==k)).ravel()
-                        # find all factors that affect X
-                        vIndFGX2 = vIndFG[vIndGX2]
-                        vIndFEX2 = vIndFE[vIndEX2]
-                        # combined with each other trait Y2
-                        for l in range(max(k,j),self.mgreml_model.data.iT):
-                            # find all parameter indices that correspond to Y
-                            vIndGY2 = np.array(np.where(vIndTG==l)).ravel()
-                            vIndEY2 = np.array(np.where(vIndTE==l)).ravel()
-                            # find all factors that affect Y
-                            vIndFGY2 = vIndFG[vIndGY2]
-                            vIndFEY2 = vIndFE[vIndEY2]
-                            # for the factors affecting Y find corresponding parameters of X
-                            vGradGY2 = mCG[k,:][vIndFGY2]
-                            vGradEY2 = mCE[k,:][vIndFEY2]
-                            # for the factors affecting X find corresponding parameters of Y
-                            vGradGX2 = mCG[l,:][vIndFGX2]
-                            vGradEX2 = mCE[l,:][vIndFEX2]
-                            # get relevant submatrices of sampling variance matrix
-                            mSamplingVGX1GX2 = self.mSamplingV[vIndGX1,:][:,vIndGX2]
-                            mSamplingVGX1GY2 = self.mSamplingV[vIndGX1,:][:,vIndGY2]
-                            mSamplingVGY1GX2 = self.mSamplingV[vIndGY1,:][:,vIndGX2]
-                            mSamplingVGY1GY2 = self.mSamplingV[vIndGY1,:][:,vIndGY2]
-                            mSamplingVEX1GX2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEX1,:][:,vIndGX2]
-                            mSamplingVEX1GY2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEX1,:][:,vIndGY2]
-                            mSamplingVEY1GX2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEY1,:][:,vIndGX2]
-                            mSamplingVEY1GY2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEY1,:][:,vIndGY2]
-                            mSamplingVGX1EX2 = self.mSamplingV[vIndGX1,:][:,self.mgreml_model.model.iParamsG+vIndEX2]
-                            mSamplingVGX1EY2 = self.mSamplingV[vIndGX1,:][:,self.mgreml_model.model.iParamsG+vIndEY2]
-                            mSamplingVGY1EX2 = self.mSamplingV[vIndGY1,:][:,self.mgreml_model.model.iParamsG+vIndEX2]
-                            mSamplingVGY1EY2 = self.mSamplingV[vIndGY1,:][:,self.mgreml_model.model.iParamsG+vIndEY2]
-                            mSamplingVEX1EX2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEX1,:][:,self.mgreml_model.model.iParamsG+vIndEX2]
-                            mSamplingVEX1EY2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEX1,:][:,self.mgreml_model.model.iParamsG+vIndEY2]
-                            mSamplingVEY1EX2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEY1,:][:,self.mgreml_model.model.iParamsG+vIndEX2]
-                            mSamplingVEY1EY2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEY1,:][:,self.mgreml_model.model.iParamsG+vIndEY2]
-                            # compute sampling covariances
-                            self.mSamplingVarVCs[iRowG,iColG] = \
-                                    np.matmul(vGradGX1,np.matmul(mSamplingVGX1GX2,vGradGX2.T)) + \
-                                    np.matmul(vGradGX1,np.matmul(mSamplingVGX1GY2,vGradGY2.T)) + \
-                                    np.matmul(vGradGY1,np.matmul(mSamplingVGY1GX2,vGradGX2.T)) + \
-                                    np.matmul(vGradGY1,np.matmul(mSamplingVGY1GY2,vGradGY2.T))
-                            self.mSamplingVarVCs[iColG,iRowG] = self.mSamplingVarVCs[iRowG,iColG]
-                            self.mSamplingVarVCs[iRowE,iColG] = \
-                                    np.matmul(vGradEX1,np.matmul(mSamplingVEX1GX2,vGradGX2.T)) + \
-                                    np.matmul(vGradEX1,np.matmul(mSamplingVEX1GY2,vGradGY2.T)) + \
-                                    np.matmul(vGradEY1,np.matmul(mSamplingVEY1GX2,vGradGX2.T)) + \
-                                    np.matmul(vGradEY1,np.matmul(mSamplingVEY1GY2,vGradGY2.T))
-                            self.mSamplingVarVCs[iColG,iRowE] = self.mSamplingVarVCs[iRowE,iColG]
-                            self.mSamplingVarVCs[iRowG,iColE] = \
-                                    np.matmul(vGradGX1,np.matmul(mSamplingVGX1EX2,vGradEX2.T)) + \
-                                    np.matmul(vGradGX1,np.matmul(mSamplingVGX1EY2,vGradEY2.T)) + \
-                                    np.matmul(vGradGY1,np.matmul(mSamplingVGY1EX2,vGradEX2.T)) + \
-                                    np.matmul(vGradGY1,np.matmul(mSamplingVGY1EY2,vGradEY2.T))
-                            self.mSamplingVarVCs[iColE,iRowG] = self.mSamplingVarVCs[iRowG,iColE]
-                            self.mSamplingVarVCs[iRowE,iColE] = \
-                                    np.matmul(vGradEX1,np.matmul(mSamplingVEX1EX2,vGradEX2.T)) + \
-                                    np.matmul(vGradEX1,np.matmul(mSamplingVEX1EY2,vGradEY2.T)) + \
-                                    np.matmul(vGradEY1,np.matmul(mSamplingVEY1EX2,vGradEX2.T)) + \
-                                    np.matmul(vGradEY1,np.matmul(mSamplingVEY1EY2,vGradEY2.T))
-                            self.mSamplingVarVCs[iColE,iRowE] = self.mSamplingVarVCs[iRowE,iColE]
-                            # update column indices
-                            iColG += 1
-                            iColE += 1
                     # update row indices
                     iRowG += 1
                     iRowE += 1
+            # if SEs are needed:
+            if self.bSEs:
+                # re-initialise row indices
+                iRowG = 0
+                iRowE = int(iSize/2)
+                # for each trait X1
+                for i in range(0,self.mgreml_model.data.iT):
+                    # find all parameter indices that correspond to X1
+                    vIndGX1 = np.array(np.where(vIndTG==i)).ravel()
+                    vIndEX1 = np.array(np.where(vIndTE==i)).ravel()
+                    # find all factors that affect X1
+                    vIndFGX1 = vIndFG[vIndGX1]
+                    vIndFEX1 = vIndFE[vIndEX1]
+                    # for each other trait Y1
+                    for j in range(i,self.mgreml_model.data.iT):
+                        # find all parameter indices that correspond to Y1
+                        vIndGY1 = np.array(np.where(vIndTG==j)).ravel()
+                        vIndEY1 = np.array(np.where(vIndTE==j)).ravel()
+                        # find all factors that affect Y1
+                        vIndFGY1 = vIndFG[vIndGY1]
+                        vIndFEY1 = vIndFE[vIndEY1]
+                        # for the factors affecting Y1 find corresponding parameters of X1
+                        vGradGY1 = mCG[i,:][vIndFGY1]
+                        vGradEY1 = mCE[i,:][vIndFEY1]
+                        # for the factors affecting X1 find corresponding parameters of Y1
+                        vGradGX1 = mCG[j,:][vIndFGX1]
+                        vGradEX1 = mCE[j,:][vIndFEX1]
+                        # initialise column indices
+                        iColG = iRowG
+                        iColE = iRowE
+                        # for each other other trait X2
+                        for k in range(i,self.mgreml_model.data.iT):
+                            # find all parameter indices that correspond to X2
+                            vIndGX2 = np.array(np.where(vIndTG==k)).ravel()
+                            vIndEX2 = np.array(np.where(vIndTE==k)).ravel()
+                            # find all factors that affect X2
+                            vIndFGX2 = vIndFG[vIndGX2]
+                            vIndFEX2 = vIndFE[vIndEX2]
+                            # for each other other other trait Y2
+                            for l in range(max(k,j),self.mgreml_model.data.iT):
+                                # find all parameter indices that correspond to Y2
+                                vIndGY2 = np.array(np.where(vIndTG==l)).ravel()
+                                vIndEY2 = np.array(np.where(vIndTE==l)).ravel()
+                                # find all factors that affect Y2
+                                vIndFGY2 = vIndFG[vIndGY2]
+                                vIndFEY2 = vIndFE[vIndEY2]
+                                # for the factors affecting Y2 find corresponding parameters of X2
+                                vGradGY2 = mCG[k,:][vIndFGY2]
+                                vGradEY2 = mCE[k,:][vIndFEY2]
+                                # for the factors affecting X2 find corresponding parameters of Y2
+                                vGradGX2 = mCG[l,:][vIndFGX2]
+                                vGradEX2 = mCE[l,:][vIndFEX2]
+                                # get relevant submatrices of covariance matrix
+                                mSamplingVGX1GX2 = self.mSamplingV[vIndGX1,:][:,vIndGX2]
+                                mSamplingVGX1GY2 = self.mSamplingV[vIndGX1,:][:,vIndGY2]
+                                mSamplingVGY1GX2 = self.mSamplingV[vIndGY1,:][:,vIndGX2]
+                                mSamplingVGY1GY2 = self.mSamplingV[vIndGY1,:][:,vIndGY2]
+                                mSamplingVEX1GX2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEX1,:][:,vIndGX2]
+                                mSamplingVEX1GY2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEX1,:][:,vIndGY2]
+                                mSamplingVEY1GX2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEY1,:][:,vIndGX2]
+                                mSamplingVEY1GY2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEY1,:][:,vIndGY2]
+                                mSamplingVGX1EX2 = self.mSamplingV[vIndGX1,:][:,self.mgreml_model.model.iParamsG+vIndEX2]
+                                mSamplingVGX1EY2 = self.mSamplingV[vIndGX1,:][:,self.mgreml_model.model.iParamsG+vIndEY2]
+                                mSamplingVGY1EX2 = self.mSamplingV[vIndGY1,:][:,self.mgreml_model.model.iParamsG+vIndEX2]
+                                mSamplingVGY1EY2 = self.mSamplingV[vIndGY1,:][:,self.mgreml_model.model.iParamsG+vIndEY2]
+                                mSamplingVEX1EX2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEX1,:][:,self.mgreml_model.model.iParamsG+vIndEX2]
+                                mSamplingVEX1EY2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEX1,:][:,self.mgreml_model.model.iParamsG+vIndEY2]
+                                mSamplingVEY1EX2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEY1,:][:,self.mgreml_model.model.iParamsG+vIndEX2]
+                                mSamplingVEY1EY2 = self.mSamplingV[self.mgreml_model.model.iParamsG+vIndEY1,:][:,self.mgreml_model.model.iParamsG+vIndEY2]
+                                # compute sampling covariances
+                                self.mSamplingVarVCs[iRowG,iColG] = \
+                                        np.matmul(vGradGX1,np.matmul(mSamplingVGX1GX2,vGradGX2.T)) + \
+                                        np.matmul(vGradGX1,np.matmul(mSamplingVGX1GY2,vGradGY2.T)) + \
+                                        np.matmul(vGradGY1,np.matmul(mSamplingVGY1GX2,vGradGX2.T)) + \
+                                        np.matmul(vGradGY1,np.matmul(mSamplingVGY1GY2,vGradGY2.T))
+                                self.mSamplingVarVCs[iColG,iRowG] = self.mSamplingVarVCs[iRowG,iColG]
+                                self.mSamplingVarVCs[iRowE,iColG] = \
+                                        np.matmul(vGradEX1,np.matmul(mSamplingVEX1GX2,vGradGX2.T)) + \
+                                        np.matmul(vGradEX1,np.matmul(mSamplingVEX1GY2,vGradGY2.T)) + \
+                                        np.matmul(vGradEY1,np.matmul(mSamplingVEY1GX2,vGradGX2.T)) + \
+                                        np.matmul(vGradEY1,np.matmul(mSamplingVEY1GY2,vGradGY2.T))
+                                self.mSamplingVarVCs[iColG,iRowE] = self.mSamplingVarVCs[iRowE,iColG]
+                                self.mSamplingVarVCs[iRowG,iColE] = \
+                                        np.matmul(vGradGX1,np.matmul(mSamplingVGX1EX2,vGradEX2.T)) + \
+                                        np.matmul(vGradGX1,np.matmul(mSamplingVGX1EY2,vGradEY2.T)) + \
+                                        np.matmul(vGradGY1,np.matmul(mSamplingVGY1EX2,vGradEX2.T)) + \
+                                        np.matmul(vGradGY1,np.matmul(mSamplingVGY1EY2,vGradEY2.T))
+                                self.mSamplingVarVCs[iColE,iRowG] = self.mSamplingVarVCs[iRowG,iColE]
+                                self.mSamplingVarVCs[iRowE,iColE] = \
+                                        np.matmul(vGradEX1,np.matmul(mSamplingVEX1EX2,vGradEX2.T)) + \
+                                        np.matmul(vGradEX1,np.matmul(mSamplingVEX1EY2,vGradEY2.T)) + \
+                                        np.matmul(vGradEY1,np.matmul(mSamplingVEY1EX2,vGradEX2.T)) + \
+                                        np.matmul(vGradEY1,np.matmul(mSamplingVEY1EY2,vGradEY2.T))
+                                self.mSamplingVarVCs[iColE,iRowE] = self.mSamplingVarVCs[iRowE,iColE]
+                                # if same row as column: get SE from sampling variance
+                                if iRowG == iColG:
+                                    self.mVCs[iRowG,3] = np.sqrt(self.mSamplingVarVCs[iRowG,iColG])
+                                    self.mVCs[iRowE,3] = np.sqrt(self.mSamplingVarVCs[iRowE,iColE])
+                                # update column indices
+                                iColG += 1
+                                iColE += 1
+                        # update row indices
+                        iRowG += 1
+                        iRowE += 1
         # indicate estimates are now done
         self.bDone = True
