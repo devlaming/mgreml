@@ -289,7 +289,7 @@ yields heritability estimates all equal to zero, as expected, in `novarG.HSq.out
 
 Notice that the option `--no-var-genetic` cannot be combined with `--rho-genetic` and/or  `--genetic-model`.
 
-In case you have estimated a model, either according to some structural model e.g. using `--genetic-model`, or just the saturated model we started with, `mgreml` can report the factor coefficients (i.e. the estimated effect of each factor on each trait) by using the `--factor-coefficients` option. Using this option not only reports the estimated factor coefficients, but also the covariance matrix of those estimates (unless the `--no-se` is used). This covariance matrix may grow very large for large *T*.
+In case you have estimated a model, either according to some structural model e.g. using `--genetic-model`, or just the saturated model we started with, `mgreml` can report the factor coefficients (i.e. the estimated effect of each factor on each trait) by using the `--factor-coefficients` option. Using this option not only reports the estimated factor coefficients, but also the covariance matrix of those estimates (unless `--no-se` is used). This covariance matrix may grow very large for large *T*.
 
 E.g. the command
 
@@ -314,7 +314,7 @@ generates, amongst others, the file `factors.coeff.out`, which contains 110 esti
 
 The file `factors.coeff.var.out` contains a 110-by-110 matrix representing the covariance matrix of those estimates. 
 
-Similarly, `mgreml` can also return the estimated variance components (again either based on some structural model, or just the saturated model), including the covariance matrix of those estimated variance components (unless the `--no-se` option is used). To get these results, use the `--variance-components` option. E.g. the command
+Similarly, `mgreml` can also return the estimated variance components (again either based on some structural model, or just the saturated model), including the covariance matrix of those estimated variance components (unless `--no-se` is used). To get these results, use the `--variance-components` option. E.g. the command
 
 ```
 python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
