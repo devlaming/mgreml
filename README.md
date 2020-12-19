@@ -350,24 +350,24 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 Inspection of `restricted_rhoG1_rhoE0.loglik.out` reveals that the saturated model fits the data significantly better than this restricted model:
 
 ```
-Log-likelihood of nested model (null hypothesis) = -76460.81732177256,
+Log-likelihood of nested model (null hypothesis) = -76460.81732259798,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 1 genetic factors and 10 environment factors,
 comprising 10 free genetic factor coefficients and 10 free environment factor coefficients in turn.
-Estimates converged after 37 BFGS iterations 
+Estimates converged after 25 BFGS iterations 
 
-Log-likelihood of parent model (alternative hypothesis) = -66849.63485188212,
+Log-likelihood of parent model (alternative hypothesis) = -66849.63346504091,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 10 genetic factors and 10 environment factors,
 comprising 55 free genetic factor coefficients and 55 free environment factor coefficients in turn.
-Estimates converged after 268 BFGS iterations 
+Estimates converged after 269 BFGS iterations 
 
 Results of likelihood-ratio test with 90 degrees of freedom:
-Chi-square test statistic is 19222.364939780877
+Chi-square test statistic is 19222.367715114146
 with P-value = 0.0
 ```
 
-Notice that `--genetic-model` and `--environment-model` also have their restricted counterparts, i.e. `--restricted-genetic-model` and `--restricted-environment-model`. This means we could have also carried out the preceding comparison of the two models using the following command:
+Notice that `--no-var-genetic`, `--genetic-model`, and `--environment-model` also have their restricted counterparts, i.e. `--restricted-no-var-genetic`, `--restricted-genetic-model`, and `--restricted-environment-model`. This means we could have also carried out the preceding comparison of the two models using the following command:
 
 ```
 python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
@@ -375,6 +375,37 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --restricted-genetic-model ./tutorial/gen_model.txt \
                 --restricted-environment-model ./tutorial/env_model.txt \
                 --out ./tutorial/restricted_custom_model
+```
+
+As expected, the file `restricted_custom_model.loglik.out` contains results that are identical to those found in `restricted_rhoG1_rhoE0.loglik.out`. 
+
+Also, to test whether the genetic components improve the fit of the model significantly, we could carry out the command
+
+```
+python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                --covar ./tutorial/covar.txt \
+                --restricted-no-var-genetic \
+                --out ./tutorial/restricted_novarG
+```
+
+where output file `restricted_novarG.loglik.out` reveals that allowing for genetic variance significantly improves the fit of the model:
+
+```
+Log-likelihood of nested model (null hypothesis) = -68327.76083331279,
+based on data on 10 traits and 4980 observations,
+with a model consisting of 1 genetic factors and 10 environment factors,
+comprising 0 free genetic factor coefficients and 55 free environment factor coefficients in turn.
+Estimates converged after 23 BFGS iterations 
+
+Log-likelihood of parent model (alternative hypothesis) = -66849.63346504091,
+based on data on 10 traits and 4980 observations,
+with a model consisting of 10 genetic factors and 10 environment factors,
+comprising 55 free genetic factor coefficients and 55 free environment factor coefficients in turn.
+Estimates converged after 269 BFGS iterations 
+
+Results of likelihood-ratio test with 55 degrees of freedom:
+Chi-square test statistic is 2956.2547365437495
+with P-value = 0.0
 ```
 
 As before, `--restricted-no-var-genetic`, `--restricted-rho-genetic`, and/or  `--restricted-genetic-model` cannot be combined with one another. Similarly, `--restricted-rho-environment` and  `--restricted-environment-model` cannot be combined with each other.
