@@ -297,10 +297,10 @@ E.g. the command
 python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --covar ./tutorial/covar.txt \
                 --factor-coefficients \
-                --out ./tutorial/full
+                --out ./tutorial/factors
 ```
 
-generates, amongst others, the file `full.coeff.out`, which contains 110 estimated factor coefficients in this case, of which a few lines are shown below:
+generates, amongst others, the file `factors.coeff.out`, which contains 110 estimated factor coefficients in this case, of which a few lines are shown below:
 
 | trait | factor | estimate | standard error |
 | --- | --- | --- | --- |
@@ -312,30 +312,30 @@ generates, amongst others, the file `full.coeff.out`, which contains 110 estimat
 | Some pheno 110 | environment factor 8 | -0.414 | 0.143 |
 | Some pheno 110 | environment factor 9 | 0.362 | 0.139 |
 
-The file `full.coeff.var.out` contains a 110-by-110 matrix representing the covariance matrix of those estimates. 
+The file `factors.coeff.var.out` contains a 110-by-110 matrix representing the covariance matrix of those estimates. 
 
-Similarly, `mgreml` can also return the estimated variance components (again either based on some structural model, or just the saturated model), including the covariance matrix of those estimated variance components. To get these results, use the `--variance-components` option. E.g. the command
+Similarly, `mgreml` can also return the estimated variance components (again either based on some structural model, or just the saturated model), including the covariance matrix of those estimated variance components (unless the `--no-se` option is used). To get these results, use the `--variance-components` option. E.g. the command
 
 ```
 python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --covar ./tutorial/covar.txt \
                 --variance-components \
-                --out ./tutorial/vcs
+                --out ./tutorial/components
 ```
 
-generates, amongst others, the file `vcs.VCs.out`, which contains 110 estimated covariance components in this case, of which a few lines are shown below:
+generates, amongst others, the file `components.VCs.out`, which contains 110 estimated covariance components in this case, of which a few lines are shown below:
 
-| component | first trait | second trait | estimate |
-| --- | --- | --- | --- |
-| genetic covariance | Some pheno 101 | Some pheno 101 | 0.987 |
-| genetic covariance | Some pheno 101 | Some pheno 102 | 0.081 |
-| genetic covariance | Some pheno 101 | Some pheno 103 | 0.202 |
-| ...  | ...  | ...  | ...  |
-| environment covariance | Some pheno 109 | Some pheno 109 | 0.646 |
-| environment covariance | Some pheno 109 | Some pheno 110 | 0.164 |
-| environment covariance | Some pheno 110 | Some pheno 110 | 0.960 |
+| component | first trait | second trait | estimate | standard error |
+| --- | --- | --- | --- | --- |
+| genetic covariance | Some pheno 101 | Some pheno 101 | 0.986497859 | 0.064358656 |
+| genetic covariance | Some pheno 101 | Some pheno 102 | 0.080845507 | 0.036152626 |
+| genetic covariance | Some pheno 101 | Some pheno 103 | 0.201904279 | 0.043026929 |
+| ... | ... | ... | ... | ... |
+| environment covariance | Some pheno 109 | Some pheno 109 | 0.645523676 | 0.02441455 |
+| environment covariance | Some pheno 109 | Some pheno 110 | 0.163881362 | 0.028728734 |
+| environment covariance | Some pheno 110 | Some pheno 110 | 0.960020745 | 0.066480516 |
 
-The file `vcs.VCs.var.out` contains a 110-by-110 matrix representing the covariance matrix of those estimates. 
+The file `components.VCs.var.out` contains a 110-by-110 matrix representing the covariance matrix of those estimates. 
 
 `mgreml` can also be used to specify two models at once, to compare them using a likelihood-ratio test, provided the null model is nested with respect to the alternative. E.g. one can use the following command to compare the saturated model to the previously considered model assuming perfect genetic correlations and no environment correlations at all:
 
