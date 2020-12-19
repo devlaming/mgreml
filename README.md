@@ -289,7 +289,7 @@ yields heritability estimates all equal to zero, as expected, in `novarG.HSq.out
 
 Notice that the option `--no-var-genetic` cannot be combined with `--rho-genetic` and/or  `--genetic-model`.
 
-In case you have estimated a model, either according to some structural model e.g. using `--genetic-model`, or just the saturated model we started with, you can make `mgreml` report the factor coefficients (i.e. the effect of each factor on each trait) by using the `--factor-coefficients` option. Using this option not only reports the estimated factor coefficients, but also the covariance matrix of those estimates. This covariance matrix may grow very large for large *T*.
+In case you have estimated a model, either according to some structural model e.g. using `--genetic-model`, or just the saturated model we started with, `mgreml` can report the factor coefficients (i.e. the estimated effect of each factor on each trait) by using the `--factor-coefficients` option. Using this option not only reports the estimated factor coefficients, but also the covariance matrix of those estimates (unless the `--no-se` is used). This covariance matrix may grow very large for large *T*.
 
 E.g. the command
 
