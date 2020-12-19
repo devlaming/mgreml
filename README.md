@@ -10,7 +10,7 @@ Please note that this is still a beta version.
 
 ## Installation
 
-Before downloading `mgreml`, please make sure [Git](https://git-scm.com/downloads) and [Anaconda](https://www.anaconda.com/) with Python 3.x are installed.
+Before downloading `mgreml`, please make sure [Git](https://git-scm.com/downloads) and [Anaconda](https://www.anaconda.com/) with **Python 3.x** are installed.
 
 In order to download `mgreml`, open a command-line interface by starting [Anaconda Prompt](https://docs.anaconda.com/anaconda/user-guide/getting-started/), navigate to your working directory, and clone the `mgreml` repository using the following command:
 
@@ -55,7 +55,7 @@ In this short tutorial we will go over the basic functions of `mgreml`. First, g
 
 Now that you have cloned the `mgreml` repository, and `mgreml` is up-and-running, the main directory of `mgreml` should contain a subdirectory called `tutorial`. This directory in turn contains several files, including `pheno.txt` and `covar.txt`. Details on how this dataset has been generated using simulation can be found in the python script in `./tutorial/simulate.py`
 
-Let's first inspect the `pheno.txt` file. This file contains data in tab-separated format on ten phenotypes observed in a set of 5,000 individuals. The first few columns and rows of this file look as follows:
+Let's first inspect the `pheno.txt` file. This file contains data in tab-separated format on ten phenotypes observed in a set of 5,000 individuals. The first two columns list family and individual ID, followed by the phenotypes:
 
 | FID | IID | Some pheno 101 | Some pheno 102 | ...  | Some pheno 109 | Some pheno 110 |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -66,6 +66,8 @@ Let's first inspect the `pheno.txt` file. This file contains data in tab-separat
 | FID 4998 | IID 9998 | 2.575 | 2.740 | ...  | 3.328 | -6.982 |
 | FID 4999 | IID 9999 | -3.072 | -0.306 | ...  | 2.530 | -1.255 |
 | FID 5000 | IID 10000 | -4.220 | 1.117 | ...  | 2.806 | 3.159 |
+
+Although `mgreml` can handle phenotype data without header, using a modifier that we discuss later, we recommend always including headers in your data, so the `mgreml` output refers e.g. to specific phenotype names rather than ambiguous indices such as `1`, `2`, etc.
 
 For the same set of individuals, you have a binary genomic-relatedness matrix (a.k.a. GRM) e.g. computed using [PLINK](https://www.cog-genomics.org/plink/) or [GCTA](https://cnsgenomics.com/software/gcta/). In this case, the set of binary GRM files comprises `data.grm.bin`, `data.grm.N.bin`, and `data.grm.id`. We refer to this set of binary GRM files by its prefix, i.e. `data`.
 
