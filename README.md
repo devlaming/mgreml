@@ -126,9 +126,11 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                 --covar ./tutorial/covar.txt --out ./tutorial/covs
 ```
 
+Notice that this analysis is computationally slightly more intensive as we have 10 covariates, each of which is allowed to have a different effect on each trait. Thus we have 100 fixed effects in total.
+
 If we compare the new estimates of heritability (see below) to the true values, taking the standard errors of the estimates into account, we see the strong bias is gone.
 
-|  | heritability | standard error |
+| trait | heritability | standard error |
 | --- | --- | --- |
 | Some pheno 101 | 0.450 | 0.025 |
 | Some pheno 102 | 0.015 | 0.030 |
