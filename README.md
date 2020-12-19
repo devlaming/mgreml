@@ -161,7 +161,7 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 
 causes `mgreml` to adjust for 1000 leading PCs from the genetic data.
 
-As there is no population stratification in our data (by virtue of our simulation design), this means adjusting for so many PCs will just reduce precision of our estimates. If we look at `many_pcs.HSq.out` we see that our estimates indeed have considerably higher standard errors:
+As there is no population stratification in our data (by virtue of our simulation design), this means adjusting for so many PCs will just reduce precision of our estimates, without eliminating any bias. If we look at `many_pcs.HSq.out` we see that our estimates indeed have considerably higher standard errors:
 
 | trait | heritability | standard error |
 | --- | --- | --- |
