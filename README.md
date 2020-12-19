@@ -267,11 +267,20 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 Inspection of the log-likelihoods in `custom_model.loglik.out` and `rhoG1_rhoE0.loglik.out` indeed reveal that these models yield an identical fit to the data:
 
 ```
-Log-likelihood of model = -76460.81732177256,
+Log-likelihood of model = -76460.81732259798,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 1 genetic factors and 10 environment factors,
 comprising 10 free genetic factor coefficients and 10 free environment factor coefficients in turn.
-Estimates converged after 37 BFGS iterations 
+Estimates converged after 25 BFGS iterations 
+```
+
+In addition, for the specific case of no genetic variance at all, `mgreml` also has the custom option `--no-var-genetic`. This enforces genetic variance to be absent for all traits in your data. E.g. the following command
+
+```
+python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                --covar ./tutorial/covar.txt \
+                --no-var-genetic \
+                --out ./tutorial/novarG
 ```
 
 Regarding specific factor models, `mgreml` also allows users to force all genetic variances to zero using `--no-var-genetic` and doing the same in the restricted model using `--restricted-no-var-genetic`. The option `--no-var-genetic` cannot be combined with `--rho-genetic` and/or  `--genetic-model`. Similarly, `--restricted-no-var-genetic` cannot be combined with `--restricted-rho-genetic` and/or  `--restricted-genetic-model`.
