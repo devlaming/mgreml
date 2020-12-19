@@ -327,13 +327,13 @@ generates, amongst others, the file `components.VCs.out`, which contains 110 est
 
 | component | first trait | second trait | estimate | standard error |
 | --- | --- | --- | --- | --- |
-| genetic covariance | Some pheno 101 | Some pheno 101 | 0.986497859 | 0.064358656 |
-| genetic covariance | Some pheno 101 | Some pheno 102 | 0.080845507 | 0.036152626 |
-| genetic covariance | Some pheno 101 | Some pheno 103 | 0.201904279 | 0.043026929 |
+| genetic covariance | Some pheno 101 | Some pheno 101 | 0.986 | 0.064 |
+| genetic covariance | Some pheno 101 | Some pheno 102 | 0.081 | 0.036 |
+| genetic covariance | Some pheno 101 | Some pheno 103 | 0.202 | 0.043 |
 | ... | ... | ... | ... | ... |
-| environment covariance | Some pheno 109 | Some pheno 109 | 0.645523676 | 0.02441455 |
-| environment covariance | Some pheno 109 | Some pheno 110 | 0.163881362 | 0.028728734 |
-| environment covariance | Some pheno 110 | Some pheno 110 | 0.960020745 | 0.066480516 |
+| environment covariance | Some pheno 109 | Some pheno 109 | 0.646 | 0.024 |
+| environment covariance | Some pheno 109 | Some pheno 110 | 0.164 | 0.029 |
+| environment covariance | Some pheno 110 | Some pheno 110 | 0.960 | 0.066 |
 
 The file `components.VCs.var.out` contains a 110-by-110 matrix representing the covariance matrix of those estimates. 
 
