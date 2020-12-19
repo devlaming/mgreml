@@ -302,15 +302,15 @@ python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 
 generates, amongst others, the file `full.coeff.out`, which contains 110 estimated factor coefficients in this case, of which a few lines are shown below:
 
-| trait | factor | coefficient |
-| --- | --- | --- |
-| Some pheno 101 | genetic factor 0 | 0.993 |
-| Some pheno 102 | genetic factor 0 | 0.081 |
-| Some pheno 103 | genetic factor 0 | 0.203 |
-| ... | ... | ... |
-| Some pheno 109 | environment factor 8 | 0.227 |
-| Some pheno 110 | environment factor 8 | -0.416 |
-| Some pheno 110 | environment factor 9 | 0.360 |
+| trait | factor | estimate | standard error |
+| --- | --- | --- | --- |
+| Some pheno 101 | genetic factor 0 | 0.993 | 0.032 |
+| Some pheno 102 | genetic factor 0 | 0.081 | 0.038 |
+| Some pheno 103 | genetic factor 0 | 0.203 | 0.041 |
+| ... | ... | ... | ... |
+| Some pheno 109 | environment factor 8 | 0.227 | 0.077 |
+| Some pheno 110 | environment factor 8 | -0.414 | 0.143 |
+| Some pheno 110 | environment factor 9 | 0.362 | 0.139 |
 
 The file `full.coeff.var.out` contains a 110-by-110 matrix representing the covariance matrix of those estimates. 
 
