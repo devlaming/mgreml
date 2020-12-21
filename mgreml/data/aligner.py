@@ -1,5 +1,7 @@
 import numpy as np
+import random
 import pandas as pd
+import networkx as nx
 from numpy.matlib import repmat
 from tqdm import tqdm
 pd.options.mode.chained_assignment = None
@@ -329,13 +331,114 @@ class MgremlData:
     
     def PruneByRelatedness(self, dfY, dfA, dfX, dRelCutoff):
         self.logger.info('APPLYING RELATEDNESS CUTOFF')
-        self.logger.warning('Warning: this method is currently still only a placeholder. Cutoff has not been applied.')
         self.logger.info('Removing individuals such that there is no relatedness in excess of ' + str(dRelCutoff) + ' in GRM')
-        self.logger.info('Using greedy algorithm as implemented in PLINK v...')
-        iN = dfY.shape[0]
-        iDropped = 0
-        # INSERT CODE ERIC HERE
-        self.logger.info('Dropping ' + str(iDropped) + ' out of ' + str(iN) + ' individiuals')
+        # for reproducability set seeds for np.random and random
+        np.random.seed(1809234)
+        random.seed(1238916)
+        # get data from DataFrame
+        mA = dfA.values
+        iN = mA.shape[0]
+        vID = np.arange(iN)
+        # create row and column indices
+        vR = np.array(repmat(vID,iN,1).ravel())
+        vC = np.array(repmat(vID,iN,1).T.ravel())
+        # get values
+        vV = mA[vR,vC]
+        # find all entries where row index < column index
+        (vIndRltC,) = np.where(vR<vC)
+        # keep only those entries
+        vR = vR[vIndRltC]
+        vC = vC[vIndRltC]
+        vV = vV[vIndRltC]
+        # find entries where value exceeds threshold
+        (vIndVgtTau,) = np.where(vV>dRelCutoff)
+        # if there is any unwanted relatedness at all
+        if len(vIndVgtTau) > 0:
+            # get indices and tabulate: how often does each unique row/column appear?
+            (vRowInd,vCountRow) = np.unique(vR[vIndVgtTau],return_counts=True)
+            (vColInd,vCountCol) = np.unique(vC[vIndVgtTau],return_counts=True)
+            # find indices of rows/columns with count == 1
+            vRowIndSingle = vRowInd[np.array(np.where(vCountRow==1)).ravel()]
+            # find indices of rows/columns with count > 1
+            vRowIndMulti = vRowInd[np.array(np.where(vCountRow>1)).ravel()]
+            vColIndMulti = vColInd[np.array(np.where(vCountCol>1)).ravel()]
+            # start out by assuming we keep all IDs
+            vIDkeep = np.ones(iN)
+            # for each row index with exactly one value in excess of tau
+            for iRow in vRowIndSingle:
+                # if that row index not also a col index with multiple appearances
+                if iRow not in vColIndMulti:
+                    # get boolean vector indicating all indices corresponding to that row
+                    bvRow = vR==iRow
+                    # find column index that corresponds to given row, with rel > dRelCutoff
+                    iCol = vC[bvRow][vV[bvRow] > dRelCutoff]
+                    # if col index is neither col nor row index with > 1 appearance
+                    if iCol not in vRowIndMulti and iCol not in vColIndMulti:
+                        # if row and col both haven't been eliminated yet
+                        if vIDkeep[iRow] == 1 and vIDkeep[iCol] == 1:
+                            # randomly add one of two to set of rows/cols to eliminate
+                            if np.random.uniform() > 0.5:
+                                vIDkeep[iCol] = 0
+                            else:
+                                vIDkeep[iRow] = 0
+            self.logger.info('First pass: dropping ' + str((vIDkeep == 0).sum()) + ' rows and columns for individuals with excessive relatedness to only one other individual and vice versa')
+            # get IDs to keep
+            vIDkeep = np.array(np.where(vIDkeep==1)).ravel()
+            # select corresponding subset of rows and cols from DataFrame
+            dfA = dfA.iloc[vIDkeep,vIDkeep]
+            # get data from DataFrame
+            mA = dfA.values
+            iN = mA.shape[0]
+            vID = np.arange(iN)
+            # create row and column indices
+            vR = np.array(repmat(vID,iN,1).ravel())
+            vC = np.array(repmat(vID,iN,1).T.ravel())
+            # get values
+            vV = mA[vR,vC]
+            # find all entries where row index < column index
+            (vIndRltC,) = np.where(vR<vC)
+            # keep only those entries
+            vR = vR[vIndRltC]
+            vC = vC[vIndRltC]
+            vV = vV[vIndRltC]
+            # find all entries with value in excess of tau
+            (vIndVgtTau,) = np.where(vV>dRelCutoff)
+            # if there is any remaining unwanted relatedness at all
+            if len(vIndVgtTau) > 0:
+                # keep only those entries
+                vR = vR[vIndVgtTau]
+                vC = vC[vIndVgtTau]
+                vV = vV[vIndVgtTau]    
+                # get matrix of index pairs with 1 row per pair with relatedness > dRelCutoff
+                mRelated = np.c_[vR,vC]
+                # get all unique IDs appearing in mRelated and turn into list
+                vUnique = np.unique(np.array(mRelated.ravel()))
+                # create a graph
+                myGraph = nx.Graph()
+                # add an edge for each related pair
+                myGraph.add_edges_from(tuple(map(tuple, mRelated)))
+                # use Boppana & Halldorsso 1992 algorithm: keeping large subset with no edges
+                lKeepIDs = nx.maximal_independent_set(myGraph)
+                # find IDs to drop
+                setDropIDs = set(vUnique) - set(lKeepIDs)
+                # take full set of IDs and remove the ones to drop
+                vFinalKeepIDs = np.sort(np.array(list(set(vID) - setDropIDs)))
+                self.logger.info('Second pass: dropping ' + str(len(setDropIDs)) + ' additional rows and columns with excessive relatedness to more than one other individual')    
+                # STAGE 4: KEEP APPROPRIATE PART OF DATAFRAME    
+                # select corresponding subset of rows and cols from DataFrame
+                dfA = dfA.iloc[vFinalKeepIDs,vFinalKeepIDs]
+            else:
+                self.logger.info('Second pass not required, as there are no individuals with relatedness in excess of ' + str(dRelCutoff) + ' left after first pass')
+            self.logger.info('Relatedness cutoff has been applied')
+            self.logger.info('Remaining sample size is ' + str(dfA.shape[0]))
+        else:
+            self.logger.info('No cutoff has been applied, as there are no individuals with relatedness in excess of ' + str(dRelCutoff))
+            self.logger.info('Remaining sample size is ' + str(dfA.shape[0]))
+        # get index of observations to keep
+        miIDs = dfA.index
+        # keep appropriate parts of dfY and dfX
+        dfY = dfY.loc[miIDs]
+        dfX = dfX.loc[miIDs]
         return dfY, dfA, dfX
         
     def CreateDummies(self, dfY, dfX, dfBinXY):

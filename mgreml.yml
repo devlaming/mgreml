@@ -3,6 +3,7 @@ dependencies:
   - python=3.*
   - pip
   - pip:
+    - networkx
     - numpy
     - pandas
     - scipy
