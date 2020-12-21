@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-from analysis import comparison
-from analysis import estimator
+from mgreml.analysis import comparison
+from mgreml.analysis import estimator
 
 class DataWriter:
     

@@ -2,12 +2,12 @@ import argparse
 import logging
 import time
 import traceback
-from data import tools
-from data import reader
-from data import aligner
-from data import writer
-from analysis import estimator
-from analysis import comparison
+from mgreml.data import reader
+from mgreml.data import aligner
+from mgreml.data import writer
+from mgreml.data import tools
+from mgreml.analysis import estimator
+from mgreml.analysis import comparison
 
 def main():
     # store starting time
@@ -43,7 +43,7 @@ def main():
             logger.info('MGREML HAS FINISHED.')
         else:
             logger.warning('No MGREML analysis will be carried out.')
-            logger.info('python ./mgreml -h shows all options')
+            logger.info('python ./mgreml.py -h shows all options')
     except Exception:
         # print the traceback
         logger.error(traceback.format_exc())

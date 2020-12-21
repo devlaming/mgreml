@@ -38,7 +38,7 @@ In case you cannot create a customised conda environment (e.g. because of insuff
 Once the above has completed, you can now run
 
 ```
-python ./mgreml -h
+python ./mgreml.py -h
 ```
 
 to print a list of all command-line options. If this command fails, something has gone wrong during installation.
@@ -46,7 +46,7 @@ to print a list of all command-line options. If this command fails, something ha
 *Windows users*: in case the preceding command fails, try replacing slashes (i.e. `/`) in all your `mgreml` commands by backslashes (i.e. `\`), so e.g. try
 
 ```
-python .\mgreml -h
+python .\mgreml.py -h
 ```
 
 ## Tutorial
@@ -74,14 +74,14 @@ For the same set of individuals, you have a binary genomic-relatedness matrix (a
 The simplest command for running an `mgreml` analysis on this data is as follows:
 
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt --out ./tutorial/nocovs
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt --out ./tutorial/nocovs
 ```
 
 Upon carrying out this command, `mgreml` will first report the follow command will be carried out:
 
 ```
-Call:
-mgreml \
+Your call:
+./mgreml.py \
 --grm ./tutorial/data \
 --pheno ./tutorial/pheno.txt \
 --out ./tutorial/nocovs
@@ -122,8 +122,8 @@ Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, print
 The simple reason for this bias is that we did not control for our fixed-effect covariates, in `./tutorial/covar.txt`, which affect the traits of interest. So we need to use the `--covar` option to specify our fixed-effect covariates. This boils down to the following `mgreml` command:
 
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                --covar ./tutorial/covar.txt --out ./tutorial/covs
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt --out ./tutorial/covs
 ```
 
 Notice that this analysis is computationally slightly more demanding as we have 10 covariates, each of which is allowed to have a different effect on each trait. This means we have 100 fixed effects in total, which our model needs to take into account.
@@ -154,9 +154,9 @@ In case you want to change the number of PCs you control for, do **NOT** add the
 For instance, the command
 
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                --covar ./tutorial/covar.txt \
-                --adjust-pcs 1000 --out ./tutorial/many_pcs
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --adjust-pcs 1000 --out ./tutorial/many_pcs
 ```
 
 causes `mgreml` to adjust for 1000 leading PCs from the genetic data.
@@ -202,9 +202,9 @@ Now, suppose each trait has a different set of covariates, `mgreml` can easily h
 Clearly, this file implies that the intercept is a covariate that applies to all phenotypes, whereas all other covariates all affect different traits. We can now perform `mgreml` estimation under this model for the fixed effects using the following command:
 
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                --covar ./tutorial/covar.txt  --covar-model ./tutorial/covar_model.txt \
-                --out ./tutorial/different_covs
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt  --covar-model ./tutorial/covar_model.txt \
+                   --out ./tutorial/different_covs
 ```
 
 Now, `different_covs.GLS.est.out`, in the folder `tutorial`, only shows fixed-effect estimates for covariates that affect the given trait according to `covar_model.txt`:
@@ -229,11 +229,11 @@ For example, we could impose a factor structure, where there is only one genetic
 To estimate this structural model, we can simply carry out the following command:
 
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                --covar ./tutorial/covar.txt \
-                --genetic-model ./tutorial/gen_model.txt \
-                --environment-model ./tutorial/env_model.txt \
-                --out ./tutorial/custom_model
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --genetic-model ./tutorial/gen_model.txt \
+                   --environment-model ./tutorial/env_model.txt \
+                   --out ./tutorial/custom_model
 ```
 
 The estimates in the resulting file, `custom_model.RhoG.out`, reveal that all genetic correlations are estimated at either zero or one, as expected under this model:
@@ -257,11 +257,11 @@ For the specific cases of genetic correlations all equal to one or all equal to 
 So, effectively, we could have also estimated the last model using the following command:
 
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                --covar ./tutorial/covar.txt \
-                --rho-genetic 1 \
-                --rho-environment 0 \
-                --out ./tutorial/rhoG1_rhoE0
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --rho-genetic 1 \
+                   --rho-environment 0 \
+                   --out ./tutorial/rhoG1_rhoE0
 ```
 
 Inspection of the log-likelihoods in `custom_model.loglik.out` and `rhoG1_rhoE0.loglik.out` indeed reveal that these models yield an identical fit to the data:
@@ -279,10 +279,10 @@ Notice that the option `--rho-genetic` cannot be combined with `--genetic-model`
 In addition, for the specific case of no genetic variance at all, `mgreml` also has the custom option `--no-var-genetic`. This enforces genetic variance to be absent for all traits in your data. E.g. the following command
 
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                --covar ./tutorial/covar.txt \
-                --no-var-genetic \
-                --out ./tutorial/novarG
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --no-var-genetic \
+                   --out ./tutorial/novarG
 ```
 
 yields heritability estimates all equal to zero, as expected, in `novarG.HSq.out`.
@@ -294,10 +294,10 @@ In case you have estimated a model, either according to some structural model e.
 E.g. the command
 
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                --covar ./tutorial/covar.txt \
-                --factor-coefficients \
-                --out ./tutorial/factors
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --factor-coefficients \
+                   --out ./tutorial/factors
 ```
 
 generates, amongst others, the file `factors.coeff.out`, which contains 110 estimated factor coefficients in this case, of which a few lines are shown below:
@@ -317,10 +317,10 @@ The file `factors.coeff.var.out` contains a 110-by-110 matrix representing the c
 Similarly, `mgreml` can also return the estimated variance components (again either based on some structural model, or just the saturated model), including the covariance matrix of those estimated variance components (unless `--no-se` is used). To get these results, use the `--variance-components` option. E.g. the command
 
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                --covar ./tutorial/covar.txt \
-                --variance-components \
-                --out ./tutorial/components
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --variance-components \
+                   --out ./tutorial/components
 ```
 
 generates, amongst others, the file `components.VCs.out`, which contains 110 estimated covariance components in this case, of which a few lines are shown below:
@@ -340,11 +340,11 @@ The file `components.VCs.var.out` contains a 110-by-110 matrix representing the 
 `mgreml` can also be used to specify two models at once, to compare them using a likelihood-ratio test, provided the null model is nested with respect to the alternative. E.g. one can use the following command to compare the saturated model to the previously considered model assuming perfect genetic correlations and no environment correlations at all:
 
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                --covar ./tutorial/covar.txt \
-                --restricted-rho-genetic 1 \
-                --restricted-rho-environment 0 \
-                --out ./tutorial/restricted_rhoG1_rhoE0
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --restricted-rho-genetic 1 \
+                   --restricted-rho-environment 0 \
+                   --out ./tutorial/restricted_rhoG1_rhoE0
 ```
 
 Inspection of `restricted_rhoG1_rhoE0.loglik.out` reveals that the saturated model fits the data significantly better than this restricted model:
@@ -370,11 +370,11 @@ with P-value = 0.0
 Notice that `--no-var-genetic`, `--genetic-model`, and `--environment-model` also have their restricted counterparts, i.e. `--restricted-no-var-genetic`, `--restricted-genetic-model`, and `--restricted-environment-model`. This means we could have also carried out the preceding comparison of the two models using the following command:
 
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                --covar ./tutorial/covar.txt \
-                --restricted-genetic-model ./tutorial/gen_model.txt \
-                --restricted-environment-model ./tutorial/env_model.txt \
-                --out ./tutorial/restricted_custom_model
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --restricted-genetic-model ./tutorial/gen_model.txt \
+                   --restricted-environment-model ./tutorial/env_model.txt \
+                   --out ./tutorial/restricted_custom_model
 ```
 
 As expected, the file `restricted_custom_model.loglik.out` contains results that are identical to those found in `restricted_rhoG1_rhoE0.loglik.out`. 
@@ -382,10 +382,10 @@ As expected, the file `restricted_custom_model.loglik.out` contains results that
 Also, to test whether the genetic components improve the fit of the model significantly, we could carry out the command
 
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                --covar ./tutorial/covar.txt \
-                --restricted-no-var-genetic \
-                --out ./tutorial/restricted_novarG
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --restricted-no-var-genetic \
+                   --out ./tutorial/restricted_novarG
 ```
 
 where output file `restricted_novarG.loglik.out` reveals that allowing for genetic variance significantly improves the fit of the model:
@@ -415,19 +415,19 @@ By default, `mgreml` will not store any intermediate results. However, using the
 Such a `.pkl` file can also be used to reinitialise `mgreml` e.g. if you accidentally switched off your computer halfway through an analysis. For instance
 
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                --covar ./tutorial/covar.txt \
-                --store-iter 50 \
-                --out ./tutorial/covar
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --store-iter 50 \
+                   --out ./tutorial/covar
 ```
 
 causes `mgreml` to store results every 50 iterations. Then, if the preceding analysis has reached e.g. up until iteration 250 before a power outage, we could reinitialise later on using the following command:
 
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                --covar ./tutorial/covar.txt \
-                --reinitialise ./tutorial/covar.estimates.iter.250.bfgs.pkl \
-                --out ./tutorial/covar_reinitialised
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --reinitialise ./tutorial/covar.estimates.iter.250.bfgs.pkl \
+                   --out ./tutorial/covar_reinitialised
 ```
 
 Notice that as such `.pkl` files already implicitly contain the full model specification, the option `--reinitialise` cannot be combined with options such as `--genetic-model`, `--rho-environment`, `--no-var-genetic`, and so on.
@@ -437,20 +437,20 @@ In case `--store-iter` is used when estimating a nested versus alternative model
 `.pkl` files can also be used to reinitialise a restricted model, using the `--restricted-reinitialise` option. E.g. the command
 
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                --covar ./tutorial/covar.txt \
-                --restricted-rho-genetic 1 \
-                --restricted-rho-environment 0 \
-                --store-iter 5 \
-                --out ./tutorial/restricted_rhoG1_rhoE0
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --restricted-rho-genetic 1 \
+                   --restricted-rho-environment 0 \
+                   --store-iter 5 \
+                   --out ./tutorial/restricted_rhoG1_rhoE0
 ```
 causes two sets of `.pkl` files to be stored (i.e. a file for every 5 iterations, for both the restricted and alternative model) and
 ```
-python ./mgreml --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                --covar ./tutorial/covar.txt \
-                --reinitialise ./tutorial/restricted_rhoG1_rhoE0.estimates.iter.265.bfgs.pkl \
-                --restricted-reinitialise ./tutorial/restricted_rhoG1_rhoE0.estimates0.iter.25.bfgs.pkl \
-                --out ./tutorial/restricted_rhoG1_rhoE0_reinitialised
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --reinitialise ./tutorial/restricted_rhoG1_rhoE0.estimates.iter.265.bfgs.pkl \
+                   --restricted-reinitialise ./tutorial/restricted_rhoG1_rhoE0.estimates0.iter.25.bfgs.pkl \
+                   --out ./tutorial/restricted_rhoG1_rhoE0_reinitialised
 ```
 reinitialises estimation for the null and alternative model from appropriate `.pkl` files. Notice that analogous to `--reinitialise`, the `--restricted-reinitialise` option cannot be combined with options such as `--restricted-environment-model` and `--restricted-rho-genetic`, as the `.pkl` file already contains the full model specification.
 
@@ -468,7 +468,7 @@ Note that `mgreml` has a few advanced options regarding the estimation algorithm
 
 In addition, `mgreml` considers the estimates to have converged if the root mean squared sum of the gradient vector (taking scale of traits and sample size into account) is below 10<sup>&minus;5</sup>. For conceptual ease, we refer to this criterion as length of the gradient. The option `--grad-tol` can be used to specify a different treshold. We do **NOT** recommend deviating from 10<sup>&minus;5</sup> by more than one order of magnitude. E.g. you could use `--grad-tol 5E-5` or `--grad-tol 1e-6`. However, we de **NOT** recommend e.g. `--grad-tol 1E-9`, as such a threshold requires a degree of convergence that is often beyond numerical precision, nor do we commend e.g. `--grad-tol 0.01`, as this is too lenient; the optimisation procedure simply has not converged when the latter convergence criterion is met.
 
-Finally, input files following the options `--pheno`,  `--covar`,  `--covar-model`, `--genetic-model`, `--environment-model`, `--restricted-genetic-model`, `--restricted-environment-model` can be comma, tab, or space-separated. Just make sure to be consistent within each file. Also, (1) when your labels (e.g. phenotype labels or FID and IIDs) contain spaces, make sure the file is not space-separated and (2) when those labels contain commas, make sure the file is not comma-separated. As a final remark, note that the command `python ./mgreml -h` shows that these options all have modifiers, such as `nolabelpheno`, to indicate when headers (e.g. phenotype labels) are absent using (e.g. using options `--pheno myphen.txt nolabelpheno` and  `--covar-model mycovmodel.txt nolabelpheno nolabelcovar`). However, as `mgreml` is a multivariate method, we strongly recommend always providing headers to `mgreml`, so everything is labelled in terms of input as well as output.
+Finally, input files following the options `--pheno`,  `--covar`,  `--covar-model`, `--genetic-model`, `--environment-model`, `--restricted-genetic-model`, `--restricted-environment-model` can be comma, tab, or space-separated. Just make sure to be consistent within each file. Also, (1) when your labels (e.g. phenotype labels or FID and IIDs) contain spaces, make sure the file is not space-separated and (2) when those labels contain commas, make sure the file is not comma-separated. As a final remark, note that the command `python ./mgreml.py -h` shows that these options all have modifiers, such as `nolabelpheno`, to indicate when headers (e.g. phenotype labels) are absent using (e.g. using options `--pheno myphen.txt nolabelpheno` and  `--covar-model mycovmodel.txt nolabelpheno nolabelcovar`). However, as `mgreml` is a multivariate method, we strongly recommend always providing headers to `mgreml`, so everything is labelled in terms of input as well as output.
 
 ## Updating `mgreml`
 

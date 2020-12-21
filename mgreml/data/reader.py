@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import logging
 import os.path
-from data import tools
+from mgreml.data import tools
 
 __version__ = '0.01'
 MASTHEAD  = "\n"
@@ -246,8 +246,8 @@ class MgremlReader:
             opts = vars(self.args)
             non_defaults = [x for x in opts.keys() if opts[x] != defaults[x]]
             header = MASTHEAD
-            header += "\nCall: \n"
-            header += 'mgreml \\\n'
+            header += "\nYour call: \n"
+            header += './mgreml.py \\\n'
             options = ['--'+x.replace('_','-')+' '+str(opts[x])+' \\' for x in non_defaults]
             header += '\n'.join(options).replace('True','').replace('False','').replace("', \'", ' ').replace("']", '').replace("['", '').replace('[', '').replace(']', '').replace(', ', ' ').replace('  ', ' ')
             header = header[0:-1]+'\n'
