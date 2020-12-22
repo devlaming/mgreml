@@ -468,9 +468,12 @@ class MgremlData:
             self.logger.info('Remaining sample size is ' + str(dfA.shape[0]))
         # get index of observations to keep
         miIDs = dfA.index
-        # keep appropriate parts of dfY and dfX
+        # keep appropriate parts of dfY
         dfY = dfY.loc[miIDs]
-        dfX = dfX.loc[miIDs]
+        # if covariates specified
+        if self.bCovs:
+            # keep appropriate parts of dfX
+            dfX = dfX.loc[miIDs]
         return dfY, dfA, dfX
         
     def CreateDummies(self, dfY, dfX, dfBinXY):
