@@ -1,11 +1,11 @@
-	intercept	my covar 301	my covar 302	my covar 303	my covar 304	my covar 305	my covar 306	my covar 307	my covar 308	my covar 309
-Some pheno 101	1	0	0	0	0	0	0	0	0	0
-Some pheno 102	1	1	0	0	0	0	0	0	0	0
-Some pheno 103	1	0	1	0	0	0	0	0	0	0
-Some pheno 104	1	0	0	1	0	0	0	0	0	0
-Some pheno 105	1	0	0	0	1	0	0	0	0	0
-Some pheno 106	1	0	0	0	0	1	0	0	0	0
-Some pheno 107	1	0	0	0	0	0	1	0	0	0
-Some pheno 108	1	0	0	0	0	0	0	1	0	0
-Some pheno 109	1	0	0	0	0	0	0	0	1	0
-Some pheno 110	1	0	0	0	0	0	0	0	0	1
+	my covar 301	my covar 302	my covar 303	my covar 304	my covar 305	my covar 306	my covar 307	my covar 308	my covar 309
+Some pheno 101	0	0	0	0	0	0	0	0	0
+Some pheno 102	1	0	0	0	0	0	0	0	0
+Some pheno 103	0	1	0	0	0	0	0	0	0
+Some pheno 104	0	0	1	0	0	0	0	0	0
+Some pheno 105	0	0	0	1	0	0	0	0	0
+Some pheno 106	0	0	0	0	1	0	0	0	0
+Some pheno 107	0	0	0	0	0	1	0	0	0
+Some pheno 108	0	0	0	0	0	0	1	0	0
+Some pheno 109	0	0	0	0	0	0	0	1	0
+Some pheno 110	0	0	0	0	0	0	0	0	1
