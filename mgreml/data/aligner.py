@@ -357,10 +357,12 @@ class MgremlData:
         # for reproducability set seeds for np.random and random
         np.random.seed(1809234)
         random.seed(1238916)
-        # get data from DataFrame
+        # get data from DataFrames
+        mY = dfY.values
         mA = dfA.values
         iN = mA.shape[0]
         vID = np.arange(iN)
+        vMiss = np.array(((dfY.isnull() | dfY.isna()).sum(axis=1))).ravel()
         # create row and column indices
         vR = np.array(repmat(vID,iN,1).ravel())
         vC = np.array(repmat(vID,iN,1).T.ravel())
@@ -398,11 +400,19 @@ class MgremlData:
                     if iCol not in vRowIndMulti and iCol not in vColIndMulti:
                         # if row and col both haven't been eliminated yet
                         if vIDkeep[iRow] == 1 and vIDkeep[iCol] == 1:
-                            # randomly add one of two to set of rows/cols to eliminate
-                            if np.random.uniform() > 0.5:
-                                vIDkeep[iCol] = 0
-                            else:
+                            # if row ind has most missing values: eliminat that individual
+                            if vMiss[iRow] > vMiss[iCol]:
                                 vIDkeep[iRow] = 0
+                            # if col ind has most missing values: eliminat that individual
+                            elif vMiss[iRow] < vMiss[iCol]:
+                                vIDkeep[iCol] = 0
+                            # if same no. of missings
+                            else:
+                                # randomly add one of two to set of rows/cols to eliminate
+                                if np.random.uniform() > 0.5:
+                                    vIDkeep[iCol] = 0
+                                else:
+                                    vIDkeep[iRow] = 0
             self.logger.info('First pass: dropping ' + str((vIDkeep == 0).sum()) + ' rows and columns for individuals with excessive relatedness to only one other individual and vice versa')
             # get IDs to keep
             vIDkeep = np.array(np.where(vIDkeep==1)).ravel()
