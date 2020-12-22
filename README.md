@@ -167,11 +167,9 @@ If we compare the new estimates of heritability (see below) to the true values, 
 | Some pheno 109 | 0.166 | 0.029 |
 | Some pheno 110 | 0.742 | 0.019 |
 
-Notice upon inspection of `covar.txt` that it does include the intercept but does not include any principal components (PCs) from the genetic data.
+Notice upon inspection of `covar.txt` that it does not include any principal components (PCs) from the genetic data.
 
-First, if you want to control for the intercept, the intercept **MUST** be included as a separate covariate in your covariate file (i.e. as a column of ones), as `mgreml` assumes the intercept is absent by default (opposed e.g. to `gcta`).
-
-Second, the file with covariates should **NEVER** contain PCs from your genetic data, as `mgreml` already removes the effects of population stratification in the so-called canonical transformation. By default, `mgreml` removes the effects of 20 leading PCs from your genetic data. The effective sample size is reduced by 20 as a result of this correction for PCs.
+In fact, in `mgreml`, the file with your covariates should **NEVER** contain PCs from your genetic data, as the tool already removes the effects of population stratification during the so-called canonical transformation. By default, `mgreml` removes the effects of 20 leading PCs from your genetic data. The effective sample size is reduced by 20 as a result of this correction for PCs.
 
 In case you want to change the number of PCs you control for, do **NOT** add these PCs to your file with covariate data. Instead, use the `--adjust-pcs` option, followed by the total number of leading PCs you want to control for. E.g. `--adjust-pcs 20` is equivalent to the default setting, `--adjust-pcs 40` controls for the 40 leadings PCs, and `--adjust-pcs 0` controls for no PCs at all (not recommended). In these three cases, the sample size is reduced by 20, 40, and zero respectively.
 
@@ -200,7 +198,9 @@ As there is no population stratification in our data (by virtue of our simulatio
 | Some pheno 109 | 0.187 | 0.046 |
 | Some pheno 110 | 0.724 | 0.025 |
 
-For advanced users, the `--adjust-pcs` option can also be followed by a second number, indicating the number of trailing eigenvectors from your GRM to adjust for. E.g. `--adjust-pcs 100 1000` controls for 100 leading eigenvectors from your GRM and 1000 trailing eigenvectors. Doing this decreases the overall sample size by 100 + 1000 = 1100. By default no trailing eigenvectors are adjusted for. However, if the trailing eigenvalues are sufficiently small, a considerable number of trailing eigenvectors may be adjusted for, boosting CPU time (as the sample size becomes smaller) without diminishing statistical efficiency of your analysis too much (as effectively only less informative bits of data are ignored).
+For advanced users, the `--adjust-pcs` option can also be followed by a second number, indicating the number of trailing eigenvectors from your GRM to adjust for. E.g. `--adjust-pcs 100 1000` controls for 100 leading eigenvectors from your GRM and 1000 trailing eigenvectors. Doing this decreases the overall sample size by 100 + 1000 = 1100.
+
+By default no trailing eigenvectors are adjusted for. However, if the trailing eigenvalues are sufficiently small, a considerable number of trailing eigenvectors may be adjusted for, boosting CPU time (as the sample size becomes smaller) without diminishing statistical efficiency of your analysis too much (as effectively only less informative bits of data are ignored). Note that adjusting for trailing eigenvectors may require you to use `--no-intercept`, as the last eigenvector from the GRM tends to be highly multicollinear with the intercept.
 
 In addition to reporting the heritabilities and their standard errors, `mgreml` also automatically reports genetic and environment correlations, as well as their standard errors.
 
