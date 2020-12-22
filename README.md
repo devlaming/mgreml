@@ -74,7 +74,8 @@ For the same set of individuals, you have a binary genomic-relatedness matrix (a
 The command for running an `mgreml` analysis on this data without correcting for any covariates at all is as follows:
 
 ```
-python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt --no-intercept --out ./tutorial/nocovs
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \ 
+                   --no-intercept --out ./tutorial/nocovs
 ```
 
 Upon carrying out this command, `mgreml` will first report the follow command will be carried out:
