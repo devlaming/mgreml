@@ -200,7 +200,7 @@ As there is no population stratification in our data (by virtue of our simulatio
 
 For advanced users, the `--adjust-pcs` option can also be followed by a second number, indicating the number of trailing eigenvectors from your GRM to adjust for. E.g. `--adjust-pcs 100 1000` controls for 100 leading eigenvectors from your GRM and 1000 trailing eigenvectors. Doing this decreases the overall sample size by 100 + 1000 = 1100.
 
-By default no trailing eigenvectors are adjusted for. However, if the trailing eigenvalues are sufficiently small, a considerable number of trailing eigenvectors may be adjusted for, boosting CPU time (as the sample size becomes smaller) without diminishing statistical efficiency of your analysis too much (as effectively only less informative bits of data are ignored). Note that adjusting for trailing eigenvectors may require you to use `--no-intercept`, as the last eigenvector from the GRM tends to be highly multicollinear with the intercept.
+By default no trailing eigenvectors are adjusted for. However, if the trailing eigenvalues are sufficiently small, a considerable number of trailing eigenvectors may be adjusted for, boosting CPU time (as the overall sample size becomes smaller) without diminishing statistical efficiency of your analysis too much (as effectively only less informative bits of data are ignored). Note that adjusting for trailing eigenvectors may require you to use `--no-intercept`, as the last eigenvector from the GRM tends to be highly multicollinear with the intercept.
 
 In addition to reporting the heritabilities and their standard errors, `mgreml` also automatically reports genetic and environment correlations, as well as their standard errors.
 
