@@ -71,10 +71,10 @@ Although `mgreml` in principle can handle phenotype data without header (using a
 
 For the same set of individuals, you have a binary genomic-relatedness matrix (a.k.a. GRM) e.g. computed using [PLINK](https://www.cog-genomics.org/plink/) or [GCTA](https://cnsgenomics.com/software/gcta/). In this case, the set of binary GRM files comprises `data.grm.bin`, `data.grm.N.bin`, and `data.grm.id`. We refer to this set of binary GRM files by its prefix, i.e. `data`.
 
-The simplest command for running an `mgreml` analysis on this data is as follows:
+The command for running an `mgreml` analysis on this data without correcting for any covariates at all is as follows:
 
 ```
-python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt --out ./tutorial/nocovs
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt --no-intercept --out ./tutorial/nocovs
 ```
 
 Upon carrying out this command, `mgreml` will first report the follow command will be carried out:
@@ -84,6 +84,7 @@ Your call:
 ./mgreml.py \
 --grm ./tutorial/data \
 --pheno ./tutorial/pheno.txt \
+--no-intercept \
 --out ./tutorial/nocovs
 ```
 
@@ -119,14 +120,35 @@ Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, print
 | Some pheno 109 | 0.166 |
 | Some pheno 110 | 0.742 |
 
-The simple reason for this bias is that we did not control for our fixed-effect covariates, in `./tutorial/covar.txt`, which affect the traits of interest. So we need to use the `--covar` option to specify our fixed-effect covariates. This boils down to the following `mgreml` command:
+The simple reason for this bias is that we did not control for any fixed-effect covariates. By removing the `--no-intercept` option, `mgreml` automatically adds one fixed effect per phenotype, namely a fixed effect that controls for differences in mean across phenotypes:
+
+```
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt --out ./tutorial/intercept
+```
+
+Resulting SNP heritability estimates in `./tutorial/intercept.HSq.out`, however, show our estimates are still strongly biased:
+
+| trait | heritability | standard error |
+| --- | --- | --- |
+| Some pheno 101 | 0.070 | 0.030 |
+| Some pheno 102 | 0.004 | 0.030 |
+| Some pheno 103 | 0.016 | 0.029 |
+| Some pheno 104 | 0.013 | 0.029 |
+| Some pheno 105 | 0.041 | 0.030 |
+| Some pheno 106 | 0.190 | 0.029 |
+| Some pheno 107 | 0.008 | 0.029 |
+| Some pheno 108 | 0.001 | 0.030 |
+| Some pheno 109 | 0.027 | 0.030 |
+| Some pheno 110 | 0.157 | 0.029 |
+
+The reasons this bias persists is that more fixed-effect covariates are at play than just the intercept. The file `./tutorial/covar.txt` contains the other covariates that affect the traits of interest. So we need to use the `--covar` option to specify these additional fixed-effect covariates. This boils down to the following `mgreml` command:
 
 ```
 python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                    --covar ./tutorial/covar.txt --out ./tutorial/covs
 ```
 
-Notice that this analysis is computationally slightly more demanding as we have 10 covariates, each of which is allowed to have a different effect on each trait. This means we have 100 fixed effects in total, which our model needs to take into account.
+Notice that analyses including covariates are computationally slightly more demanding. E.g. in this case we have 10 covariates (i.e. the intercept + 9 additional covariates in `./tutorial/covar.txt`), each of which is allowed to have a different effect on each trait. As we have 10 traits, this means we have 100 fixed effects in total, which our model needs to take into account.
 
 If we compare the new estimates of heritability (see below) to the true values, taking the standard errors of the estimates into account, we see the strong bias is gone.
 
