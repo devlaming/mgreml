@@ -124,7 +124,8 @@ Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, print
 The simple reason for this bias is that we did not control for any fixed-effect covariates. By removing the `--no-intercept` option, `mgreml` automatically adds one fixed effect per phenotype, namely a fixed effect that controls for differences in mean across phenotypes:
 
 ```
-python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt --out ./tutorial/intercept
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --out ./tutorial/intercept
 ```
 
 Resulting SNP heritability estimates in `./tutorial/intercept.HSq.out`, however, show our estimates are still strongly biased:
