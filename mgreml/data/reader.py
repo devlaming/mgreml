@@ -87,6 +87,8 @@ class MgremlReader:
             self.SetNumberOfPCs()
             # determine whether SEs are desired
             self.NeedSEs()
+            # determine whether intercept needs to be added
+            self.NeedIntercept()
             # determine whether all coeffs are desired
             self.NeedAllCoeffs()
             # determine whether all variance components are desired
@@ -153,6 +155,8 @@ class MgremlReader:
                             help = 'Prefix of the binary GRM e.g. from GCTA or PLINK.')
         self.parser.add_argument('--pheno', metavar = 'myphen.txt [nolabelpheno]', default = None, type = str, nargs = '+',
                             help = 'Name of your phenotype file. Possible to add the flags nolabelpheno e.g. --pheno mypheno.txt nolabelpheno; not recommended, please label your phenotypes! File should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per phenotype.')
+        self.parser.add_argument('--no-intercept', action = 'store_true',
+                            help = 'optional flag to indicate the intercept should not be included automatically as covariate.')
         self.parser.add_argument('--covar', metavar = 'mycov.txt [nolabelcovar]', default = None, type = str, nargs = '+',
                             help = 'Optional flag naming your covariate file. Possible to add the flags nolabelcovar e.g. --covar mycovar.txt nolabelcovar; not recommended, please label your covariates! File should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per covariate. WARNING: do not include principal components from your genetic data as covariates. MGREML automatically controls for 20 principal components using the canonical transformation. If you want to control for more or fewer principal components, use the --adjust-pcs option instead.')
         self.parser.add_argument('--covar-model', metavar = 'mycovmodel.txt [nolabelpheno] [nolabelcovar]', default = None, type = str, nargs = '+',
@@ -587,6 +591,16 @@ class MgremlReader:
         else:
             self.bSEs = True
             self.logger.info('Your results will include standard errors.')
+            
+    def NeedIntercept(self):
+        # if --no-intercept option used
+        if self.args.no_intercept:
+            # do not automatically add intercept
+            self.bIntercept = False
+        else:
+            self.bIntercept = True
+            self.logger.info('An intercept will be added automatically to your set of covariates.')
+            self.logger.info('This intercept will apply to all phenotypes in your data.')
             
     def NeedAllCoeffs(self):
         # if --factor-coefficients option used

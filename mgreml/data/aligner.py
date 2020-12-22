@@ -10,6 +10,9 @@ class MgremlData:
 
     iManyDummies = 1000
     sF = 'factor '
+    iIntPos = 0
+    iIntVal = 1
+    sIntLab = 'intercept'
     
     def __init__(self, mReader):
         # read out MgremlReader
@@ -18,12 +21,15 @@ class MgremlData:
         dfY = mReader.dfY
         dfX = mReader.dfX
         dfBinXY = mReader.dfBinXY
+        bIntercept = mReader.bIntercept
         iDropLeadPCs = mReader.iDropLeadPCs
         iDropTrailPCs = mReader.iDropTrailPCs
         bDropAnyMissing = mReader.bDropMissings
         self.logger.info('2. CLEANING YOUR DATA')
         # find out if we have covariates
-        self.DetermineIfCovsAreGiven(dfX, dfBinXY)
+        self.DetermineIfCovsAreGiven(dfX, dfBinXY, bIntercept)
+        # add intercept if required
+        (dfX, dfBinXY) = self.AddIntercept(dfY, dfX, dfBinXY, bIntercept)
         # if we have covariates, and different covariates apply to different traits
         if self.bCovs and not(self.bSameCovs):
             # clean up the specification of the part of the model on covariates
@@ -114,13 +120,25 @@ class MgremlData:
         dfBinFY = pd.DataFrame(data=0, index=pd.Index(lLabels), columns=pd.Index(lFactorName))
         return dfBinFY
         
-    def DetermineIfCovsAreGiven(self, dfX, dfBinXY):
-        # assert whether we have covariates and whether we have same covs across traits
+    def DetermineIfCovsAreGiven(self, dfX, dfBinXY, bIntercept):
+        # assert whether we have regular covariates
         self.bCovs = isinstance(dfX, pd.DataFrame)
         self.bSameCovs = not(isinstance(dfBinXY, pd.DataFrame))
         # if we have no covariates, yet different covariates have been specified
         if not(self.bCovs) and not(self.bSameCovs):
-            raise SyntaxError('you have specified different covariates to apply to different traits, without supplying data on those covariates using --covar')
+            raise SyntaxError('you have specified different covariates to apply to different traits, while not providing any data on those covariates using --covar')
+        # for final assertion if covariates are present, also consider presence of intercept
+        self.bCovs = self.bCovs or bIntercept
+        
+    def AddIntercept(self, dfY, dfX, dfBinXY, bIntercept):
+        if bIntercept:
+            if isinstance(dfX, pd.DataFrame):
+                dfX.insert(MgremlData.iIntPos, MgremlData.sIntLab, MgremlData.iIntVal)
+            else:
+                dfX = pd.DataFrame(MgremlData.iIntVal, index=dfY.index, columns=[MgremlData.sIntLab])
+            if not(self.bSameCovs):
+                dfBinXY.insert(MgremlData.iIntPos, MgremlData.sIntLab, MgremlData.iIntVal)
+        return dfX, dfBinXY
     
     def CleanSpecificationCovariates(self, dfY, dfX, dfBinXY):
         self.logger.info('INSPECTING YOUR COVARIATE MODEL')
@@ -203,16 +221,20 @@ class MgremlData:
         dRankY = np.linalg.matrix_rank(mY)
         # count the number of phenotypes
         iT = dfY.shape[1]
+        # no warning has yet been issued
+        bWarning = False
         # if rank is below the number of covariates
         if dRankY < iT:
             self.logger.warning('Warning: your phenotype data is rank deficient, i.e. there is perfect multicollinearity.')
             self.logger.warning('This may lead to poorly identified models.')
+            bWarning = True
         # compute the phenotype variance of each trait
         vVarY = np.var(mY,axis=0)
         # if there is at least one trait with no variance
         if (vVarY == 0).sum() > 0:
             raise ValueError('you have specified one or more phenotypes without any variance at all')
-        self.logger.info('No irregularities found')
+        if not(bWarning):
+            self.logger.info('No irregularities found')
     
     def FindOverlapAndSort(self, dfY, dfA, dfX, dfBinXY):
         self.logger.info('JOINING YOUR DATA')
