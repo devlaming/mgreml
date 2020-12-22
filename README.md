@@ -211,7 +211,7 @@ In case you care neither about standard errors nor the covariance matrix of esti
 Now, suppose each trait has a different set of covariates, `mgreml` can easily handle this using the `--covar-model` option. This option should be followed by a filename which contains a binary table, indicating which covariate affects which phenotype. E.g. the `tutorial` folder contains `covar_model.txt`, of which the content is shown below:
 
 |  | my covar 301 | my covar 302 | my covar 303 | my covar 304 | my covar 305 | my covar 306 | my covar 307 | my covar 308 | my covar 309 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Some pheno 101 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | Some pheno 102 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | Some pheno 103 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
