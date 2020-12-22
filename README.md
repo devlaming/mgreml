@@ -210,20 +210,20 @@ In case you care neither about standard errors nor the covariance matrix of esti
 
 Now, suppose each trait has a different set of covariates, `mgreml` can easily handle this using the `--covar-model` option. This option should be followed by a filename which contains a binary table, indicating which covariate affects which phenotype. E.g. the `tutorial` folder contains `covar_model.txt`, of which the content is shown below:
 
-|  | intercept | my covar 301 | my covar 302 | my covar 303 | my covar 304 | my covar 305 | my covar 306 | my covar 307 | my covar 308 | my covar 309 |
+|  | my covar 301 | my covar 302 | my covar 303 | my covar 304 | my covar 305 | my covar 306 | my covar 307 | my covar 308 | my covar 309 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Some pheno 101 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| Some pheno 102 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| Some pheno 103 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| Some pheno 104 | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
-| Some pheno 105 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-| Some pheno 106 | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
-| Some pheno 107 | 1 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
-| Some pheno 108 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
-| Some pheno 109 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
-| Some pheno 110 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| Some pheno 101 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Some pheno 102 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Some pheno 103 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Some pheno 104 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Some pheno 105 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| Some pheno 106 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
+| Some pheno 107 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
+| Some pheno 108 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
+| Some pheno 109 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
+| Some pheno 110 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 
-Clearly, this file implies that the intercept is a covariate that applies to all phenotypes, whereas all other covariates all affect different traits. We can now perform `mgreml` estimation under this model for the fixed effects using the following command:
+Clearly, each covariate affects a different trait. We can now perform `mgreml` estimation under this model for the fixed effects using the following command:
 
 ```
 python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
@@ -231,7 +231,11 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                    --out ./tutorial/different_covs
 ```
 
-Now, `different_covs.GLS.est.out`, in the folder `tutorial`, only shows fixed-effect estimates for covariates that affect the given trait according to `covar_model.txt`:
+Notice here that we did not use `--no-intercept`. This means `mgreml` (1) adds the intercept to the set of covariates and (2) assumes the intercept applies to all phenotypes.
+
+So in total, we have 10 fixed effects for the intercept (i.e. one fixed effect per trait), and 9 additional fixed effects for `my covar 301` up until `my covar 309`.
+
+Now, `different_covs.GLS.est.out`, in the folder `tutorial`, shows the fixed-effect estimates for the intercept affecting all traits and for the covariates that affect a given trait according to `covar_model.txt`:
 
 | trait | covariate | beta hat | standard error |
 | --- | --- | --- | --- |
@@ -480,11 +484,20 @@ reinitialises estimation for the null and alternative model from appropriate `.p
 
 `mgreml` performs basic data management, e.g. in terms of figuring out for which individuals we have phenotypic as well as GRM data (and data on covariates, if applicable). In case `--covar-model` is used `mgreml` also tests if there are any covariates that affect no phenotype at all, and if so, excludes such covariates.
 
-*Warning: the following option still needs to be implemented:* `mgreml` also performs relatedness pruning when using the `--rel-cutoff` option. E.g. `--rel-cutoff 0.025` selects a subset of individuals such that relatedness in the GRM is nowhere in excess of 0.025. `mgreml` follows the same algorithm for such a cutoff as [PLINK](https://www.cog-genomics.org/plink/1.9/distance#rel_cutoff). Importantly, `mgreml` does this pruning at such a stage that sample size is maximised (e.g. for a pair of individuals with a relatedness in excess of the threshold, we do not drop the individual for whom we have phenotype data and keep the individual for whom we do not have any phenotype data at all).
+`mgreml` also performs relatedness pruning when using the `--rel-cutoff` option. E.g. the following command selects a subset of individuals such that relatedness in the GRM is nowhere in excess of 0.05:
 
-In general, `mgreml` simply tries to maximise sample size at each turn. E.g. if an individual has missing values only for a subset of the phenotypes, `mgreml` keeps that individual in the data, by introducing phenotype-by-individual-specific dummies (i.e. dummies that control for individual *i* having a missing value for trait *t*). Even when a covariate is missing, sometimes parts of that observation can still be salvaged (i.e. if the missing covariate does not affect all phenotypes according to `--covar-model`).
+```
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --rel-cutoff 0.05 \
+                   --out ./tutorial/pruned
+```
 
-However, introducing these dummies to control for gaps in the data can become computationally highly demanding. Controlling for fixed-effect covariates has a computational complexity of the order *NT*<sup> 2</sup> provided the number of unique covariates is of the order 1. However, if e.g. missingness in each trait is a proportion of sample size, then the total number of unique covariates to control for this missingness becomes of the order *NT*, and thereby the computational complexity of controlling for this missingness of the order *N*<sup> 2</sup>*T*<sup> 3</sup>, which is prohibitively complex for large *N* and *T*.
+`mgreml` follows the greedy algorithm developed by Boppana and Halldorsson (1992); [doi:10.1007/BF01994876](https://link.springer.com/article/10.1007/BF01994876). Importantly, `mgreml` does this pruning at such a stage that sample size is maximised (e.g. for a pair of individuals with a relatedness in excess of the threshold, we do not drop the individual for whom we have phenotype data and keep the individual for whom we do not have any phenotype data at all).
+
+In general, `mgreml` simply tries to preserve sample size at each turn. E.g. if an individual has missing values only for a subset of the phenotypes, `mgreml` keeps that individual in the data, by introducing phenotype-by-individual-specific dummies (i.e. dummies that control for individual *i* having a missing value for trait *t*). Even when a covariate is missing, sometimes parts of that observation can still be salvaged (i.e. if the missing covariate does not affect all phenotypes according to `--covar-model`).
+
+Introducing dummies to control for gaps in the data can become computationally highly demanding. Controlling for fixed-effect covariates has a computational complexity of the order *NT*<sup> 2</sup> provided the number of unique covariates is of the order 1. However, if e.g. missingness in each trait is a proportion of sample size, then the total number of unique covariates needed to control for this missingness becomes of the order *NT*, and thereby the computational complexity of controlling for this missingness of the order *N*<sup> 2</sup>*T*<sup> 3</sup>, which is prohibitively complex for large *N* and *T*.
 
 Therefore, `mgreml` has a `--drop-missings` option, whereby all individuals are dropped that have at least one missing phenotype and/or at least one missing covariate that is relevant (either because `--covar-model` has not been used, or because the file following `--covar-model` indicates the covariate with a missing value for a given individual affects at least one trait).
 
@@ -492,7 +505,9 @@ Note that `mgreml` has a few advanced options regarding the estimation algorithm
 
 In addition, `mgreml` considers the estimates to have converged if the root mean squared sum of the gradient vector (taking scale of traits and sample size into account) is below 10<sup>&minus;5</sup>. For conceptual ease, we refer to this criterion as length of the gradient. The option `--grad-tol` can be used to specify a different treshold. We do **NOT** recommend deviating from 10<sup>&minus;5</sup> by more than one order of magnitude. E.g. you could use `--grad-tol 5E-5` or `--grad-tol 1e-6`. However, we de **NOT** recommend e.g. `--grad-tol 1E-9`, as such a threshold requires a degree of convergence that is often beyond numerical precision, nor do we commend e.g. `--grad-tol 0.01`, as this is too lenient; the optimisation procedure simply has not converged when the latter convergence criterion is met.
 
-Finally, input files following the options `--pheno`,  `--covar`,  `--covar-model`, `--genetic-model`, `--environment-model`, `--restricted-genetic-model`, `--restricted-environment-model` can be comma, tab, or space-separated. Just make sure to be consistent within each file. Also, (1) when your labels (e.g. phenotype labels or FID and IIDs) contain spaces, make sure the file is not space-separated and (2) when those labels contain commas, make sure the file is not comma-separated. As a final remark, note that the command `python ./mgreml.py -h` shows that these options all have modifiers, such as `nolabelpheno`, to indicate when headers (e.g. phenotype labels) are absent using (e.g. using options `--pheno myphen.txt nolabelpheno` and  `--covar-model mycovmodel.txt nolabelpheno nolabelcovar`). However, as `mgreml` is a multivariate method, we strongly recommend always providing headers to `mgreml`, so everything is labelled in terms of input as well as output.
+Input files following the options `--pheno`,  `--covar`,  `--covar-model`, `--genetic-model`, `--environment-model`, `--restricted-genetic-model`, `--restricted-environment-model` can be comma, tab, or space-separated. Just make sure to be consistent within each file. Also, (1) when your labels (e.g. phenotype labels or FID and IIDs) contain spaces, make sure the file is not space-separated and (2) when those labels contain commas, make sure the file is not comma-separated.
+
+Finally, that the options `--pheno`,  `--covar`,  `--covar-model`, `--genetic-model`, `--environment-model`, `--restricted-genetic-model`, `--restricted-environment-model` have modifiers `nolabelpheno`, `nolabelcovar`, and `nolabelfactor` to indicate when headers (e.g. phenotype labels) are absent. E.g. the following options are possible in `mgreml`: `--pheno myphen.txt nolabelpheno` and  `--covar-model mycovmodel.txt nolabelpheno nolabelcovar`). However, as `mgreml` is a multivariate method, we strongly recommend always providing headers to `mgreml`, so everything is labelled in terms of input as well as output.
 
 ## Updating `mgreml`
 
