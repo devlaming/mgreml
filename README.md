@@ -158,13 +158,13 @@ If we compare the new estimates of heritability (see below) to the true values, 
 | --- | --- | --- |
 | Some pheno 101 | 0.450 | 0.025 |
 | Some pheno 102 | 0.015 | 0.030 |
-| Some pheno 103 | 0.032 | 0.029 |
+| Some pheno 103 | 0.031 | 0.029 |
 | Some pheno 104 | 0.044 | 0.029 |
-| Some pheno 105 | 0.481 | 0.025 |
+| Some pheno 105 | 0.482 | 0.025 |
 | Some pheno 106 | 0.487 | 0.025 |
-| Some pheno 107 | 0.036 | 0.029 |
+| Some pheno 107 | 0.037 | 0.029 |
 | Some pheno 108 | 0.017 | 0.029 |
-| Some pheno 109 | 0.165 | 0.029 |
+| Some pheno 109 | 0.166 | 0.029 |
 | Some pheno 110 | 0.742 | 0.019 |
 
 Notice upon inspection of `covar.txt` that it does include the intercept but does not include any principal components (PCs) from the genetic data.
