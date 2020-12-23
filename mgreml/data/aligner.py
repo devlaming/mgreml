@@ -382,13 +382,13 @@ class MgremlData:
             if vCount.sum() > 0:
                 # temporarily keep only rows and cols with 1 entry > threshold
                 # i.e. keep the singletons with singletons, and not
-                # singletons with mulitples
+                # singletons with multiples
                 vSelect = (vCount == 1)
                 vID = vID[vSelect]
                 mB = mB[vSelect,:][:,vSelect]
                 # find upper matrix of subset of rows and columns
                 mBU = np.triu(mB)
-                # find cols and rows where mAU is in excess of threshold
+                # find cols and rows where mBU indicates relatedness > threshold
                 (vSelectRow,vSelectCol) = np.where(mBU)
                 # relate them back to original IDs in vID
                 mPairIDs = np.stack((vID[vSelectRow],vID[vSelectCol]))
