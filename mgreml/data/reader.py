@@ -155,36 +155,36 @@ class MgremlReader:
                             help = 'prefix of binary GRM')
         self.parser.add_argument('--grm-cutoff', metavar = 'THRESHOLD', default = None, type = float,
                             help = 'option to drop individuals using greedy algorithm, such that there is no relatedness in GRM in excess of threshold for remaining individuals')
-        self.parser.add_argument('--adjust-pcs', metavar = 'INTEGER [INTEGER]', default = None, type = int, nargs = '+',
-                            help = 'option to specify for how many leading principal components (PCs) from genetic data to adjust (to control for population stratification) and for how many trailing PCs to adjust (for computational efficiency); if just one non-negative integer is specified this is taken as the number of leading PCs to adjust for')
-        self.parser.add_argument('--pheno', metavar = 'FILENAME [nolabelpheno]', default = None, type = str, nargs = '+',
-                            help = 'phenotype file: should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per phenotype; can be followed by optional flag nolabelpheno, e.g. --pheno mypheno.txt nolabelpheno, but we recommend to label phenotypes')
+        self.parser.add_argument('--adjust-pcs', metavar = '', default = None, type = int, nargs = '+',
+                            help = '\b\b\b\b\b\b\b\b\bINTEGER [INTEGER] option to specify for how many leading principal components (PCs) from genetic data to adjust (to control for population stratification) and for how many trailing PCs to adjust (for computational efficiency); if just one non-negative integer is specified this is taken as the number of leading PCs to adjust for')
+        self.parser.add_argument('--pheno', metavar = '', default = None, type = str, nargs = '+',
+                            help = '\b\b\b\b\b\b\b\b\b\b\b\b\b\bFILENAME [nolabelpheno] phenotype file: should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per phenotype; can be followed by optional flag nolabelpheno, e.g. --pheno mypheno.txt nolabelpheno, but we recommend to label phenotypes')
         self.parser.add_argument('--drop-missings', action = 'store_true',
                             help = 'option to drop all observations from data with at least one missing phenotype or at least one missing covariate')
         self.parser.add_argument('--no-intercept', action = 'store_true',
                             help = 'option to indicate an intercept should not be included automatically as covariate')
-        self.parser.add_argument('--covar', metavar = 'FILENAME [nolabelcovar]', default = None, type = str, nargs = '+',
-                            help = 'optional covariate file: should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per covariate; can be followed by optional flag nolabelcovar, e.g. --covar mycovar.txt nolabelcovar, but we recommend to label covariates; WARNING: do not include principal components from genetic data as covariates, use --adjust-pcs instead')
-        self.parser.add_argument('--covar-model', metavar = 'FILENAME [nolabelpheno] [nolabelcovar]', default = None, type = str, nargs = '+',
-                            help = 'optional covariate model file: should be comma-, space-, or tab-separated, with one row per phenotype and one column per covariate; can be followed by optional flags nolabelpheno and/or nolabelcovar, but we recommend to label phenotypes and covariates; without --covar-model, all covariates are assumed to apply to all traits')
-        groupGenetic.add_argument('--genetic-model', metavar = 'FILENAME [nolabelpheno] [nolabelfactor]', default = None, type = str, nargs = '+',
-                            help = 'optional genetic model file: should be comma-, space-, or tab-separated, with one row per phenotype and one column per genetic factor; can be followed by optional flags nolabelpheno and/or nolabelfactor, but we recommend to label phenotypes and genetic factors')
+        self.parser.add_argument('--covar', metavar = '', default = None, type = str, nargs = '+',
+                            help = '\b\b\b\b\b\b\b\b\b\b\b\b\b\bFILENAME [nolabelcovar] optional covariate file: should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per covariate; can be followed by optional flag nolabelcovar, e.g. --covar mycovar.txt nolabelcovar, but we recommend to label covariates; WARNING: do not include principal components from genetic data as covariates, use --adjust-pcs instead')
+        self.parser.add_argument('--covar-model', metavar = '', default = None, type = str, nargs = '+',
+                            help = 'FILENAME [nolabelpheno] [nolabelcovar] optional covariate model file: should be comma-, space-, or tab-separated, with one row per phenotype and one column per covariate; can be followed by optional flags nolabelpheno and/or nolabelcovar, but we recommend to label phenotypes and covariates; without --covar-model, all covariates are assumed to apply to all traits')
+        groupGenetic.add_argument('--genetic-model', metavar = '', default = None, type = str, nargs = '+',
+                            help = 'FILENAME [nolabelpheno] [nolabelfactor] optional genetic model file: should be comma-, space-, or tab-separated, with one row per phenotype and one column per genetic factor; can be followed by optional flags nolabelpheno and/or nolabelfactor, but we recommend to label phenotypes and genetic factors')
         groupGenetic.add_argument('--rho-genetic', metavar = '0 or 1', choices = [0, 1], default = None, type = int,
                             help = 'option followed by 0 or 1, forcing all genetic correlations to take on the specified value; this flag cannot be combined with --genetic-model')
         groupGenetic.add_argument('--no-var-genetic', action = 'store_true',
                             help = 'option to force all genetic variances to equal zero; this flag cannot be combined with --genetic-model and/or --rho-genetic')
-        groupRestrictedGenetic.add_argument('--restricted-genetic-model', metavar = 'FILENAME [nolabelpheno] [nolabelfactor]', default = None, type = str, nargs = '+',
-                            help = 'optional restricted genetic model file: should be comma-, space-, or tab-separated, with one row per phenotype and one column per genetic factor; can be followed by optional flags nolabelpheno and/or nolabelfactor, but we recommend to label phenotypes and genetic factors')
+        groupRestrictedGenetic.add_argument('--restricted-genetic-model', metavar = '', default = None, type = str, nargs = '+',
+                            help = 'FILENAME [nolabelpheno] [nolabelfactor] optional restricted genetic model file: should be comma-, space-, or tab-separated, with one row per phenotype and one column per genetic factor; can be followed by optional flags nolabelpheno and/or nolabelfactor, but we recommend to label phenotypes and genetic factors')
         groupRestrictedGenetic.add_argument('--restricted-rho-genetic', metavar = '0 or 1', choices = [0, 1], default = None, type = int,
                             help = 'option followed by 0 or 1, forcing all genetic correlations in the restricted model to take on the specified value; this flag cannot be combined with --restricted-genetic-model')
         groupRestrictedGenetic.add_argument('--restricted-no-var-genetic', action = 'store_true',
                             help = 'option to force all genetic variances in the restricted model to equal zero; this flag cannot be combined with --restricted-genetic-model and/or --restricted-rho-genetic')
-        groupEnvironment.add_argument('--environment-model', metavar = 'FILENAME [nolabelpheno] [nolabelfactor]', default = None, type = str, nargs = '+',
-                            help = 'optional environment model file: should be comma-, space-, or tab-separated, with one row per phenotype and one column per environment factor; can be followed by optional flags nolabelpheno and/or nolabelfactor, but we recommend to label phenotypes and environment factors')
+        groupEnvironment.add_argument('--environment-model', metavar = '', default = None, type = str, nargs = '+',
+                            help = 'FILENAME [nolabelpheno] [nolabelfactor] optional environment model file: should be comma-, space-, or tab-separated, with one row per phenotype and one column per environment factor; can be followed by optional flags nolabelpheno and/or nolabelfactor, but we recommend to label phenotypes and environment factors')
         groupEnvironment.add_argument('--rho-environment', metavar = '0', choices = [0], default = None, type = int,
                             help = 'option followed by 0, forcing all environment correlations to zero; this flag cannot be combined with --environment-model')
-        groupRestrictedEnvironment.add_argument('--restricted-environment-model', metavar = 'FILENAME [nolabelpheno] [nolabelfactor]', default = None, type = str, nargs = '+',
-                            help = 'optional restricted environment model file: should be comma-, space-, or tab-separated, with one row per phenotype and one column per environment factor; can be followed by optional flags nolabelpheno and/or nolabelfactor, but we recommend to label phenotypes and environment factors')
+        groupRestrictedEnvironment.add_argument('--restricted-environment-model', metavar = '', default = None, type = str, nargs = '+',
+                            help = 'FILENAME [nolabelpheno] [nolabelfactor] optional restricted environment model file: should be comma-, space-, or tab-separated, with one row per phenotype and one column per environment factor; can be followed by optional flags nolabelpheno and/or nolabelfactor, but we recommend to label phenotypes and environment factors')
         groupRestrictedEnvironment.add_argument('--restricted-rho-environment', metavar = '0', choices = [0], default = None, type = int,
                             help = 'option followed by 0, forcing all environment correlations in the restricted model to zero; this flag cannot be combined with --restricted-environment-model')
         self.parser.add_argument('--no-se', action = 'store_true',
