@@ -350,7 +350,7 @@ class MgremlData:
             # keep only those individuals in data on covariates
             dfX = dfX.loc[miIDs]
         return dfY, dfA, dfX
-    
+        
     def PruneByRelatedness(self, dfY, dfA, dfX, dRelCutoff):
         self.logger.info('APPLYING RELATEDNESS CUTOFF')
         self.logger.info('Removing individuals such that there is no relatedness in excess of ' + str(dRelCutoff) + ' in GRM')
@@ -361,63 +361,55 @@ class MgremlData:
         mY = dfY.values
         mA = dfA.values
         iN = mA.shape[0]
-        vID = np.arange(iN)
+        vIDstart = np.arange(iN)
         vMiss = np.array(((dfY.isnull() | dfY.isna()).sum(axis=1))).ravel()
-        # create row and column indices
-        vR = np.array(repmat(vID,iN,1).ravel())
-        vC = np.array(repmat(vID,iN,1).T.ravel())
-        # get values
-        vV = mA[vR,vC]
-        # find all entries where row index < column index
-        (vIndRltC,) = np.where(vR<vC)
-        # keep only those entries
-        vR = vR[vIndRltC]
-        vC = vC[vIndRltC]
-        vV = vV[vIndRltC]
-        # find entries where value exceeds threshold
-        (vIndVgtTau,) = np.where(vV>dRelCutoff)
+        # temporarily remove diagonal from GRM
+        mA = mA - np.diag(np.diag(mA))
+        # use this matrix to create binary matrix == 1 when in excess of cutoff
+        mB = mA > dRelCutoff
+        # count no. of elements per row in excess of threshold
+        vCount = mB.sum(axis=0)
         # if there is any unwanted relatedness at all
-        if len(vIndVgtTau) > 0:
-            # get indices and tabulate: how often does each unique row/column appear?
-            (vRowInd,vCountRow) = np.unique(vR[vIndVgtTau],return_counts=True)
-            (vColInd,vCountCol) = np.unique(vC[vIndVgtTau],return_counts=True)
-            # find indices of rows/columns with count == 1
-            vRowIndSingle = vRowInd[np.array(np.where(vCountRow==1)).ravel()]
-            # find indices of rows/columns with count > 1
-            vRowIndMulti = vRowInd[np.array(np.where(vCountRow>1)).ravel()]
-            vColIndMulti = vColInd[np.array(np.where(vCountCol>1)).ravel()]
-            # start out by assuming we keep all IDs
-            vIDkeep = np.ones(iN)
-            # for each row index with exactly one value in excess of tau
-            for iRow in vRowIndSingle:
-                # if that row index not also a col index with multiple appearances
-                if iRow not in vColIndMulti:
-                    # get boolean vector indicating all indices corresponding to that row
-                    bvRow = vR==iRow
-                    # find column index that corresponds to given row, with rel > dRelCutoff
-                    iCol = vC[bvRow][vV[bvRow] > dRelCutoff]
-                    # if col index is neither col nor row index with > 1 appearance
-                    if iCol not in vRowIndMulti and iCol not in vColIndMulti:
-                        # if row and col both haven't been eliminated yet
-                        if vIDkeep[iRow] == 1 and vIDkeep[iCol] == 1:
-                            # if row ind has most missing values: eliminat that individual
-                            if vMiss[iRow] > vMiss[iCol]:
-                                vIDkeep[iRow] = 0
-                            # if col ind has most missing values: eliminat that individual
-                            elif vMiss[iRow] < vMiss[iCol]:
-                                vIDkeep[iCol] = 0
-                            # if same no. of missings
-                            else:
-                                # randomly add one of two to set of rows/cols to eliminate
-                                if np.random.uniform() > 0.5:
-                                    vIDkeep[iCol] = 0
-                                else:
-                                    vIDkeep[iRow] = 0
-            self.logger.info('First pass: dropping ' + str((vIDkeep == 0).sum()) + ' rows and columns for individuals with excessive relatedness to only one other individual and vice versa')
-            # get IDs to keep
-            vIDkeep = np.array(np.where(vIDkeep==1)).ravel()
-            # select corresponding subset of rows and cols from DataFrame
-            dfA = dfA.iloc[vIDkeep,vIDkeep]
+        if vCount.sum() > 0:
+            # temporarily keep only rows and cols with 1 entry > threshold
+            # i.e. keep the singletons
+            vSelect = (vCount == 1)
+            vID = vIDstart[vSelect]
+            mB = mB[vSelect,:][:,vSelect]
+            # count no. of elements per row in excess of threshold for singletons
+            vCount = mB.sum(axis=0)
+            # if there is any unwanted relatedness amongst singletons
+            if vCount.sum() > 0:
+                # temporarily keep only rows and cols with 1 entry > threshold
+                # i.e. keep the singletons with singletons, and not
+                # singletons with mulitples
+                vSelect = (vCount == 1)
+                vID = vID[vSelect]
+                mB = mB[vSelect,:][:,vSelect]
+                # find upper matrix of subset of rows and columns
+                mBU = np.triu(mB)
+                # find cols and rows where mAU is in excess of threshold
+                (vSelectRow,vSelectCol) = np.where(mBU)
+                # relate them back to original IDs in vID
+                mPairIDs = np.stack((vID[vSelectRow],vID[vSelectCol]))
+                # for those IDs, use vMiss to determine missingness
+                vMissID0 = vMiss[mPairIDs[0,:]]
+                vMissID1 = vMiss[mPairIDs[1,:]]
+                # for each pair: choose whether to drop col or row
+                vDrop1 = (vMissID0<vMissID1).astype(int) + ((vMissID0 == vMissID1)*(np.random.uniform(size=vMissID0.shape)>0.5)).astype(int)
+                vDrop0 = 1 - vDrop1
+                vDrop = np.hstack((mPairIDs[0,vDrop0>0],mPairIDs[1,vDrop1>0]))
+                # take full set of IDs and remove the ones to drop
+                vKeepIDs = np.sort(np.array(list(set(vIDstart) - set(vDrop))))
+                # select corresponding subset of rows and cols from DataFrame
+                dfA = dfA.iloc[vKeepIDs,vKeepIDs]
+                # count no. of dropped rows and columns
+                iDropped = vDrop.shape[0]
+            else:
+                # if no relatedness amongst singletons: nothing dropped in 1st pass
+                iDropped = 0
+            # print no. of observations dropped in 1st pass
+            self.logger.info('First pass: dropped ' + str(iDropped) + ' individuals with only one relatedness value in excess of ' + str(dRelCutoff))
             # get data from DataFrame
             mA = dfA.values
             iN = mA.shape[0]
@@ -433,7 +425,7 @@ class MgremlData:
             vR = vR[vIndRltC]
             vC = vC[vIndRltC]
             vV = vV[vIndRltC]
-            # find all entries with value in excess of tau
+            # find all entries with value in excess of cutoff
             (vIndVgtTau,) = np.where(vV>dRelCutoff)
             # if there is any remaining unwanted relatedness at all
             if len(vIndVgtTau) > 0:
@@ -455,17 +447,16 @@ class MgremlData:
                 setDropIDs = set(vUnique) - set(lKeepIDs)
                 # take full set of IDs and remove the ones to drop
                 vFinalKeepIDs = np.sort(np.array(list(set(vID) - setDropIDs)))
-                self.logger.info('Second pass: dropping ' + str(len(setDropIDs)) + ' additional rows and columns with excessive relatedness to more than one other individual')    
-                # STAGE 4: KEEP APPROPRIATE PART OF DATAFRAME    
                 # select corresponding subset of rows and cols from DataFrame
                 dfA = dfA.iloc[vFinalKeepIDs,vFinalKeepIDs]
+                # print no. of observations dropped in 2nd pass
+                self.logger.info('Second pass: dropped ' + str(len(setDropIDs)) + ' individuals with relatedness values in excess of ' + str(dRelCutoff))
             else:
                 self.logger.info('Second pass not required, as there are no individuals with relatedness in excess of ' + str(dRelCutoff) + ' left after first pass')
             self.logger.info('Relatedness cutoff has been applied')
-            self.logger.info('Remaining sample size is ' + str(dfA.shape[0]))
         else:
             self.logger.info('No cutoff has been applied, as there are no individuals with relatedness in excess of ' + str(dRelCutoff))
-            self.logger.info('Remaining sample size is ' + str(dfA.shape[0]))
+        self.logger.info('Remaining sample size is ' + str(dfA.shape[0]))
         # get index of observations to keep
         miIDs = dfA.index
         # keep appropriate parts of dfY
@@ -475,7 +466,7 @@ class MgremlData:
             # keep appropriate parts of dfX
             dfX = dfX.loc[miIDs]
         return dfY, dfA, dfX
-        
+    
     def CreateDummies(self, dfY, dfX, dfBinXY):
         # if there are any missings at all
         if ((dfY.isnull() | dfY.isna()).sum()[0] > 0):
