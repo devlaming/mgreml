@@ -227,7 +227,7 @@ Clearly, each covariate affects a different trait. We can now perform `mgreml` e
 
 ```
 python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
-                   --covar ./tutorial/covar.txt  --covar-model ./tutorial/covar_model.txt \
+                   --covar ./tutorial/covar.txt --covar-model ./tutorial/covar_model.txt \
                    --out ./tutorial/different_covs
 ```
 
@@ -250,7 +250,7 @@ Now, `different_covs.GLS.est.out`, in the folder `tutorial`, shows the fixed-eff
 
 E.g. `my covar 301` does not affect `Some pheno 101` in this case.
 
-Analogous to `--covar-model`, users can also specify which genetic factor affects which trait and which environment factor affects which trait. Such specifications can be passed to `mgreml` using the `--genetic-model` and `--environment-model` options. Note, that any such user-specified structural model must be identified. Moreover, for the factor specification of the environment, `mgreml` requires as many factors as there are traits.
+Analogous to `--covar-model`, users can also specify which genetic factor affects which trait and which environment factor affects which trait. Such specifications can be passed to `mgreml` using the `--genetic-model` and `--environment-model` options. Note that any such user-specified structural model must be identified. Moreover, for the factor specification of the environment, `mgreml` requires as many factors as there are traits.
 
 For example, we could impose a factor structure, where there is only one genetic factor, and where there are *T*=10 environment factors, each affecting a different trait. Effectively, this boils down to a model with genetic correlations all equal to one and environment correlations all equal to zero. These factor structures are shown in the files `gen_model.txt` and `env_model.txt` both found in the `tutorial` folder. Both files contain a binary table, with elements equal to one, where a given factor is permitted to affect the given phenotype, and equal to zero otherwise.
 
@@ -280,7 +280,7 @@ Similarly, the estimates of environment correlations, in `custom_model.RhoE.out`
 
 Notice that in `mgreml`, specifying `--genetic-model` does not require you to also specify `--environment-model` (nor the other way around).
 
-For the specific cases of genetic correlations all equal to one or all equal to zero, and environment correlations all equal to zero, `mgreml` has two custom options that can be used for such cases instead of `--genetic-model` and `--environment-model`, namely `--rho-genetic 0` or  `--rho-genetic 1` and  `--rho-environment 0`.
+For the specific cases of genetic correlations all equal to one or all equal to zero, and environment correlations all equal to zero, `mgreml` has two custom options that can be used for such cases instead of `--genetic-model` and `--environment-model`, namely `--rho-genetic 0` or `--rho-genetic 1` and `--rho-environment 0`.
 
 So, effectively, we could have also estimated the last model using the following command:
 
@@ -315,7 +315,7 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 
 yields heritability estimates all equal to zero, as expected, in `novarG.HSq.out`.
 
-Notice that the option `--no-var-genetic` cannot be combined with `--rho-genetic` and/or  `--genetic-model`.
+Notice that the option `--no-var-genetic` cannot be combined with `--rho-genetic` and/or `--genetic-model`.
 
 In case you have estimated a model, either according to some structural model e.g. using `--genetic-model`, or just the saturated model we started with, `mgreml` can report the factor coefficients (i.e. the estimated effect of each factor on each trait) by using the `--factor-coefficients` option. Using this option not only reports the estimated factor coefficients, but also the covariance matrix of those estimates (unless `--no-se` is used). This covariance matrix may grow very large for large *T*.
 
@@ -436,7 +436,7 @@ Chi-square test statistic is 2956.2547365437495
 with P-value = 0.0
 ```
 
-As before, `--restricted-no-var-genetic`, `--restricted-rho-genetic`, and/or  `--restricted-genetic-model` cannot be combined with one another. Similarly, `--restricted-rho-environment` and  `--restricted-environment-model` cannot be combined with each other.
+As before, `--restricted-no-var-genetic`, `--restricted-rho-genetic`, and/or `--restricted-genetic-model` cannot be combined with one another. Similarly, `--restricted-rho-environment` and `--restricted-environment-model` cannot be combined with each other.
 
 By default, `mgreml` will not store any intermediate results. However, using the `--store-iter` option, users can specify every how many iterations they want the current parameter estimates to be stored. E.g. `--store-iter 10` will cause `mgreml` to store estimates every ten iterations. The estimates will be stored in a so-called `.pkl` with a prefix a set by the `--out` option. This `.pkl` file contains the model specification as well as the estimates of that model in a given iteration.
 
@@ -505,9 +505,9 @@ Note that `mgreml` has a few advanced options regarding the estimation algorithm
 
 In addition, `mgreml` considers the estimates to have converged if the root mean squared sum of the gradient vector (taking scale of traits and sample size into account) is below 10<sup>&minus;5</sup>. For conceptual ease, we refer to this criterion as length of the gradient. The option `--grad-tol` can be used to specify a different treshold. We do **NOT** recommend deviating from 10<sup>&minus;5</sup> by more than one order of magnitude. E.g. you could use `--grad-tol 5E-5` or `--grad-tol 1e-6`. However, we de **NOT** recommend e.g. `--grad-tol 1E-9`, as such a threshold requires a degree of convergence that is often beyond numerical precision, nor do we commend e.g. `--grad-tol 0.01`, as this is too lenient; the optimisation procedure simply has not converged when the latter convergence criterion is met.
 
-Input files following the options `--pheno`,  `--covar`,  `--covar-model`, `--genetic-model`, `--environment-model`, `--restricted-genetic-model`, `--restricted-environment-model` can be comma, tab, or space-separated. Just make sure to be consistent within each file. Also, (1) when your labels (e.g. phenotype labels or FID and IIDs) contain spaces, make sure the file is not space-separated and (2) when those labels contain commas, make sure the file is not comma-separated.
+Input files following the options `--pheno`, `--covar`, `--covar-model`, `--genetic-model`, `--environment-model`, `--restricted-genetic-model`, `--restricted-environment-model` can be comma, tab, or space-separated. Just make sure to be consistent within each file. Also, (1) when your labels (e.g. phenotype labels or FID and IIDs) contain spaces, make sure the file is not space-separated and (2) when those labels contain commas, make sure the file is not comma-separated.
 
-Finally, that the options `--pheno`,  `--covar`,  `--covar-model`, `--genetic-model`, `--environment-model`, `--restricted-genetic-model`, `--restricted-environment-model` have modifiers `nolabelpheno`, `nolabelcovar`, and `nolabelfactor` to indicate when headers (e.g. phenotype labels) are absent. E.g. the following options are possible in `mgreml`: `--pheno myphen.txt nolabelpheno` and  `--covar-model mycovmodel.txt nolabelpheno nolabelcovar`). However, as `mgreml` is a multivariate method, we strongly recommend always providing headers to `mgreml`, so everything is labelled in terms of input as well as output.
+Finally, that the options `--pheno`, `--covar`, `--covar-model`, `--genetic-model`, `--environment-model`, `--restricted-genetic-model`, `--restricted-environment-model` have modifiers `nolabelpheno`, `nolabelcovar`, and `nolabelfactor` to indicate when headers (e.g. phenotype labels) are absent. E.g. the following options are possible in `mgreml`: `--pheno myphen.txt nolabelpheno` and `--covar-model mycovmodel.txt nolabelpheno nolabelcovar`). However, as `mgreml` is a multivariate method, we strongly recommend always providing headers to `mgreml`, so everything is labelled in terms of input as well as output.
 
 ## Updating `mgreml`
 
