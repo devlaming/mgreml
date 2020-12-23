@@ -81,7 +81,7 @@ class MgremlReader:
             self.logger.info('READING OPTIONS')
             # determine whether we will drop missings
             self.DropMissings()
-            # determine whether rel-cutoff has been used
+            # determine whether --grm-cutoff has been used
             self.SetRelCutOff()
             # determine how many PCs to drop
             self.SetNumberOfPCs()
@@ -151,60 +151,60 @@ class MgremlReader:
         groupEnvironment = self.parser.add_mutually_exclusive_group()
         groupRestrictedEnvironment = self.parser.add_mutually_exclusive_group()
         #create arguments
-        self.parser.add_argument('--grm', metavar = 'mygrm', default = None, type = str,
-                            help = 'Prefix of the binary GRM e.g. from GCTA or PLINK.')
-        self.parser.add_argument('--pheno', metavar = 'myphen.txt [nolabelpheno]', default = None, type = str, nargs = '+',
-                            help = 'Name of your phenotype file. Possible to add the flags nolabelpheno e.g. --pheno mypheno.txt nolabelpheno; not recommended, please label your phenotypes! File should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per phenotype.')
-        self.parser.add_argument('--no-intercept', action = 'store_true',
-                            help = 'optional flag to indicate the intercept should not be included automatically as covariate.')
-        self.parser.add_argument('--covar', metavar = 'mycov.txt [nolabelcovar]', default = None, type = str, nargs = '+',
-                            help = 'Optional flag naming your covariate file. Possible to add the flags nolabelcovar e.g. --covar mycovar.txt nolabelcovar; not recommended, please label your covariates! File should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per covariate. WARNING: do not include principal components from your genetic data as covariates. MGREML automatically controls for 20 principal components using the canonical transformation. If you want to control for more or fewer principal components, use the --adjust-pcs option instead.')
-        self.parser.add_argument('--covar-model', metavar = 'mycovmodel.txt [nolabelpheno] [nolabelcovar]', default = None, type = str, nargs = '+',
-                            help = 'Optional flag naming the file that specifies which covariates (columns) apply to which phenotypes (rows). Possible to add the flags nolabelpheno and/or nolabelcovar; not recommended, please label your phenotypes and covariates! If no file is specified, all covariates are assumed to apply to all traits.')
-        groupGenetic.add_argument('--genetic-model', metavar = 'mygenmodel.txt [nolabelpheno] [nolabelfactor]', default = None, type = str, nargs = '+',
-                            help = 'Optional flag naming the file that specifies which genetic factors (columns) affect which phenotypes (rows). Possible to add the flags nolabelpheno and/or nolabelfactor; not recommended, please label your phenotypes and genetic factors!')
-        groupGenetic.add_argument('--rho-genetic', choices = [0, 1], default = None, type = int,
-                            help = 'Optional flag followed by integer equal to zero or one, forcing all genetic correlations to take on the specified value. This flag cannot be combined with --genetic-model.')
-        groupGenetic.add_argument('--no-var-genetic', action = 'store_true',
-                            help = 'Optional flag, forcing all genetic variances to be equal to zero. This flag cannot be combined with --genetic-model and/or --rho-genetic.')
-        groupRestrictedGenetic.add_argument('--restricted-genetic-model', metavar = 'mygenmodel0.txt [nolabelpheno] [nolabelfactor]', default = None, type = str, nargs = '+',
-                            help = 'Optional flag naming the file that specifies for a restricted model which genetic factors (columns) affect which phenotypes (row). Possible to add the flags nolabelpheno and/or nolabelfactor; not recommended, please label your phenotypes and genetic factors!')
-        groupRestrictedGenetic.add_argument('--restricted-rho-genetic', choices = [0, 1], default = None, type = int,
-                            help = 'Optional flag followed by integer equal to zero or one, forcing all genetic correlations in the restricted model to take on the specified value. This flag cannot be combined with --restricted-genetic-model.')
-        groupRestrictedGenetic.add_argument('--restricted-no-var-genetic', action = 'store_true',
-                            help = 'Optional flag, forcing all genetic variances in the restricted model to be equal to zero. This flag cannot be combined with --restricted-genetic-model and/or --restricted-rho-genetic.')
-        groupEnvironment.add_argument('--environment-model', metavar = 'myenvmodel.txt [nolabelpheno] [nolabelfactor]', default = None, type = str, nargs = '+',
-                            help = 'Name of a file that specifies which environment factors (columns) affect which phenotypes (rows). Possible to add the flags nolabelpheno and/or nolabelfactor; not recommended, always name things.')
-        groupEnvironment.add_argument('--rho-environment', choices = [0], default = None, type = int,
-                            help = 'Optional flag followed by integer equal to zero, forcing all environment correlations to zero. This flag cannot be combined with --environment-model.')
-        groupRestrictedEnvironment.add_argument('--restricted-environment-model', metavar = 'myenvmodel0.txt [nolabelpheno] [nolabelfactor]', default = None, type = str, nargs = '+',
-                            help = 'Name of a file that specifies for a restricted model which environment factors (columns) affect which phenotypes (row). Possible to add the flags nolabelpheno and/or nolabelfactor; not recommended, always name things.')
-        groupRestrictedEnvironment.add_argument('--restricted-rho-environment', choices = [0], default = None, type = int,
-                            help = 'Optional flag followed by integer equal to zero, forcing all environment correlations in the restricted model to zero. This flag cannot be combined with --restricted-environment-model.')
-        self.parser.add_argument('--adjust-pcs', metavar = '20 [0]', default = None, type = int, nargs = '+',
-                            help = 'optional flag to specify for how many leading principal components (PCs) to adjust (as method to control for population stratification) and for how many trailing PCs to adjust (for computational efficiency); if just one non-negative integer is specified this is taken as the number of leading PCs to adjust for')
+        self.parser.add_argument('--grm', metavar = 'PREFIX', default = None, type = str,
+                            help = 'prefix of binary GRM')
+        self.parser.add_argument('--grm-cutoff', metavar = 'THRESHOLD', default = None, type = float,
+                            help = 'option to drop individuals using greedy algorithm, such that there is no relatedness in GRM in excess of threshold for remaining individuals')
+        self.parser.add_argument('--adjust-pcs', metavar = 'INTEGER [INTEGER]', default = None, type = int, nargs = '+',
+                            help = 'option to specify for how many leading principal components (PCs) from genetic data to adjust (to control for population stratification) and for how many trailing PCs to adjust (for computational efficiency); if just one non-negative integer is specified this is taken as the number of leading PCs to adjust for')
+        self.parser.add_argument('--pheno', metavar = 'FILENAME [nolabelpheno]', default = None, type = str, nargs = '+',
+                            help = 'phenotype file: should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per phenotype; can be followed by optional flag nolabelpheno, e.g. --pheno mypheno.txt nolabelpheno, but we recommend to label phenotypes')
         self.parser.add_argument('--drop-missings', action = 'store_true',
-                            help = 'optional flag to drop all observations from data with at least one missing phenotype or at least one missing covariate')
-        self.parser.add_argument('--rel-cutoff', metavar = '0.025', default = None, type = float,
-                            help = 'optional flag followed by a value above which overly related individuals are removed from the GRM using a greedy algorithm')
+                            help = 'option to drop all observations from data with at least one missing phenotype or at least one missing covariate')
+        self.parser.add_argument('--no-intercept', action = 'store_true',
+                            help = 'option to indicate an intercept should not be included automatically as covariate')
+        self.parser.add_argument('--covar', metavar = 'FILENAME [nolabelcovar]', default = None, type = str, nargs = '+',
+                            help = 'optional covariate file: should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per covariate; can be followed by optional flag nolabelcovar, e.g. --covar mycovar.txt nolabelcovar, but we recommend to label covariates; WARNING: do not include principal components from genetic data as covariates, use --adjust-pcs instead')
+        self.parser.add_argument('--covar-model', metavar = 'FILENAME [nolabelpheno] [nolabelcovar]', default = None, type = str, nargs = '+',
+                            help = 'optional covariate model file: should be comma-, space-, or tab-separated, with one row per phenotype and one column per covariate; can be followed by optional flags nolabelpheno and/or nolabelcovar, but we recommend to label phenotypes and covariates; without --covar-model, all covariates are assumed to apply to all traits')
+        groupGenetic.add_argument('--genetic-model', metavar = 'FILENAME [nolabelpheno] [nolabelfactor]', default = None, type = str, nargs = '+',
+                            help = 'optional genetic model file: should be comma-, space-, or tab-separated, with one row per phenotype and one column per genetic factor; can be followed by optional flags nolabelpheno and/or nolabelfactor, but we recommend to label phenotypes and genetic factors')
+        groupGenetic.add_argument('--rho-genetic', metavar = '0 or 1', choices = [0, 1], default = None, type = int,
+                            help = 'option followed by 0 or 1, forcing all genetic correlations to take on the specified value; this flag cannot be combined with --genetic-model')
+        groupGenetic.add_argument('--no-var-genetic', action = 'store_true',
+                            help = 'option to force all genetic variances to equal zero; this flag cannot be combined with --genetic-model and/or --rho-genetic')
+        groupRestrictedGenetic.add_argument('--restricted-genetic-model', metavar = 'FILENAME [nolabelpheno] [nolabelfactor]', default = None, type = str, nargs = '+',
+                            help = 'optional restricted genetic model file: should be comma-, space-, or tab-separated, with one row per phenotype and one column per genetic factor; can be followed by optional flags nolabelpheno and/or nolabelfactor, but we recommend to label phenotypes and genetic factors')
+        groupRestrictedGenetic.add_argument('--restricted-rho-genetic', metavar = '0 or 1', choices = [0, 1], default = None, type = int,
+                            help = 'option followed by 0 or 1, forcing all genetic correlations in the restricted model to take on the specified value; this flag cannot be combined with --restricted-genetic-model')
+        groupRestrictedGenetic.add_argument('--restricted-no-var-genetic', action = 'store_true',
+                            help = 'option to force all genetic variances in the restricted model to equal zero; this flag cannot be combined with --restricted-genetic-model and/or --restricted-rho-genetic')
+        groupEnvironment.add_argument('--environment-model', metavar = 'FILENAME [nolabelpheno] [nolabelfactor]', default = None, type = str, nargs = '+',
+                            help = 'optional environment model file: should be comma-, space-, or tab-separated, with one row per phenotype and one column per environment factor; can be followed by optional flags nolabelpheno and/or nolabelfactor, but we recommend to label phenotypes and environment factors')
+        groupEnvironment.add_argument('--rho-environment', metavar = '0', choices = [0], default = None, type = int,
+                            help = 'option followed by 0, forcing all environment correlations to zero; this flag cannot be combined with --environment-model')
+        groupRestrictedEnvironment.add_argument('--restricted-environment-model', metavar = 'FILENAME [nolabelpheno] [nolabelfactor]', default = None, type = str, nargs = '+',
+                            help = 'optional restricted environment model file: should be comma-, space-, or tab-separated, with one row per phenotype and one column per environment factor; can be followed by optional flags nolabelpheno and/or nolabelfactor, but we recommend to label phenotypes and environment factors')
+        groupRestrictedEnvironment.add_argument('--restricted-rho-environment', metavar = '0', choices = [0], default = None, type = int,
+                            help = 'option followed by 0, forcing all environment correlations in the restricted model to zero; this flag cannot be combined with --restricted-environment-model')
         self.parser.add_argument('--no-se', action = 'store_true',
-                            help = 'optional flag to indicate calculation of standard errors and covariance matrix of estimates should be skipped (e.g. when only interested in a likelihood-ratio test for a nested model)')
+                            help = 'option to skip calculation of standard errors and covariance matrix of estimates')
         self.parser.add_argument('--factor-coefficients', action = 'store_true', 
-                            help = 'optional flag to report all estimated factor coefficients')
+                            help = 'option to report estimated factor coefficients')
         self.parser.add_argument('--variance-components', action = 'store_true', 
-                            help = 'optional flag to report all estimated variance components')
+                            help = 'option to report estimated variance components')
         self.parser.add_argument('--newton', action = 'store_true',
-                            help = 'optional flag to perform Newton instead of BFGS; not recommended, unless the model is well-identified and the number of traits is small')
-        self.parser.add_argument('--grad-tol', metavar = '1E-5', default = None, type = float,
-                            help = 'optional flag to set convergence threshold on the length of the gradient vector per parameter, per observation, different from the default value of 1E-5')
-        self.parser.add_argument('--store-iter', metavar = '50', default = None, type = int, 
-                            help = 'optional flag to specify every how many iterations you want to store results (e.g. every 50 itertions)')
-        self.parser.add_argument('--reinitialise', metavar = 'myoutput.estimates.iter.100.bfgs.pkl', default = None, type = str,  
-                            help = 'optional flag to reinitialise MGREML estimation for a model and its estimates as specified in a .pkl file generated by the --store-iter option')
-        self.parser.add_argument('--restricted-reinitialise', metavar = 'myoutput.estimates0.iter.100.bfgs.pkl', default = None, type = str,  
-                            help = 'optional flag to reinitialise MGREML estimation for a restricted model and its estimates as specified in a .pkl file generated by the --store-iter option')
-        self.parser.add_argument('--out', metavar = 'myoutput', default = None, type = str,
-                            help = 'Prefix of the output files.')
+                            help = 'option to use Newton method instead of BFGS; not recommended, unless the model is well-defined, starting values are of good quality, and the number of traits is small')
+        self.parser.add_argument('--grad-tol', metavar = 'THRESHOLD', default = None, type = float,
+                            help = 'option to set convergence threshold on the length of the gradient vector per parameter, per observation, different from the default value of 1E-5')
+        self.parser.add_argument('--store-iter', metavar = 'INTEGER', default = None, type = int, 
+                            help = 'option to specify every how many iterations you want to store results')
+        self.parser.add_argument('--reinitialise', metavar = 'FILENAME', default = None, type = str,  
+                            help = 'option to reinitialise mgreml for a model and its estimates from a .pkl file stored by --store-iter')
+        self.parser.add_argument('--restricted-reinitialise', metavar = 'FILENAME', default = None, type = str,  
+                            help = 'option to reinitialise mgreml for a restricted model and its estimates from a .pkl file generated by --store-iter')
+        self.parser.add_argument('--out', metavar = 'PREFIX', default = None, type = str,
+                            help = 'prefix of output files')
         # try to parse the input arguments
         try:
             # parse the input options
@@ -621,13 +621,13 @@ class MgremlReader:
             self.bVarComp = False
             
     def SetRelCutOff(self):
-        # if --rel-cutoff used
-        if self.args.rel_cutoff is not None:
-            if (self.args.rel_cutoff < 0):
-                raise ValueError('--rel-cutoff should be followed by non-negative value.')
+        # if --grm-cutoff used
+        if self.args.grm_cutoff is not None:
+            if (self.args.grm_cutoff < 0):
+                raise ValueError('--grm-cutoff should be followed by non-negative value.')
             else:
                 self.bRelCutoff = True
-                self.dRelCutoff = self.args.rel_cutoff
+                self.dRelCutoff = self.args.grm_cutoff
                 self.logger.info('A relatedness cutoff of ' + str(self.dRelCutoff) + ' will be applied to your GRM.')
         else:
             self.bRelCutoff = False
