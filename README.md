@@ -449,12 +449,12 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                    --out ./tutorial/covar
 ```
 
-causes `mgreml` to store results every 50 iterations. Then, if the preceding analysis has reached e.g. up until iteration 250 before a power outage, we could reinitialise later on using the following command:
+causes `mgreml` to store results every 50 iterations. Then, if the preceding analysis has reached e.g. up until iteration 200 before a power outage, we could reinitialise later on using the following command:
 
 ```
 python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                    --covar ./tutorial/covar.txt \
-                   --reinitialise ./tutorial/covar.estimates.iter.250.bfgs.pkl \
+                   --reinitialise ./tutorial/covar.estimates.iter.200.bfgs.pkl \
                    --out ./tutorial/covar_reinitialised
 ```
 
@@ -469,28 +469,41 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                    --covar ./tutorial/covar.txt \
                    --restricted-rho-genetic 1 \
                    --restricted-rho-environment 0 \
-                   --store-iter 5 \
+                   --store-iter 10 \
                    --out ./tutorial/restricted_rhoG1_rhoE0
 ```
-causes two sets of `.pkl` files to be stored (i.e. a file for every 5 iterations, for both the restricted and alternative model) and
+causes two sets of `.pkl` files to be stored (i.e. a file for every ten iterations, for both the restricted and alternative model) and
 ```
 python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                    --covar ./tutorial/covar.txt \
-                   --reinitialise ./tutorial/restricted_rhoG1_rhoE0.estimates.iter.265.bfgs.pkl \
-                   --restricted-reinitialise ./tutorial/restricted_rhoG1_rhoE0.estimates0.iter.25.bfgs.pkl \
+                   --reinitialise ./tutorial/restricted_rhoG1_rhoE0.estimates.iter.200.bfgs.pkl \
+                   --restricted-reinitialise ./tutorial/restricted_rhoG1_rhoE0.estimates0.iter.20.bfgs.pkl \
                    --out ./tutorial/restricted_rhoG1_rhoE0_reinitialised
 ```
 reinitialises estimation for the null and alternative model from appropriate `.pkl` files. Notice that analogous to `--reinitialise`, the `--restricted-reinitialise` option cannot be combined with options such as `--restricted-environment-model` and `--restricted-rho-genetic`, as the `.pkl` file already contains the full model specification.
 
 `mgreml` performs basic data management, e.g. in terms of figuring out for which individuals we have phenotypic as well as GRM data (and data on covariates, if applicable). In case `--covar-model` is used `mgreml` also tests if there are any covariates that affect no phenotype at all, and if so, excludes such covariates.
 
-`mgreml` also performs relatedness pruning when using the `--rel-cutoff` option. E.g. the following command selects a subset of individuals such that relatedness in the GRM is nowhere in excess of 0.05:
+`mgreml` also performs relatedness pruning when using the `--grm-cutoff` option. E.g. the following command selects a subset of individuals such that relatedness in the GRM is nowhere in excess of 0.05:
 
 ```
 python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                    --covar ./tutorial/covar.txt \
-                   --rel-cutoff 0.05 \
+                   --grm-cutoff 0.05 \
                    --out ./tutorial/pruned
+```
+
+which in this case causes the sample size to decrease by 13, as in shown in part of the log-file below:
+
+```
+2. CLEANING YOUR DATA
+[...]
+APPLYING RELATEDNESS CUTOFF
+Removing individuals such that there is no relatedness in excess of 0.05 in GRM
+First pass: dropped 13 individuals with only one relatedness value in excess of 0.05
+Second pass not required, as there are no individuals with relatedness in excess of 0.05 left after first pass
+Relatedness cutoff has been applied
+Remaining sample size is 4987
 ```
 
 `mgreml` follows the greedy algorithm developed by Boppana and Halldórsson (1992); [doi:10.1007/BF01994876](https://link.springer.com/article/10.1007/BF01994876). Importantly, `mgreml` does this pruning at such a stage that sample size is maximised. E.g. for a pair of individuals with a relatedness in excess of the threshold, we try to keep the observation with the lowest missingness.
