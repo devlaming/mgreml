@@ -532,9 +532,7 @@ An overview of all `mgreml` commands is listed below:
 | --- | --- |
 | -h, --help | show help message and exit |
 | --grm PREFIX | prefix of binary GRM |
-| --grm-cutoff THRESHOLD | option to drop individuals using greedy algorithm, |
-|  | such that there is no relatedness in GRM in excess of |
-|  | threshold for remaining individuals |
+| --grm-cutoff THRESHOLD | option to drop individuals using greedy algorithm, <br> such that there is no relatedness in GRM in excess of <br> threshold for remaining individuals |
 | --adjust-pcs INTEGER [INTEGER] | option to specify for how |
 |  | many leading principal components (PCs) from genetic |
 |  | data to adjust (to control for population |
