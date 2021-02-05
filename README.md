@@ -531,13 +531,10 @@ An overview of all `mgreml` commands is listed below:
 | Command | Usage |
 | --- | --- |
 | -h, --help | show help message and exit |
-| --- | --- |
 | --grm PREFIX | prefix of binary GRM |
-| --- | --- |
 | --grm-cutoff THRESHOLD | option to drop individuals using greedy algorithm, |
 |  | such that there is no relatedness in GRM in excess of |
 |  | threshold for remaining individuals |
-| --- | --- |
 | --adjust-pcs INTEGER [INTEGER] | option to specify for how |
 |  | many leading principal components (PCs) from genetic |
 |  | data to adjust (to control for population |
@@ -545,7 +542,6 @@ An overview of all `mgreml` commands is listed below:
 |  | adjust (for computational efficiency); if just one |
 |  | non-negative integer is specified this is taken as the |
 |  | number of leading PCs to adjust for |
-| --- | --- |
 | --pheno FILENAME [nolabelpheno]  | phenotype file: |
 |  | should be comma-, space-, or tab-separated, with one |
 |  | row per individual, with FID and IID as first two |
@@ -553,14 +549,11 @@ An overview of all `mgreml` commands is listed below:
 |  | followed by optional flag nolabelpheno, e.g. --pheno |
 |  | mypheno.txt nolabelpheno, but we recommend to label |
 |  | phenotypes |
-| --- | --- |
 | --drop-missings | option to drop all observations from data with at |
 |  | least one missing phenotype or at least one missing |
 |  | covariate |
-| --- | --- |
 | --no-intercept | option to indicate an intercept should not be included |
 |  | automatically as covariate |
-| --- | --- |
 | --covar FILENAME [nolabelcovar]  | optional |
 |  | covariate file: should be comma-, space-, or tab- |
 |  | separated, with one row per individual, with FID and |
@@ -570,7 +563,6 @@ An overview of all `mgreml` commands is listed below:
 |  | but we recommend to label covariates; WARNING: do not |
 |  | include principal components from genetic data as |
 |  | covariates, use --adjust-pcs instead |
-| --- | --- |
 | --covar-model FILENAME | optional |
 |  [nolabelpheno] [nolabelcovar]  | covariate model file: should be comma-, space-, or |
 |  | tab-separated, with one row per phenotype and one |
@@ -579,39 +571,32 @@ An overview of all `mgreml` commands is listed below:
 |  | recommend to label phenotypes and covariates; without |
 |  | --covar-model, all covariates are assumed to apply to |
 |  | all traits |
-| --- | --- |
 | --genetic-model FILENAME |  optional |
 |  [nolabelpheno] [nolabelfactor] | genetic model file: should be comma-, space-, or tab- |
 |  | separated, with one row per phenotype and one column |
 |  | per genetic factor; can be followed by optional flags |
 |  | nolabelpheno and/or nolabelfactor, but we recommend to |
 |  | label phenotypes and genetic factors |
-| --- | --- |
 |  --rho-genetic 0 or 1  | option followed by 0 or 1, forcing all genetic |
 |  | correlations to take on the specified value; this flag |
 |  | cannot be combined with --genetic-model |
-| --- | --- |
 | --no-var-genetic | option to force all genetic variances to equal zero; |
 |  | this flag cannot be combined with --genetic-model |
 |  | and/or --rho-genetic |
-| --- | --- |
 | --restricted-genetic-model FILENAME |  optional |
 |  [nolabelpheno] [nolabelfactor] | restricted genetic model file: should be comma-, |
 |  | space-, or tab-separated, with one row per phenotype |
 |  | and one column per genetic factor; can be followed by |
 |  | optional flags nolabelpheno and/or nolabelfactor, but |
 |  | we recommend to label phenotypes and genetic factors |
-| --- | --- |
 | --restricted-rho-genetic 0 or 1 | option followed by 0 or 1, forcing all genetic |
 |  | correlations in the restricted model to take on the |
 |  | specified value; this flag cannot be combined with |
 |  | --restricted-genetic-model |
-| --- | --- |
 | --restricted-no-var-genetic | option to force all genetic variances in the |
 |  | restricted model to equal zero; this flag cannot be |
 |  | combined with --restricted-genetic-model and/or |
 |  | --restricted-rho-genetic |
-| --- | --- |
 | --environment-model FILENAME |  optional |
 |  [nolabelpheno] [nolabelfactor] | environment model file: should be comma-, space-, or |
 |  | tab-separated, with one row per phenotype and one |
@@ -619,11 +604,9 @@ An overview of all `mgreml` commands is listed below:
 |  | optional flags nolabelpheno and/or nolabelfactor, but |
 |  | we recommend to label phenotypes and environment |
 |  | factors |
-| --- | --- |
 | --rho-environment 0  | option followed by 0, forcing all environment |
 |  | correlations to zero; this flag cannot be combined |
 |  | with --environment-model |
-| --- | --- |
 | --restricted-environment-model FILENAME |  optional |
 |  [nolabelpheno] [nolabelfactor] | restricted environment model file: should be comma-, |
 |  | space-, or tab-separated, with one row per phenotype |
@@ -631,38 +614,28 @@ An overview of all `mgreml` commands is listed below:
 |  | by optional flags nolabelpheno and/or nolabelfactor, |
 |  | but we recommend to label phenotypes and environment |
 |  | factors |
-| --- | --- |
 | --restricted-rho-environment 0 | option followed by 0, forcing all environment |
 |  | correlations in the restricted model to zero; this |
 |  | flag cannot be combined with --restricted-environment- |
 |  | model |
-| --- | --- |
 | --no-se | option to skip calculation of standard errors and |
 |  | covariance matrix of estimates |
-| --- | --- |
 | --factor-coefficients | option to report estimated factor coefficients |
-| --- | --- |
 | --variance-components | option to report estimated variance components |
-| --- | --- |
 | --newton | option to use Newton method instead of BFGS; not |
 |  | recommended, unless the model is well-defined, |
 |  | starting values are of good quality, and the number of |
 |  | traits is small |
-| --- | --- |
 | --grad-tol THRESHOLD | option to set convergence threshold on the length of |
 |  | the gradient vector per parameter, per observation, |
 |  | different from the default value of 1E-5 |
-| --- | --- |
 | --store-iter INTEGER | option to specify every how many iterations you want |
 |  | to store results |
-| --- | --- |
 | --reinitialise FILENAME | option to reinitialise mgreml for a model and its |
 |  | estimates from a .pkl file stored by --store-iter |
-| --- | --- |
 | --restricted-reinitialise FILENAME | option to reinitialise mgreml for a restricted model |
 |  | and its estimates from a .pkl file generated by |
 |  | --store-iter |
-| --- | --- |
 | --out PREFIX |  prefix of output files |
 
 ## Updating `mgreml`
