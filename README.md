@@ -530,14 +530,14 @@ An overview of all `mgreml` commands is listed below:
 
 | Command | Usage |
 | --- | --- |
-| -h, --help | show help message and exit |
-| --grm PREFIX | prefix of binary GRM |
-| --grm-cutoff THRESHOLD | option to drop individuals using greedy algorithm, <br> such that there is no relatedness in GRM in excess of <br> threshold for remaining individuals |
-| --adjust-pcs INTEGER [INTEGER] | option to specify for how <br> many leading principal components (PCs) from genetic <br> data to adjust (to control for population <br> stratification) and for how many trailing PCs to <br> adjust (for computational efficiency); if just one <br> non-negative integer is specified this is taken as the <br> number of leading PCs to adjust for |
-| --pheno FILENAME [nolabelpheno]  | phenotype file: <br> should be comma-, space-, or tab-separated, with one <br> row per individual, with FID and IID as first two <br> fields, followed by a field per phenotype; can be <br> followed by optional flag nolabelpheno, e.g. --pheno <br> mypheno.txt nolabelpheno, but we recommend to label <br> phenotypes |
-| --drop-missings | option to drop all observations from data with at <br> least one missing phenotype or at least one missing <br> covariate |
-| --no-intercept | option to indicate an intercept should not be included <br> automatically as covariate |
-| --covar FILENAME [nolabelcovar]  | optional covariate file: should be comma-, space-, or tab- <br> separated, with one row per individual, with FID and <br> IID as first two fields, followed by a field per <br> covariate; can be followed by optional flag <br> nolabelcovar, e.g. --covar mycovar.txt nolabelcovar, <br> but we recommend to label covariates; WARNING: do not <br> include principal components from genetic data as <br> covariates, use --adjust-pcs instead |
+| `-h`, `--help` | show help message and exit |
+| `--grm PREFIX` | prefix of binary GRM |
+| `--grm-cutoff THRESHOLD` | option to drop individuals using greedy algorithm, <br> such that there is no relatedness in GRM in excess of <br> threshold for remaining individuals |
+| `--adjust-pcs INTEGER [INTEGER]` | option to specify for how <br> many leading principal components (PCs) from genetic <br> data to adjust (to control for population <br> stratification) and for how many trailing PCs to <br> adjust (for computational efficiency); if just one <br> non-negative integer is specified this is taken as the <br> number of leading PCs to adjust for |
+| `--pheno FILENAME [nolabelpheno]` | phenotype file: <br> should be comma-, space-, or tab-separated, with one <br> row per individual, with FID and IID as first two <br> fields, followed by a field per phenotype; can be <br> followed by optional flag `nolabelpheno`, e.g. `--pheno` <br> `mypheno.txt nolabelpheno`, but we recommend to label <br> phenotypes |
+| `--drop-missings` | option to drop all observations from data with at <br> least one missing phenotype or at least one missing <br> covariate |
+| `--no-intercept` | option to indicate an intercept should not be included <br> automatically as covariate |
+| `--covar FILENAME [nolabelcovar]` | optional covariate file: should be comma-, space-, or tab- <br> separated, with one row per individual, with FID and <br> IID as first two fields, followed by a field per <br> covariate; can be followed by optional flag <br> `nolabelcovar`, e.g. `--covar mycovar.txt nolabelcovar`, <br> but we recommend to label covariates; :warning: do not <br> include principal components from genetic data as <br> covariates, use `--adjust-pcs` instead |
 | --covar-model FILENAME <br> [nolabelpheno] [nolabelcovar] | optional covariate model file: should be comma-, space-, or <br> tab-separated, with one row per phenotype and one <br> column per covariate; can be followed by optional <br> flags nolabelpheno and/or nolabelcovar, but we <br> recommend to label phenotypes and covariates; without <br> --covar-model, all covariates are assumed to apply to <br> all traits |
 | --genetic-model FILENAME <br> [nolabelpheno] [nolabelfactor] |  optional genetic model file: should be comma-, space-, or tab- <br> separated, with one row per phenotype and one column <br> per genetic factor; can be followed by optional flags <br> nolabelpheno and/or nolabelfactor, but we recommend to <br> label phenotypes and genetic factors |
 | --rho-genetic 0 or 1  | option followed by 0 or 1, forcing all genetic <br> correlations to take on the specified value; this flag <br> cannot be combined with --genetic-model |
