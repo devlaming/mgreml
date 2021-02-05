@@ -565,8 +565,6 @@ Before contacting us, please try the following:
 1. Go over the tutorial in this `README.md` file
 2. Go over the method, described in detail in the supplementary information of the paper (citation below)
 
-If that doesn't work, you can get in touch with us via the [e.g. google group; to be decided](...).
-
 ## Citation
 
 If you use the software, please cite
