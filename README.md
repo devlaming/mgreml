@@ -18,7 +18,7 @@ In order to download `mgreml`, open a command-line interface by starting [Anacon
 git clone https://github.com/devlaming/mgreml.git
 ```
 
-Then enter the newly created `mgreml` directory using:
+Now, enter the newly created `mgreml` directory using:
 
 ```
 cd mgreml
