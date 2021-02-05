@@ -43,7 +43,7 @@ python ./mgreml.py -h
 
 to print a list of all command-line options. If this command fails, something has gone wrong during installation.
 
-*Windows users*: in case the preceding command fails, try replacing slashes (i.e. `/`) in all your `mgreml` commands by backslashes (i.e. `\`), so e.g. try
+:warning: **Windows users**: in case the preceding command fails, try replacing slashes (i.e. `/`) in all `mgreml` commands by backslashes (i.e. `\`), so e.g. try
 
 ```
 python .\mgreml.py -h
