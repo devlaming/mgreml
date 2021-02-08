@@ -586,7 +586,7 @@ class MgremlData:
             # if same covariates across traits
             if self.bSameCovs:
                 # compute log|X'X| across all traits in one go using EVD of X'X
-                (vThetaXTX,_) = np.linalg.eigh(mXTX)
+                vThetaXTX = np.linalg.eigvalsh(mXTX)
                 # if any eigenvalue is too close to zero or negative
                 if any(vThetaXTX < abs(np.finfo(float).eps)):
                     # raise an error with a proper explanation of the likely cause
@@ -614,7 +614,7 @@ class MgremlData:
                     # compute OLS residual of Y w.r.t. X
                     mR[:,it] = self.mY[:,it] - ((self.mX[:,vIndBinaryX])@(np.linalg.inv(mXTX[vIndBinaryX,:][:,vIndBinaryX])@((self.mXT[vIndBinaryX,:])@(self.mY[:,it]))))
                     # compute log|X'X| for given trait using EVD
-                    (vThetaXTX,_) = np.linalg.eigh(mXTX[vIndBinaryX,:][:,vIndBinaryX])
+                    vThetaXTX = np.linalg.eigvalsh(mXTX[vIndBinaryX,:][:,vIndBinaryX])
                     # if any eigenvalue is too close to zero or negative
                     if any(vThetaXTX < abs(np.finfo(float).eps)):
                         # raise an error with a proper explanation of the likely cause
