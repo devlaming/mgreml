@@ -606,7 +606,7 @@ Before contacting us, please try the following:
 
 If you use the software, please cite
 
-[]()
+[R. de Vlaming, E.A.W. Slob, P.R. Jansen, A. Dagher, P.D. Koellinger, P.J.F. Groenen, and C.A. Rietveld (2021). Multivariate analysis reveals shared genetic architecture of brain morphology and human behavior. *bioRxiv*: **440478**.](https://www.biorxiv.org/content/early/2021/04/19/2021.04.19.440478)
 
 ## License
 
@@ -617,5 +617,4 @@ This project is licensed under GNU GPL v3.
 Ronald de Vlaming (Vrije Universiteit Amsterdam)
 
 Eric Slob (University of Cambridge)
-
 
