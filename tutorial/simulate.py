@@ -1,3 +1,6 @@
+''' 
+simulate.py: simulates data used in the MGREML tutorial
+'''
 import numpy as np
 import pandas as pd
 from numpy.matlib import repmat
@@ -10,7 +13,7 @@ def SimulateData():
     iM = 10000
     iT = 10
     iK = 10
-    # set ploidy of human genomen
+    # set ploidy of human genome
     iP = 2    
     # set the number of environment and genetic factors
     iFG = 2+iT
@@ -23,7 +26,7 @@ def SimulateData():
     dMinMAF = 1E-2
     # initialise allele frequencies
     vAF = np.random.beta(dBetaParam1,dBetaParam2,size=iM)
-    # keep updating until all between dMinMAF and 1-dMinMAF
+    # keep drawing allele frequencies until all between dMinMAF and 1-dMinMAF
     while (min(vAF) < dMinMAF) or (max(vAF) > (1-dMinMAF)):
         (vIndAFlow,) = np.where(vAF < dMinMAF)
         (vIndAFhigh,) = np.where(vAF > (1-dMinMAF))
@@ -83,12 +86,12 @@ def SimulateData():
     sFileY = 'pheno.txt'
     dfX.to_csv(sFileX, sep='\t')
     dfY.to_csv(sFileY, sep='\t')
-    # compute heritabilities and store
+    # compute true heritabilities and store
     vHSq = mLiabG.var(axis=0) / ((mLiabG+mLiabE).var(axis=0))
     dfHSq = pd.DataFrame(vHSq,index=lPheno,columns=['heritability'])
     sHSq = 'true.HSq.txt'
     dfHSq.to_csv(sHSq, sep='\t')
-    # compute correlations and store
+    # compute true correlations and store
     mRhoG = np.outer(np.diag(mCG@mCG.T)**(-0.5),np.diag(mCG@mCG.T)**(-0.5))*(mCG@mCG.T)
     mRhoE = np.outer(np.diag(mCE@mCE.T)**(-0.5),np.diag(mCE@mCE.T)**(-0.5))*(mCE@mCE.T)
     dfRhoG = pd.DataFrame(mRhoG,index=lPheno,columns=lPheno)
@@ -97,7 +100,7 @@ def SimulateData():
     sRhoE = 'true.RhoE.txt'
     dfRhoG.to_csv(sRhoG, sep='\t')
     dfRhoE.to_csv(sRhoE, sep='\t')
-    # store fixed effects
+    # store true fixed effects
     dfBeta = pd.DataFrame(mBeta,index=lCov,columns=lPheno)
     sBeta = 'true.Beta.txt'
     dfBeta.to_csv(sBeta, sep='\t')
