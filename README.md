@@ -534,7 +534,7 @@ An overview of all `mgreml` commands is listed below:
 | --- | --- |
 | `-h`, `--help` | show help message and exit |
 | `--grm PREFIX` | prefix of binary GRM |
-| `--grm-cutoff THRESHOLD` | option to drop individuals using greedy algorithm, such that there is no relatedness in GRM in excess of threshold for remaining individuals |
+| `--grm-cutoff THRESHOLD` | option to drop individuals using a greedy algorithm, such that there is no relatedness in GRM in excess of threshold for remaining individuals |
 | `--adjust-pcs INTEGER [INTEGER]` | option to specify for how many leading principal components (PCs) from genetic data to adjust (to control for population stratification) and for how many trailing PCs to adjust (for computational efficiency); if just one non-negative integer is specified this is taken as the number of leading PCs to adjust for |
 | `--pheno FILENAME [nolabelpheno]` | phenotype file: should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per phenotype; can be followed by optional flag `nolabelpheno`, e.g. `--pheno` `mypheno.txt nolabelpheno`, but we recommend to label phenotypes |
 | `--drop-missings` | option to drop all observations from data with at least one missing phenotype or at least one missing covariate |
