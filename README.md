@@ -604,7 +604,7 @@ Before contacting us, please try the following:
 
 ### Contact
 
-In case you have a question that is not resolved by going over the preceding two steps, or in case you have encountered a bug, please send an e-mail to r.devlaming\[at\]vu.nl.
+In case you have a question that is not resolved by going over the preceding two steps, or in case you have encountered a bug, please send an e-mail to r.devlaming \[at\] vu.nl.
 
 ## Citation
 
