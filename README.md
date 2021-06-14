@@ -602,6 +602,10 @@ Before contacting us, please try the following:
 1. Go over the tutorial in this `README.md` file
 2. Go over the method, described in detail in the supplementary information of the paper (citation below)
 
+### Contact
+
+In case you have a question that is not resolved by going over the preceding two steps, or in case you have encountered a bug, please send an e-mail to r\[dot\]devlaming\[at\]vu\[dot\]nl.
+
 ## Citation
 
 If you use the software, please cite
