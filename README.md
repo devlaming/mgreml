@@ -1,6 +1,6 @@
 # MGREML (Multivariate GREML) `BETA VERSION 0.01`
 
-`mgreml` is a command-line tool for rapid estimation of SNP-based heritability and genetic correlations for (nearly) balanced data on many traits in a single analysis using a genomic-relatedness matrix (GRM) using Python 3.x.
+`mgreml` is a command-line tool using Python 3.x for rapid estimation of SNP-based heritability and genetic correlations for (nearly) balanced data on many traits in a single analysis, using a genomic-relatedness matrix (GRM) derived from SNP data on unrelated individuals.
 
 `mgreml` can easily handle estimation of the full genetic correlation matrix for up to 100 traits observed in 20,000 individuals. `mgreml` allows users to specify structural models and test hypotheses regarding nested models (e.g. no genetic correlations). In addition, the tool can handle a considerable amount of fixed-effect covariates and a very minor degree of phenotypic missingness.
 
@@ -33,7 +33,7 @@ conda activate mgreml
 
 (or `activate mgreml` instead of `conda activate mgreml` on some machines).
 
-In case you cannot create a customised conda environment (e.g. because of insufficient user rights) or simply prefer to use Anaconda Navigator or `pip` to install packages e.g. in your base environment rather than a custom environment, please note that `mgreml` only requires Python 3.x with the packages `networkx`, `numpy`, `pandas`, `scipy`, and `tqdm` installed.
+In case you cannot create a customised conda environment (e.g. because of insufficient user rights) or simply prefer to use Anaconda Navigator or `pip` to install packages e.g. in your base environment rather than a custom environment, please note that `mgreml` only requires Python 3.x with the packages `networkx`, `numpy`, `pandas`, `psutil`, `scipy`, and `tqdm` installed.
 
 Once the above has completed, you can now run
 
@@ -69,7 +69,7 @@ Let's first inspect the `pheno.txt` file. This file contains data in tab-separat
 
 Although `mgreml` in principle can handle phenotype data without header (using a modifier that we discuss later on), we recommend always including headers in your data, so e.g. your phenotypes are labelled, allowing `mgreml` output to refer to specific phenotype names rather than ambiguous indices such as `1`, `2`, `3` etc.
 
-For the same set of individuals, you have a binary genomic-relatedness matrix (a.k.a. GRM) e.g. computed using [PLINK](https://www.cog-genomics.org/plink/) or [GCTA](https://cnsgenomics.com/software/gcta/). In this case, the set of binary GRM files comprises `data.grm.bin`, `data.grm.N.bin`, and `data.grm.id`. We refer to this set of binary GRM files by its prefix, i.e. `data`.
+For the same set of individuals, you have a binary genomic-relatedness matrix (a.k.a. GRM) e.g. computed using [LDAK](https://dougspeed.com/ldak/), [PLINK](https://www.cog-genomics.org/plink/), or [GCTA](https://cnsgenomics.com/software/gcta/). In this case, the set of binary GRM files comprises `data.grm.bin`, `data.grm.N.bin`, and `data.grm.id`. We refer to this set of binary GRM files by its prefix, i.e. `data`.
 
 The command for running an `mgreml` analysis on this data without correcting for any covariates at all is as follows:
 
