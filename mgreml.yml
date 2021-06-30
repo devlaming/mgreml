@@ -6,6 +6,7 @@ dependencies:
     - networkx
     - numpy
     - pandas
+    - psutil
     - scipy
     - tqdm
 

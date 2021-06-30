@@ -4,7 +4,7 @@ import logging
 import os.path
 from mgreml.data import tools
 
-__version__ = '0.01'
+__version__ = '0.02'
 MASTHEAD  = "\n"
 MASTHEAD += "########################################################################\n"
 MASTHEAD += "##                                                                    ##\n"
@@ -23,7 +23,7 @@ MASTHEAD += "###################################################################
 MASTHEAD += "##                                                                    ##\n"
 MASTHEAD += "##  BETA VERSION {V}                                                 ##\n".format(V=__version__)
 MASTHEAD += "##                                                                    ##\n"
-MASTHEAD += "##  (C) 2020 Ronald de Vlaming and Eric Slob                          ##\n"
+MASTHEAD += "##  (C) 2021 Ronald de Vlaming and Eric Slob                          ##\n"
 MASTHEAD += "##                                                                    ##\n"
 MASTHEAD += "##  Vrije Universiteit Amsterdam and University of Cambridge          ##\n"
 MASTHEAD += "##  GNU General Public License v3                                     ##\n"
@@ -55,10 +55,11 @@ class MgremlReader:
     # set default convergence treshold
     dGradTol = 1E-5
     
-    def __init__(self, parser, logger):
-        # store logger and parser as attributes of instance
+    def __init__(self, parser, logger, process):
+        # store logger, parser, and process as attributes of instance
         self.logger = logger
         self.parser = parser
+        self.process = process
         # initialise arguments and logger
         self.InitialiseArgumentsAndLogger()
         # print welcome screen and given input args
@@ -78,6 +79,7 @@ class MgremlReader:
         # if we can analyse, read in data
         if self.bAnalyse:
             self.logger.info('1. READING IN ALL DATA, MODELS, AND INPUT OPTIONS')
+            self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
             self.logger.info('READING OPTIONS')
             # determine whether we will drop missings
             self.DropMissings()
@@ -295,7 +297,8 @@ class MgremlReader:
         # convert to pd dataframe        
         self.dfA = pd.DataFrame(mA, columns=index, index=index)
         # print update
-        self.logger.info('Finished reading in GRM\n')
+        self.logger.info('Finished reading in GRM')
+        self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB\n')
         
     def ReadData(self, sType):
         # figure out what type of input data we have
@@ -368,6 +371,7 @@ class MgremlReader:
             self.dfX = dfData
         # report reading data is done
         self.logger.info('Finished reading in ' + sData + ' data')
+        self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
 
     def ReadModel(self, sType, bNull = False):
         # set no label string for phenotypes (in rows of all models)
@@ -483,6 +487,7 @@ class MgremlReader:
                 self.dfEnvBinFY = dfBin
         # report reading data is done
         self.logger.info('Finished reading in the ' + sData)
+        self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
     
     def IsNested(self):
         self.bNested = (self.args.restricted_genetic_model is not None) \

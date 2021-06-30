@@ -36,8 +36,9 @@ class MgremlEstimator:
         else: # if alternative model, read out appropriate attributes
             dfGenBinFY = mdData.dfGenBinFY
             dfEnvBinFY = mdData.dfEnvBinFY
-        # store the logger
+        # store the logger and the process
         self.logger = mdData.logger
+        self.process = mdData.process
         # initialise mgreml model
         self.mgreml_model = model.MgremlModel(mdData, dfGenBinFY, dfEnvBinFY, bNested)
         # set iteration counter
@@ -68,7 +69,8 @@ class MgremlEstimator:
         self.dGradTol = mdData.dGradTol
         # set prefix for storing iteration results
         self.sPrefix = mdData.sPrefix
-        self.logger.info('Model initialised\n')
+        self.logger.info('Model initialised')
+        self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB\n')
         
     def PerformEstimation(self):
         if self.bBFGS:
@@ -77,7 +79,8 @@ class MgremlEstimator:
             self.PerformNewton()
         # compute statistics
         self.ComputeStatistics()
-        self.logger.info('Model estimation complete\n')
+        self.logger.info('Model estimation complete')
+        self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB\n')
     
     def ComputeGradLength(self):
         vIndT = self.mgreml_model.model.GetTraitIndices()
@@ -177,6 +180,7 @@ class MgremlEstimator:
         if self.bSEs:
             # print update
             self.logger.info("BFGS converged. Now computing covariance matrix of estimates.")
+            self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
             self.logger.warning("Warning! This may take hours for a large sample size and a large number of traits")
             # compute information matrix
             (self.dLogL, self.vGrad, self.mInfo) = self.mgreml_model.ComputeLogLik(MgremlEstimator.bGradBFGS, self.bSEs)
@@ -191,6 +195,7 @@ class MgremlEstimator:
         dMinEigVal = 1E-9
         # print statement that BFGS starts now
         self.logger.info("Performing Newton algorithm to find coefficients that maximise the MGREML log-likelihood")
+        self.logger.warning("Warning! Each iteration may take hours for a large sample size and a large number of traits")
         # while convergence has not occurred
         while self.bNotConverged:
             # update iteration counter

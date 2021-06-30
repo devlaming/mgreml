@@ -28,6 +28,7 @@ class DataWriter:
     
     def __init__(self, estimates, data):
         self.logger = data.logger
+        self.process = data.process
         self.sPrefix = data.sPrefix
         self.bNested = data.bNested
         self.bSEs = data.bSEs
@@ -38,6 +39,7 @@ class DataWriter:
     
     def WriteResults(self):
         self.logger.info('6. WRITING MGREML RESULTS')
+        self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
         if not(self.estimates.IsConverged()):
             raise RuntimeError('Trying to write output results while estimates have not converged')
         if not(self.estimates.IsDone()):
@@ -60,7 +62,8 @@ class DataWriter:
         if self.bNested:
             self.logger.info('WRITING RESULTS LIKELIHOOD-RATIO TEST')
             self.WriteLRT()
-        self.logger.info('Done writing results\n')
+        self.logger.info('Done writing results')
+        self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB\n')
        
     def WriteHSq(self):
         if self.bNested:

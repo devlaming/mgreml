@@ -17,6 +17,7 @@ class MgremlData:
     def __init__(self, mReader):
         # read out MgremlReader
         self.logger = mReader.logger
+        self.process = mReader.process
         dfA = mReader.dfA
         dfY = mReader.dfY
         dfX = mReader.dfX
@@ -26,6 +27,7 @@ class MgremlData:
         iDropTrailPCs = mReader.iDropTrailPCs
         bDropAnyMissing = mReader.bDropMissings
         self.logger.info('2. CLEANING YOUR DATA')
+        self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
         # find out if we have covariates
         self.DetermineIfCovsAreGiven(dfX, dfBinXY, bIntercept)
         # add intercept if required
@@ -52,6 +54,7 @@ class MgremlData:
         # finalise Mgreml data using canonical transformation
         self.FinaliseData(dfY, dfA, dfX, dfBinXY, iDropLeadPCs, iDropTrailPCs)
         self.logger.info('3. STORING ALL MGREML SETTINGS')
+        self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
         # store whether we have a nested model
         self.bNested = mReader.bNested
         # store booleans indicating if any models
@@ -99,7 +102,8 @@ class MgremlData:
         self.sInitValsFile = mReader.sInitValsFile
         self.bReinitialise0 = mReader.bReinitialise0
         self.sInitValsFile0 = mReader.sInitValsFile0
-        self.logger.info('Settings stored\n')
+        self.logger.info('Settings stored')
+        self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB\n')
     
     @staticmethod
     def SetPerfectRho(lLabels, sPrefix):
@@ -223,7 +227,7 @@ class MgremlData:
         iT = dfY.shape[1]
         # no warning has yet been issued
         bWarning = False
-        # if rank is below the number of covariates
+        # if rank is below the number of phenotypes
         if dRankY < iT:
             self.logger.warning('Warning: your phenotype data is rank deficient, i.e. there is perfect multicollinearity.')
             self.logger.warning('This may lead to poorly identified models.')
@@ -288,6 +292,7 @@ class MgremlData:
     
     def DropMissings(self, dfY, dfA, dfX, dfBinXY, bDropAnyMissing):
         self.logger.info('DROPPING PROBLEMATIC INDIVIDUALS BECAUSE OF MISSING PHENOTYPES AND/OR COVARIATES')
+        self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
         # if we have covariates
         if self.bCovs:
             iCount = 0
@@ -353,6 +358,7 @@ class MgremlData:
         
     def PruneByRelatedness(self, dfY, dfA, dfX, dRelCutoff):
         self.logger.info('APPLYING RELATEDNESS CUTOFF')
+        self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
         self.logger.info('Removing individuals such that there is no relatedness in excess of ' + str(dRelCutoff) + ' in GRM')
         # for reproducability set seeds for np.random and random
         np.random.seed(1809234)
@@ -471,6 +477,7 @@ class MgremlData:
         # if there are any missings at all
         if ((dfY.isnull() | dfY.isna()).sum()[0] > 0):
             self.logger.info('CREATING PHENOTYPE-SPECIFIC DUMMY VARIABLES TO CONTROL FOR REMAINING MISSINGNESS')
+            self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
             # if there are no covariates yet
             if not(self.bCovs):
                 # initialise dfX and dfBinXY
@@ -521,6 +528,7 @@ class MgremlData:
     
     def FinaliseData(self, dfY, dfA, dfX, dfBinXY, iDropLeadPCs, iDropTrailPCs):
         self.logger.info('FINALISING DATA BEFORE MGREML ANALYSIS')
+        self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
         # convert dataframes to numpy arrays
         mY = np.array(dfY)
         mA = np.array(dfA)
@@ -640,4 +648,5 @@ class MgremlData:
                 self.logger.info('Final number of fixed effects, K = ' + str(self.iK*self.iT))
             else:
                 self.logger.info('Final number of fixed effects, K = ' + str(self.iKtotal))
-        self.logger.info('Data cleaning complete\n')
+        self.logger.info('Data cleaning complete')
+        self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB\n')
