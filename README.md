@@ -33,7 +33,7 @@ conda activate mgreml
 
 (or `activate mgreml` instead of `conda activate mgreml` on some machines).
 
-In case you cannot create a customised conda environment (e.g. because of insufficient user rights) or simply prefer to use Anaconda Navigator or `pip` to install packages e.g. in your base environment rather than a custom environment, please note that `mgreml` only requires Python 3.x with the packages `networkx`, `numpy`, `pandas`, `psutil`, `scipy`, and `tqdm` installed.
+In case you cannot create a customised conda environment (e.g. because of insufficient user rights) or simply prefer to use Anaconda Navigator or `pip` to install packages e.g. in your base environment rather than a custom environment, please note that `mgreml` only requires Python 3.x with the packages `networkx`, `numpy`, `pandas`, `psutil`, `scipy`, and `tqdm` installed. To all [SURFsara](https://userinfo.surfsara.nl/) users: please note that the default Python 3.x environment already has all necessary packages [pre-installed](https://userinfo.surfsara.nl/systems/shared/software/python).
 
 Once the above has completed, you can now run
 
