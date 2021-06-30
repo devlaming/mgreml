@@ -269,7 +269,7 @@ class MgremlReader:
         if not(os.path.isfile(BinFileName)) or not(os.path.isfile(IDFileName)):
             raise TypeError('specified set of GRM files either incomplete or non-existent.')
         # read IDs and sample size
-        ids = pd.read_csv(IDFileName, sep = '\t', header = None)
+        ids = pd.read_csv(IDFileName, sep = None, engine='python', header = None)
         ids.columns= MgremlReader.lLabelsFID_IID
         arrays=[ids['FID'],ids['IID']]
         tuples = list(zip(*arrays))
