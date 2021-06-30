@@ -264,10 +264,9 @@ class MgremlReader:
     def ReadGRM(self):
         # set filenames for reading binary GRM
         BinFileName = self.args.grm + ".grm.bin"
-        NFileName = self.args.grm + ".grm.N.bin"
         IDFileName = self.args.grm + ".grm.id"
         # check if one or more files are missing:
-        if not(os.path.isfile(BinFileName)) or not(os.path.isfile(NFileName)) or not(os.path.isfile(IDFileName)):
+        if not(os.path.isfile(BinFileName)) or not(os.path.isfile(IDFileName)):
             raise TypeError('specified set of GRM files either incomplete or non-existent.')
         # read IDs and sample size
         ids = pd.read_csv(IDFileName, sep = '\t', header = None)
