@@ -27,6 +27,8 @@ def main():
         if myMgremlReader.bAnalyse:
             # align the data
             myMgremlData = aligner.MgremlData(myMgremlReader)
+            # delete myMgremlReader
+            del(myMgremlReader)
             # if we have a nested model
             if myMgremlData.bNested:
                 # initialise nested estimators
