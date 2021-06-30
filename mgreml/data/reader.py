@@ -104,8 +104,8 @@ class MgremlReader:
             # assert if one or two models have been specified
             self.IsNested()
             # determine if we need to reinitialise anything
-            self.NeedToReinitialise(bNull = False)
-            self.NeedToReinitialise(bNull = True)
+            self.NeedToReinitialise()
+            self.NeedToReinitialise(MgremlReader.bNull)
             # determine whether any correlations are fixed to zero or one
             # or if genetic variances are fixed to zero
             self.FindFixedRhoVar()
