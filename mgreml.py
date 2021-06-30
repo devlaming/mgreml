@@ -3,7 +3,6 @@ import logging
 import time
 import traceback
 import os, psutil
-import gc
 from mgreml.data import reader
 from mgreml.data import aligner
 from mgreml.data import writer
@@ -20,8 +19,6 @@ def main():
     logger = logging.getLogger(__name__)
     # initialise memory tracker
     process = psutil.Process(os.getpid())
-    # enable garbage collection to free up memory
-    gc.enable()
     # try MGREML
     try:
         # read in data
