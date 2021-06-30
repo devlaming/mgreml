@@ -1,4 +1,4 @@
-# MGREML (Multivariate GREML) `BETA VERSION 0.01`
+# MGREML (Multivariate GREML) `BETA VERSION 0.02`
 
 `mgreml` is a command-line tool using Python 3.x for rapid estimation of SNP-based heritability and genetic correlations for (nearly) balanced data on many traits in a single analysis, using a genomic-relatedness matrix (GRM) derived from SNP data on unrelated individuals.
 
