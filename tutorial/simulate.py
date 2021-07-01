@@ -10,9 +10,11 @@ def SimulateData():
     np.random.seed(392993604)
     # set sample size, no. of SNPs, no. of traits and covariates
     iN = 5000
-    iM = 10000
+    iM = 2500
     iT = 10
     iK = 10
+    # set heritability
+    dHSq = 0.25
     # set ploidy of human genome
     iP = 2    
     # set the number of environment and genetic factors
@@ -64,6 +66,10 @@ def SimulateData():
     # generate liabilities and phenotypes
     mLiabG = (mFG@mCG.T)*(2**(-0.5)) # each phen affected by 2 gen factors
     mLiabE = (mFE@mCE.T)*(iFE**(-0.5)) # each phen affected by iFE env factors
+    # give all liabilities mean zero and variance yielding desired heritability
+    mLiabG = (mLiabG - repmat(mLiabG.mean(axis=0),iN,1))/repmat(mLiabG.std(axis=0),iN,1)
+    mLiabE = np.sqrt((1-dHSq)/dHSq)*(mLiabE - repmat(mLiabE.mean(axis=0),iN,1))/repmat(mLiabE.std(axis=0),iN,1)
+    # generate phenotypes with set heritability
     mY = mLiabG + mLiabE + mX@mBeta
     # generate FIDs and IIDs
     lFID = ['FID ' + str(i) for i in range(1,iN+1)]
