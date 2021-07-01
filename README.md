@@ -187,16 +187,16 @@ As there is no population stratification in our data (by virtue of our simulatio
 
 | trait | heritability | standard error |
 | --- | --- | --- |
-| Some pheno 101 | 0.459 | 0.035 |
-| Some pheno 102 | 0.070 | 0.050 |
-| Some pheno 103 | 0.029 | 0.050 |
-| Some pheno 104 | 0.099 | 0.049 |
-| Some pheno 105 | 0.468 | 0.035 |
-| Some pheno 106 | 0.499 | 0.034 |
-| Some pheno 107 | 0.034 | 0.051 |
-| Some pheno 108 | 0.022 | 0.050 |
-| Some pheno 109 | 0.187 | 0.046 |
-| Some pheno 110 | 0.724 | 0.025 |
+| Some pheno 101 | 0.230 | 0.032 |
+| Some pheno 102 | 0.252 | 0.032 |
+| Some pheno 103 | 0.262 | 0.031 |
+| Some pheno 104 | 0.298 | 0.029 |
+| Some pheno 105 | 0.235 | 0.032 |
+| Some pheno 106 | 0.258 | 0.032 |
+| Some pheno 107 | 0.274 | 0.031 |
+| Some pheno 108 | 0.245 | 0.031 |
+| Some pheno 109 | 0.230 | 0.032 |
+| Some pheno 110 | 0.311 | 0.030 |
 
 For advanced users, the `--adjust-pcs` option can also be followed by a second number, indicating the number of trailing eigenvectors from your GRM to adjust for. E.g. `--adjust-pcs 100 1000` controls for 100 leading eigenvectors from your GRM and 1000 trailing eigenvectors. Doing this decreases the overall sample size by 100 + 1000 = 1100.
 
