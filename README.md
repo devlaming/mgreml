@@ -253,7 +253,9 @@ E.g. `my covar 301` does not affect `Some pheno 101` in this case.
 
 Analogous to `--covar-model`, users can also specify which genetic factor affects which trait and which environment factor affects which trait. Such specifications can be passed to `mgreml` using the `--genetic-model` and `--environment-model` options. Note that any such user-specified structural model must be identified. Moreover, for the factor specification of the environment, `mgreml` requires as many factors as there are traits.
 
-For example, we could impose a factor structure, where there is only one genetic factor, and where there are *T*=10 environment factors, each affecting a different trait. Effectively, this boils down to a model with genetic correlations all equal to one and environment correlations all equal to zero. These factor structures are shown in the files `gen_model.txt` and `env_model.txt` both found in the `tutorial` folder. Both files contain a binary table, with elements equal to one, where a given factor is permitted to affect the given phenotype, and equal to zero otherwise.
+For example, we could impose a factor structure, where there is only one genetic factor, and where there are *T*=10 environment factors, each affecting only a single trait, and no trait being affected by two distinct environment factors.
+
+Effectively, this boils down to a model with genetic correlations all equal to one and environment correlations all equal to zero. These factor structures are shown in the files `gen_model.txt` and `env_model.txt` both found in the `tutorial` folder. Both files contain a binary table, with elements equal to one, where a given factor is permitted to affect the given phenotype, and equal to zero otherwise.
 
 To estimate this structural model, we can simply carry out the following command:
 
@@ -267,15 +269,15 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 
 The estimates in the resulting file, `custom_model.RhoG.out`, reveal that all genetic correlations are estimated at either zero or one, as expected under this model:
 
-|  | Some pheno 101 | Some pheno 102 | Some pheno 103 | ...  | Some pheno 108 | Some pheno 109 | Some pheno 110 |
+|  | Some pheno 101 | Some pheno 102 | Some pheno 103 | ... | Some pheno 108 | Some pheno 109 | Some pheno 110 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Some pheno 101 | 1 | -1 | 1 | ...  | -1 | -1 | -1 |
-| Some pheno 102 | -1 | 1 | -1 | ...  | 1 | 1 | 1 |
-| Some pheno 103 | 1 | -1 | 1 | ...  | -1 | -1 | -1 |
-| ...  | ...  | ...  | ...  | ...  | ...  | ...  | ... |
-| Some pheno 108 | -1 | 1 | -1 | ...  | 1 | 1 | 1 |
-| Some pheno 109 | -1 | 1 | -1 | ...  | 1 | 1 | 1 |
-| Some pheno 110 | -1 | 1 | -1 | ...  | 1 | 1 | 1 |
+| Some pheno 101 | 1 | 1 | -1 | ... | 1 | 1 | -1 |
+| Some pheno 102 | 1 | 1 | -1 | ... | 1 | 1 | -1 |
+| Some pheno 103 | -1 | -1 | 1 | ... | -1 | -1 | 1 |
+| ... | ... | ... | ... | ... | ... | ... | ... |
+| Some pheno 108 | 1 | 1 | -1 | ... | 1 | 1 | -1 |
+| Some pheno 109 | 1 | 1 | -1 | ... | 1 | 1 | -1 |
+| Some pheno 110 | -1 | -1 | 1 | ... | -1 | -1 | 1 |
 
 Similarly, the estimates of environment correlations, in `custom_model.RhoE.out`, show these are all estimated at zero, also as expected under this model.
 
