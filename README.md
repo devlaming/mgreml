@@ -71,6 +71,8 @@ Although `mgreml` in principle can handle phenotype data without header (using a
 
 For the same set of individuals, you have a binary genomic-relatedness matrix (a.k.a. GRM) e.g. computed using [LDAK](https://dougspeed.com/ldak/), [PLINK](https://www.cog-genomics.org/plink/), or [GCTA](https://cnsgenomics.com/software/gcta/). In this case, the set of binary GRM files comprises `data.grm.bin`, `data.grm.N.bin`, and `data.grm.id` (MGREML ignores whether or not the `.grm.N.bin` file is present). We refer to this set of binary GRM files by its prefix, i.e. `data`.
 
+### Basic estimation
+
 The command for running an `mgreml` analysis on this data without correcting for any covariates at all is as follows:
 
 ```
@@ -121,7 +123,11 @@ Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, print
 | Some pheno 109 | 0.249 |
 | Some pheno 110 | 0.249 |
 
-The simple reason for this bias is that we did not control for any fixed-effect covariates. By removing the `--no-intercept` option, `mgreml` automatically adds one fixed effect per phenotype, namely a fixed effect that controls for differences in mean across phenotypes:
+The simple reason for this bias is that we did not control for any fixed-effect covariates.
+
+### Controlling for covariates
+
+By removing the `--no-intercept` option, `mgreml` automatically adds one fixed effect per phenotype, namely a fixed effect that controls for differences in mean across phenotypes:
 
 ```
 python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
@@ -167,9 +173,9 @@ If we compare the new estimates of heritability (see below) to the true values, 
 | Some pheno 109 | 0.255 | 0.017 |
 | Some pheno 110 | 0.267 | 0.017 |
 
-Notice upon inspection of `covar.txt` that it does not include any principal components (PCs) from the genetic data.
+### Correcting for population stratification
 
-In fact, in `mgreml`, the file with your covariates should **NEVER** contain PCs from your genetic data, as the tool already removes the effects of population stratification during the so-called canonical transformation. By default, `mgreml` removes the effects of 20 leading PCs from your genetic data. The effective sample size is reduced by 20 as a result of this correction for PCs.
+In the previous part, you may have noticed that `covar.txt` does not include any principal components (PCs) from the genetic data as fixed-effect covariates. Perhaps surprisingly, this is perfectly normal for an `mgreml` analysis. In fact, in `mgreml`, the file with your covariates should **NEVER** contain PCs from your genetic data, as `mgreml` already removes the effects of population stratification during the so-called canonical transformation. By default, `mgreml` removes the effects of 20 leading PCs from your genetic data. The effective sample size is reduced by 20 as a result of this correction for PCs.
 
 In case you want to change the number of PCs you control for, do **NOT** add these PCs to your file with covariate data. Instead, use the `--adjust-pcs` option, followed by the total number of leading PCs you want to control for. E.g. `--adjust-pcs 20` is equivalent to the default setting, `--adjust-pcs 40` controls for the 40 leadings PCs, and `--adjust-pcs 0` controls for no PCs at all (not recommended). In these three cases, the sample size is reduced by 20, 40, and zero respectively.
 
@@ -202,11 +208,15 @@ For advanced users, the `--adjust-pcs` option can also be followed by a second n
 
 By default no trailing eigenvectors are adjusted for. However, if the trailing eigenvalues are sufficiently small, we may adjust for a considerable number of them, boosting CPU time (as the overall sample size becomes smaller), without diminishing statistical efficiency of the analysis too much (as effectively only less informative bits of data are ignored). Note that adjusting for trailing eigenvectors may require you to use `--no-intercept`, as the last eigenvector from the GRM tends to be highly multicollinear with the intercept for technical reasons.
 
+### Standard errors and variance matrix of estimates
+
 In addition to reporting the heritabilities and their standard errors, `mgreml` also automatically reports genetic and environment correlations, as well as their standard errors.
 
 In case you care neither about standard errors nor the covariance matrix of estimates, you can use the `--no-se` option. Especially for a large number of traits, computing the standard errors is computationally demanding, as this requires calculating the average information matrix, which has a computational complexity of the order *NT*<sup> 4</sup>, where *T* denotes the number of traits and *N* the number of observations.
 
 `mgreml` also automatically reports the fixed-effect estimates (a.k.a. GLS estimates), including the covariance matrix of those estimates, and their standard errors. If the `--no-se` option is used, the estimated covariance matrix and standard errors of the GLS estimates will not be included either.
+
+### Different traits with different covariates
 
 Now, suppose each trait has a different set of covariates, `mgreml` can easily handle this using the `--covar-model` option. This option should be followed by a filename which contains a binary table, indicating which covariate affects which phenotype. E.g. the `tutorial` folder contains `covar_model.txt`, of which the content is shown below:
 
@@ -250,6 +260,8 @@ Now, `different_covs.GLS.est.out`, in the folder `tutorial`, shows the fixed-eff
 | Some pheno 110 | my covar 309 | 1.398 | 0.005 |
 
 E.g. `my covar 301` does not affect `Some pheno 101` in this case.
+
+### Specifying structural models
 
 Analogous to `--covar-model`, users can also specify which genetic factor affects which trait and which environment factor affects which trait. Such specifications can be passed to `mgreml` using the `--genetic-model` and `--environment-model` options. Note that any such user-specified structural model must be identified. Moreover, for the factor specification of the environment, `mgreml` requires as many factors as there are traits.
 
