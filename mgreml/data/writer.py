@@ -38,7 +38,7 @@ class DataWriter:
         self.estimates = estimates
     
     def WriteResults(self):
-        self.logger.info('6. WRITING MGREML RESULTS')
+        self.logger.info('5. WRITING MGREML RESULTS')
         self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
         if not(self.estimates.IsConverged()):
             raise RuntimeError('Trying to write output results while estimates have not converged')
