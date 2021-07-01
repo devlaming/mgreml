@@ -430,7 +430,7 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 
 As expected, the file `restricted_custom_model.loglik.out` contains results that are identical to those found in `restricted_rhoG1_rhoE0.loglik.out`. 
 
-Also, to test whether the genetic components improve the fit of the model significantly, we could carry out the command
+As a further example, to test if the genetic components even improve the fit of the model in the first place, we could carry out the command
 
 ```
 python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
@@ -442,20 +442,20 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 where output file `restricted_novarG.loglik.out` reveals that allowing for genetic variance significantly improves the fit of the model:
 
 ```
-Log-likelihood of nested model (null hypothesis) = -68327.76083331279,
+Log-likelihood of nested model (null hypothesis) = -94524.01375204921,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 1 genetic factors and 10 environment factors,
 comprising 0 free genetic factor coefficients and 55 free environment factor coefficients in turn.
-Estimates converged after 23 BFGS iterations 
+Estimates converged after 20 BFGS iterations 
 
-Log-likelihood of parent model (alternative hypothesis) = -66849.63346504091,
+Log-likelihood of parent model (alternative hypothesis) = -85227.3677092077,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 10 genetic factors and 10 environment factors,
 comprising 55 free genetic factor coefficients and 55 free environment factor coefficients in turn.
-Estimates converged after 269 BFGS iterations 
+Estimates converged after 53 BFGS iterations 
 
 Results of likelihood-ratio test with 55 degrees of freedom:
-Chi-square test statistic is 2956.2547365437495
+Chi-square test statistic is 18593.29208568303
 with P-value = 0.0
 ```
 
