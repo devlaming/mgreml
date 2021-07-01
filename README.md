@@ -401,20 +401,20 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 Inspection of `restricted_rhoG1_rhoE0.loglik.out` reveals that the saturated model fits the data significantly better than this restricted model:
 
 ```
-Log-likelihood of nested model (null hypothesis) = -76460.81732259798,
+Log-likelihood of nested model (null hypothesis) = -103463.59460195125,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 1 genetic factors and 10 environment factors,
 comprising 10 free genetic factor coefficients and 10 free environment factor coefficients in turn.
-Estimates converged after 25 BFGS iterations 
+Estimates converged after 36 BFGS iterations 
 
-Log-likelihood of parent model (alternative hypothesis) = -66849.63346504091,
+Log-likelihood of parent model (alternative hypothesis) = -85227.3677092077,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 10 genetic factors and 10 environment factors,
 comprising 55 free genetic factor coefficients and 55 free environment factor coefficients in turn.
-Estimates converged after 269 BFGS iterations 
+Estimates converged after 53 BFGS iterations 
 
 Results of likelihood-ratio test with 90 degrees of freedom:
-Chi-square test statistic is 19222.367715114146
+Chi-square test statistic is 36472.4537854871
 with P-value = 0.0
 ```
 
