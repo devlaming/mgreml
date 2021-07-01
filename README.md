@@ -310,11 +310,11 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 Inspection of the log-likelihoods in `custom_model.loglik.out` and `rhoG1_rhoE0.loglik.out` indeed reveal that these models yield an identical fit to the data:
 
 ```
-Log-likelihood of model = -76460.81732259798,
+Log-likelihood of model = -103463.59460195125,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 1 genetic factors and 10 environment factors,
 comprising 10 free genetic factor coefficients and 10 free environment factor coefficients in turn.
-Estimates converged after 25 BFGS iterations 
+Estimates converged after 36 BFGS iterations 
 ```
 
 Notice that the option `--rho-genetic` cannot be combined with `--genetic-model` and, similarly, that `--rho-environment` cannot be combined with `--environment-model`.
