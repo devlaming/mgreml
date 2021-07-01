@@ -156,16 +156,16 @@ If we compare the new estimates of heritability (see below) to the true values, 
 
 | trait | heritability | standard error |
 | --- | --- | --- |
-| Some pheno 101 | 0.450 | 0.025 |
-| Some pheno 102 | 0.015 | 0.030 |
-| Some pheno 103 | 0.031 | 0.029 |
-| Some pheno 104 | 0.044 | 0.029 |
-| Some pheno 105 | 0.482 | 0.025 |
-| Some pheno 106 | 0.487 | 0.025 |
-| Some pheno 107 | 0.037 | 0.029 |
-| Some pheno 108 | 0.017 | 0.029 |
-| Some pheno 109 | 0.166 | 0.029 |
-| Some pheno 110 | 0.742 | 0.019 |
+| Some pheno 101 | 0.253 | 0.017 |
+| Some pheno 102 | 0.260 | 0.017 |
+| Some pheno 103 | 0.251 | 0.017 |
+| Some pheno 104 | 0.258 | 0.017 |
+| Some pheno 105 | 0.236 | 0.017 |
+| Some pheno 106 | 0.247 | 0.017 |
+| Some pheno 107 | 0.269 | 0.017 |
+| Some pheno 108 | 0.246 | 0.017 |
+| Some pheno 109 | 0.255 | 0.017 |
+| Some pheno 110 | 0.267 | 0.017 |
 
 Notice upon inspection of `covar.txt` that it does not include any principal components (PCs) from the genetic data.
 
