@@ -80,7 +80,7 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                    --no-intercept --out ./tutorial/nocovs
 ```
 
-Upon carrying out this command, `mgreml` will first report the follow command will be carried out:
+When carrying out this command, `mgreml` will first show the welcome screen and directly after that summarise the input options that you specified:
 
 ```
 Your call:
@@ -553,7 +553,7 @@ Therefore, `mgreml` has a `--drop-missings` option, whereby all individuals are 
 
 ### Advanced options
 
-Note that `mgreml` has a few advanced options regarding the estimation algorithm. First, `--newton` forces `mgreml` to use a Newton algorithm for solving the optimisation problem instead of BFGS. Although in theory this approach requires fewer iterations that BFGS, we strongly recommend sticking to BFGS: especially for large *T*, BFGS iterations are much faster and numerically more stable.
+Note that `mgreml` has a few advanced options regarding the estimation algorithm. First, `--newton` forces `mgreml` to use a Newton algorithm for solving the optimisation problem instead of BFGS. Although in theory this approach requires fewer iterations than BFGS to converge, we recommend using BFGS: especially for large *T*, single BFGS iterations are so much faster than single Newton iterations, that the overall runtime of the BFGS algorithm is much lower than the runtime of the Newton algorithm.
 
 In addition, `mgreml` considers the estimates to have converged if the root mean squared sum of the gradient vector (taking scale of traits and sample size into account) is below 10<sup>&minus;5</sup>. For conceptual ease, we refer to this criterion as length of the gradient. The option `--grad-tol` can be used to specify a different treshold.
 
