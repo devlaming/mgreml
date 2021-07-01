@@ -57,15 +57,15 @@ Now that you have cloned the `mgreml` repository, and `mgreml` is up-and-running
 
 Let's first inspect the `pheno.txt` file. This file contains data in tab-separated format on ten phenotypes observed in a set of 5,000 individuals. The first two columns list family and individual ID, followed by the phenotypes:
 
-| FID | IID | Some pheno 101 | Some pheno 102 | ...  | Some pheno 109 | Some pheno 110 |
+| FID | IID | Some pheno 101 | Some pheno 102 | ... | Some pheno 109 | Some pheno 110 |
 | --- | --- | --- | --- | --- | --- | --- |
-| FID 1 | IID 5001 | -2.072 | -3.676 | ...  | 4.641 | 7.931 |
-| FID 2 | IID 5002 | -1.472 | -1.467 | ...  | 6.098 | 3.570 |
-| FID 3 | IID 5003 | -3.392 | -7.277 | ...  | -0.832 | -5.750 |
-| ...  | ...  | ...  | ...  | ...  | ...  | ...  |
-| FID 4998 | IID 9998 | 2.575 | 2.740 | ...  | 3.328 | -6.982 |
-| FID 4999 | IID 9999 | -3.072 | -0.306 | ...  | 2.530 | -1.255 |
-| FID 5000 | IID 10000 | -4.220 | 1.117 | ...  | 2.806 | 3.159 |
+| FID 1 | IID 5001 | 3.738 | 1.447 | ... | 0.585 | 1.848 |
+| FID 2 | IID 5002 | -3.667 | -1.704 | ... | 0.317 | -0.946 |
+| FID 3 | IID 5003 | -2.644 | -0.737 | ... | -2.647 | 0.093 |
+| ... | ... |  |  | ... |  |  |
+| FID 4998 | IID 9998 | -2.487 | 0.550 | ... | 2.467 | -2.093 |
+| FID 4999 | IID 9999 | -2.460 | -2.980 | ... | 6.344 | -0.201 |
+| FID 5000 | IID 10000 | -2.192 | -3.691 | ... | 0.024 | -0.906 |
 
 Although `mgreml` in principle can handle phenotype data without header (using a modifier that we discuss later on), we recommend always including headers in your data, so e.g. your phenotypes are labelled, allowing `mgreml` output to refer to specific phenotype names rather than ambiguous indices such as `1`, `2`, `3` etc.
 
@@ -95,31 +95,31 @@ The estimated heritabilities are as follows:
 
 | trait | heritability | standard error |
 | --- | --- | --- |
-| Some pheno 101 | 0.052 | 0.029 |
-| Some pheno 102 | 0.002 | 0.031 |
-| Some pheno 103 | 0.017 | 0.029 |
-| Some pheno 104 | 0.013 | 0.029 |
-| Some pheno 105 | 0.038 | 0.030 |
-| Some pheno 106 | 0.171 | 0.029 |
-| Some pheno 107 | 0.005 | 0.030 |
-| Some pheno 108 | 0.001 | 0.030 |
-| Some pheno 109 | 0.016 | 0.032 |
-| Some pheno 110 | 0.156 | 0.029 |
+| Some pheno 101 | 0.088 | 0.016 |
+| Some pheno 102 | 0.063 | 0.016 |
+| Some pheno 103 | 0.088 | 0.016 |
+| Some pheno 104 | 0.064 | 0.016 |
+| Some pheno 105 | 0.059 | 0.016 |
+| Some pheno 106 | 0.063 | 0.016 |
+| Some pheno 107 | 0.085 | 0.016 |
+| Some pheno 108 | 0.145 | 0.017 |
+| Some pheno 109 | 0.037 | 0.015 |
+| Some pheno 110 | 0.154 | 0.017 |
 
 Comparing these estimates to the true values in `./tutorial/true.HSq.txt`, printed below, we see that our estimates seem to be biased.
 
 | trait | heritability |
 | --- | --- |
-| Some pheno 101 | 0.472 |
-| Some pheno 102 | 0.007 |
-| Some pheno 103 | 0.035 |
-| Some pheno 104 | 0.055 |
-| Some pheno 105 | 0.467 |
-| Some pheno 106 | 0.500 |
-| Some pheno 107 | 0.022 |
-| Some pheno 108 | 0.034 |
-| Some pheno 109 | 0.166 |
-| Some pheno 110 | 0.742 |
+| Some pheno 101 | 0.249 |
+| Some pheno 102 | 0.252 |
+| Some pheno 103 | 0.248 |
+| Some pheno 104 | 0.249 |
+| Some pheno 105 | 0.253 |
+| Some pheno 106 | 0.252 |
+| Some pheno 107 | 0.248 |
+| Some pheno 108 | 0.250 |
+| Some pheno 109 | 0.249 |
+| Some pheno 110 | 0.249 |
 
 The simple reason for this bias is that we did not control for any fixed-effect covariates. By removing the `--no-intercept` option, `mgreml` automatically adds one fixed effect per phenotype, namely a fixed effect that controls for differences in mean across phenotypes:
 
@@ -132,16 +132,16 @@ Resulting SNP heritability estimates in `./tutorial/intercept.HSq.out`, however,
 
 | trait | heritability | standard error |
 | --- | --- | --- |
-| Some pheno 101 | 0.070 | 0.030 |
-| Some pheno 102 | 0.004 | 0.030 |
-| Some pheno 103 | 0.016 | 0.029 |
-| Some pheno 104 | 0.013 | 0.029 |
-| Some pheno 105 | 0.041 | 0.030 |
-| Some pheno 106 | 0.190 | 0.029 |
-| Some pheno 107 | 0.008 | 0.029 |
-| Some pheno 108 | 0.001 | 0.030 |
-| Some pheno 109 | 0.027 | 0.030 |
-| Some pheno 110 | 0.157 | 0.029 |
+| Some pheno 101 | 0.084 | 0.016 |
+| Some pheno 102 | 0.083 | 0.016 |
+| Some pheno 103 | 0.088 | 0.016 |
+| Some pheno 104 | 0.076 | 0.016 |
+| Some pheno 105 | 0.058 | 0.016 |
+| Some pheno 106 | 0.072 | 0.016 |
+| Some pheno 107 | 0.088 | 0.016 |
+| Some pheno 108 | 0.151 | 0.017 |
+| Some pheno 109 | 0.055 | 0.016 |
+| Some pheno 110 | 0.159 | 0.017 |
 
 The reasons this bias persists is that more fixed-effect covariates are at play than just the intercept. The file `./tutorial/covar.txt` contains the other covariates that affect the traits of interest. So we need to use the `--covar` option to specify these additional fixed-effect covariates. This boils down to the following `mgreml` command:
 
