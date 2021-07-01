@@ -239,14 +239,15 @@ Now, `different_covs.GLS.est.out`, in the folder `tutorial`, shows the fixed-eff
 
 | trait | covariate | beta hat | standard error |
 | --- | --- | --- | --- |
-| Some pheno 101 | intercept | -1.413 | 0.041 |
-| Some pheno 102 | intercept | -1.777 | 0.031 |
-| Some pheno 102 | my covar 301 | -1.432 | 0.017 |
+| Some pheno 101 | intercept | -0.328 | 0.047 |
+| Some pheno 102 | intercept | -1.063 | 0.045 |
+| Some pheno 102 | my covar 301 | 1.646 | 0.011 |
+| Some pheno 103 | intercept | -0.307 | 0.054 |
 | ... | ... | ... | ... |
-| Some pheno 109 | intercept | 2.269 | 0.037 |
-| Some pheno 109 | my covar 308 | -1.282 | 0.014 |
-| Some pheno 110 | intercept | -0.397 | 0.057 |
-| Some pheno 110 | my covar 309 | 1.172 | 0.031 |
+| Some pheno 109 | intercept | 1.184 | 0.109 |
+| Some pheno 109 | my covar 308 | 5.766 | 0.013 |
+| Some pheno 110 | intercept | 0.684 | 0.035 |
+| Some pheno 110 | my covar 309 | 1.398 | 0.005 |
 
 E.g. `my covar 301` does not affect `Some pheno 101` in this case.
 
