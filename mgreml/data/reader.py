@@ -172,8 +172,6 @@ class MgremlReader:
                 self.ReadModel(MgremlReader.sEnv, MgremlReader.bNull)
             else:
                 self.dfEnvBinFY0 = None
-            # set constrained models if needed
-            self.SetConstrainedModels()
             # print update
             self.logger.info('READING DATA')
             # read phenotype file
@@ -208,6 +206,8 @@ class MgremlReader:
             self.lPhenos = self.dfY.columns.tolist()
             if self.bCovs:
                 self.lCovs = self.dfX.columns.tolist()
+            # set constrained models if needed
+            self.SetConstrainedModels()
             # finalise Mgreml data using canonical transformation
             self.FinaliseData()
             # print update
