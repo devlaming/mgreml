@@ -537,7 +537,7 @@ Remaining sample size is 4956
 [...]
 ```
 
-`mgreml` follows the greedy algorithm developed by Boppana and Halldórsson (1992); [doi:10.1007/BF01994876](https://link.springer.com/article/10.1007/BF01994876). Importantly, `mgreml` does this pruning at such a stage that sample size is maximised. E.g. for a pair of individuals with a relatedness in excess of the threshold, we try to keep the observation with the lowest missingness.
+`mgreml` follows the greedy algorithm developed by Boppana and Halldórsson (1992); [doi:10.1007/BF01994876](https://link.springer.com/article/10.1007/BF01994876). Importantly, `mgreml` does this pruning at such a stage and in such a manner that sample size is maximised. E.g. for a pair of individuals with a relatedness in excess of the threshold, we try to keep the observation with the lowest missingness in terms of phenotypes and covariates.
 
 In general, `mgreml` simply tries to preserve sample size at each turn. E.g. if an individual has missing values only for a subset of the phenotypes, `mgreml` keeps that individual in the data, by introducing phenotype-by-individual-specific dummies (i.e. dummies that control for individual *i* having a missing value for trait *t*). Even when a covariate is missing, sometimes parts of that observation can still be salvaged (i.e. if the missing covariate does not affect all phenotypes according to `--covar-model`).
 
