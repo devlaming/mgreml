@@ -27,6 +27,8 @@ class MgremlEstimator:
     bSilentNewton = True
     # set maximum number of iterations for Newton and BFGS
     iMaxIter = 2000
+    # need to compute gradient and AI matrix after three strikes of failed BFGS
+    bAllAtStrike3 = True
     
     def __init__(self, mdData, bNested = False):
         # if null model, read out appropriate attributes
@@ -88,10 +90,12 @@ class MgremlEstimator:
         self.dGradLengthPerParam = np.sqrt(np.power(vGradRescaled,2).mean())
         
     def PerformBFGS(self):
-        # use two strikes out system to reset inverse hessian to -I,
-        # if two subsequent iterations produce to little change
-        bStrike1 = False
-        bStrike2 = False
+        # use three strikes out system
+        # after two strikes: reset inverse hessian to -I
+        # after three strikes: set inverse hessian based on AI matrix (expensive)
+        iStrikes = 0
+        # set lowest eigenvalue permitted in info matrix per N to 1E-9
+        dMinEigVal = 1E-9
         # print statement that BFGS starts now
         self.logger.info('Performing BFGS algorithm to find coefficients that maximise the MGREML log-likelihood')
         # compute logL and gradient for current estimates
@@ -142,26 +146,24 @@ class MgremlEstimator:
                 dSTY = np.dot(vS,vY)
                 # if magnitude dot product is too low
                 if abs(dSTY) < MgremlEstimator.dTolDot:
-                    # if first strike has already occurred
-                    if bStrike1:
-                        # indicate this is second strike
-                        bStrike2 = True
-                        # print warning
-                        self.logger.warning("Warning: too small change in two subsequent BFGS iterations; reinitialising approximate inverse Hessian")
-                    else: # if first strike has not yet occurred
-                        # indicate this is first strike
-                        bStrike1 = True
+                    # increase strikes by 1
+                    iStrikes = iStrikes + 1
+                    if iStrikes == 1:
                         # replace dot product by tolerance
                         dSTY = -MgremlEstimator.dTolDot
                         # print warning
                         self.logger.warning("Warning: too small change in BFGS iteration; may have disproportionate effect on approximate inverse Hessian")
+                    elif iStrikes == 2:
+                        # print warning
+                        self.logger.warning("Warning: too small change in two subsequent BFGS iterations; reinitialising approximate inverse Hessian")
+                    else:
+                        # print warning
+                        self.logger.warning("Warning: too small change in at least three subsequent BFGS iterations; reinitialising approximate inverse Hessian using the inverse of the average information matrix (this may take hours!)")
                 else:
-                    # if change has occurred in this iteration,
-                    # set both strike booleans to False
-                    bStrike1 = False
-                    bStrike2 = False
-                # if no two strikes have been reached
-                if not(bStrike2):
+                    # if change has occurred in this iteration set strikes to 0
+                    iStrikes = 0
+                # if less than two strikes: regular update
+                if iStrikes < 2:
                     # compute rho
                     dR = 1/dSTY
                     # compute some intermediate vectors
@@ -171,12 +173,18 @@ class MgremlEstimator:
                     self.mIH = self.mIH - np.outer(vV,vW) - np.outer(vW,vV) + np.outer(vV,vV)*np.dot(vW,vY) + np.outer(vV,vS)
                     # stabilise approximated inverse hessian
                     self.mIH = (self.mIH + self.mIH.T)/2
-                else: # if this is the second strike
+                elif iStrikes == 2: # if two strikes
                     # reinitalise approximate inverse Hessian as -I
                     self.mIH = -np.eye(self.mgreml_model.model.iParams)
-                    # set both strike booleans to False
-                    bStrike1 = False
-                    bStrike2 = False
+                else: # if three strikes
+                    # compute AI matrix
+                    (_, _, mInfo) = self.mgreml_model.ComputeLogLik(MgremlEstimator.bAllAtStrike3,MgremlEstimator.bAllAtStrike3)
+                    # compute pseudo inverse of unconstrained part
+                    (mInvInfo,_) = self.PseudoInvertSymmetricMat(mInfo,dMinEigVal)
+                    # set approximate inverse hessian
+                    self.mIH = -mInvInfo
+                    # reset strikes count
+                    iStrikes = 0
         if self.bSEs:
             # print update
             self.logger.info("BFGS converged. Now computing covariance matrix of estimates.")
