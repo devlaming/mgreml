@@ -332,7 +332,9 @@ yields heritability estimates all equal to zero, as expected, in `novarG.HSq.out
 
 Notice that the option `--no-var-genetic` cannot be combined with `--rho-genetic` and/or `--genetic-model`.
 
-In case you have estimated a model, either according to some structural model e.g. using `--genetic-model`, or just the saturated model we started with, `mgreml` can report the factor coefficients (i.e. the estimated effect of each factor on each trait) by using the `--factor-coefficients` option. Using this option not only reports the estimated factor coefficients, but also the covariance matrix of those estimates (unless `--no-se` is used). This covariance matrix may grow very large for large *T*.
+### Factor coefficients and variance components
+
+In case you estimate a model using `mgreml`, either according to some specific structural model (e.g. using `--genetic-model`) or the default fully saturated model we started with, `mgreml` can report the factor coefficients (i.e. the estimated effect of each factor on each trait) by using the `--factor-coefficients` option. Using this option not only reports the estimated factor coefficients, but also the covariance matrix of those estimates (unless `--no-se` is used). :warning: This covariance matrix may grow very large for large *T*.
 
 E.g. the command
 
@@ -347,13 +349,15 @@ generates, amongst others, the file `factors.coeff.out`, which contains 110 esti
 
 | trait | factor | estimate | standard error |
 | --- | --- | --- | --- |
-| Some pheno 101 | genetic factor 0 | 0.993 | 0.032 |
-| Some pheno 102 | genetic factor 0 | 0.081 | 0.038 |
-| Some pheno 103 | genetic factor 0 | 0.203 | 0.041 |
+| Some pheno 101 | genetic factor 0 | 1.005 | 0.039 |
+| Some pheno 102 | genetic factor 0 | -0.197 | 0.056 |
+| Some pheno 103 | genetic factor 0 | 0.285 | 0.056 |
+| Some pheno 104 | genetic factor 0 | -0.341 | 0.054 |
 | ... | ... | ... | ... |
-| Some pheno 109 | environment factor 8 | 0.227 | 0.077 |
-| Some pheno 110 | environment factor 8 | -0.414 | 0.143 |
-| Some pheno 110 | environment factor 9 | 0.362 | 0.139 |
+| Some pheno 110 | environment factor 7 | 0.034 | 0.005 |
+| Some pheno 109 | environment factor 8 | 0.929 | 0.013 |
+| Some pheno 110 | environment factor 8 | 0.230 | 0.004 |
+| Some pheno 110 | environment factor 9 | 0.106 | 0.001 |
 
 The file `factors.coeff.var.out` contains a 110-by-110 matrix representing the covariance matrix of those estimates. 
 
@@ -368,17 +372,21 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 
 generates, amongst others, the file `components.VCs.out`, which contains 110 estimated covariance components in this case, of which a few lines are shown below:
 
-| component | first trait | second trait | estimate | standard error |
+| component type | first trait | second trait | estimate | standard error |
 | --- | --- | --- | --- | --- |
-| genetic covariance | Some pheno 101 | Some pheno 101 | 0.986 | 0.064 |
-| genetic covariance | Some pheno 101 | Some pheno 102 | 0.081 | 0.036 |
-| genetic covariance | Some pheno 101 | Some pheno 103 | 0.202 | 0.043 |
+| genetic covariance | Some pheno 101 | Some pheno 101 | 1.010 | 0.078 |
+| genetic covariance | Some pheno 101 | Some pheno 102 | -0.198 | 0.055 |
+| genetic covariance | Some pheno 101 | Some pheno 103 | 0.286 | 0.055 |
+| genetic covariance | Some pheno 101 | Some pheno 104 | -0.343 | 0.055 |
 | ... | ... | ... | ... | ... |
-| environment covariance | Some pheno 109 | Some pheno 109 | 0.646 | 0.024 |
-| environment covariance | Some pheno 109 | Some pheno 110 | 0.164 | 0.029 |
-| environment covariance | Some pheno 110 | Some pheno 110 | 0.960 | 0.066 |
+| environment covariance | Some pheno 108 | Some pheno 110 | 0.006 | 0.054 |
+| environment covariance | Some pheno 109 | Some pheno 109 | 2.977 | 0.076 |
+| environment covariance | Some pheno 109 | Some pheno 110 | 0.985 | 0.057 |
+| environment covariance | Some pheno 110 | Some pheno 110 | 2.959 | 0.076 |
 
 The file `components.VCs.var.out` contains a 110-by-110 matrix representing the covariance matrix of those estimates. 
+
+### Nested models and likelihood-ratio tests
 
 `mgreml` can also be used to specify two models at once, to compare them using a likelihood-ratio test, provided the null model is nested with respect to the alternative. E.g. one can use the following command to compare the saturated model to the previously considered model assuming perfect genetic correlations and no environment correlations at all:
 
