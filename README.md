@@ -463,7 +463,9 @@ As before, `--restricted-no-var-genetic`, `--restricted-rho-genetic`, and/or `--
 
 :warning: **when using options such as `--restricted-genetic-model` and `--genetic-model`, it is your own responsibility to ensure the restricted model is nested with respect to the other model.** `mgreml` only inspects nestedness superficially. The best way to allow `mgreml` to assert nestedness is to appropriately label the factors in both models.
 
-By default, `mgreml` will not store any intermediate results. However, using the `--store-iter` option, users can specify every how many iterations they want the current parameter estimates to be stored. E.g. `--store-iter 10` will cause `mgreml` to store estimates every ten iterations. The estimates will be stored in a so-called `.pkl` with a prefix a set by the `--out` option. This `.pkl` file contains the model specification as well as the estimates of that model in a given iteration.
+### Estimation reinitialisation 
+
+By default, `mgreml` will not store any intermediate results. However, using the `--store-iter` option, users can specify every how many iterations they want the current parameter estimates to be stored. E.g. `--store-iter 10` will make `mgreml` store estimates every ten iterations. The estimates will be stored in a so-called `.pkl` with a prefix a set by the `--out` option. This `.pkl` file contains the model specification as well as the estimates of that model in a given iteration.
 
 Such a `.pkl` file can also be used to reinitialise `mgreml` e.g. if you accidentally switched off your computer halfway through an analysis. For instance
 
