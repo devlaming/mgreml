@@ -191,7 +191,7 @@ If we compare the new estimates of heritability (see below) to the true values, 
 
 Moreover, when looking at the heatmaps of the genetic correlations as estimated by `mgreml` and the true genetic correlations, we see that `mgreml` provides highly accurate estimates in this simulation:
 
-![Comparison of mgreml estimates of genetic correlations and true genetic correlations](https://github.com/devlaming/mgreml/blob/master/tutorial/rhoG_estimates_true.png?raw=true)
+![Comparison of `mgreml` estimates of genetic correlations and true genetic correlations](https://github.com/devlaming/mgreml/blob/master/tutorial/rhoG_estimates_true.png?raw=true)
 
 ### Population stratification
 
