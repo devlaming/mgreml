@@ -51,7 +51,23 @@ python .\mgreml.py -h
 
 ## Tutorial
 
-In this tutorial, you will learn how to use `mgreml`. Before you start using `mgreml`, please go over the steps under [Installation](#installation).
+In this tutorial, you will learn how to use `mgreml`. Before you start using `mgreml`, please go over the steps under [Installation](#installation). The following topics will be covered in this tutorial:
+
+1. [Tutorial data](#tutorial-data)
+2. [Basic estimation](#basic-estimation)
+3. [Controlling for covariates](#controlling-for-covariates)
+4. [Population stratification](#population-stratification)
+5. [Standard errors](#standard-errors)
+6. [Different traits with different covariates](#different-traits-with-different-covariates)
+7. [Specifying structural models](#specifying-structural-models)
+8. [Factor coefficients and variance components](#factor-coefficients-and-variance-components)
+9. [Nested models and likelihood-ratio tests](#nested-models-and-likelihood-ratio-tests)
+10. [Estimation reinitialisation](#estimation-reinitialisation)
+11. [Data formats and management](#data-formats-and-management)
+12. [Missing data and unbalancedness](#missing-data-and-unbalancedness)
+13. [Advanced options](#advanced-options)
+
+### Tutorial data
 
 Now that you have cloned the `mgreml` repository, and `mgreml` is up-and-running, the main directory of `mgreml` should contain a subdirectory called `tutorial`. This directory in turn contains several files, including `pheno.txt` and `covar.txt`. Details on how this dataset has been generated using simulation can be found in the python script in `./tutorial/simulate.py`
 
@@ -173,7 +189,7 @@ If we compare the new estimates of heritability (see below) to the true values, 
 | Some pheno 109 | 0.255 | 0.017 |
 | Some pheno 110 | 0.267 | 0.017 |
 
-### Correcting for population stratification
+### Population stratification
 
 In the previous part, you may have noticed that `covar.txt` does not include any principal components (PCs) from the genetic data as fixed-effect covariates. Perhaps surprisingly, this is perfectly normal for an `mgreml` analysis. In fact, in `mgreml`, the file with your covariates should **NEVER** contain PCs from your genetic data, as `mgreml` already removes the effects of population stratification during the so-called canonical transformation. By default, `mgreml` removes the effects of 20 leading PCs from your genetic data. The effective sample size is reduced by 20 as a result of this correction for PCs.
 
@@ -208,11 +224,11 @@ For advanced users, the `--adjust-pcs` option can also be followed by a second n
 
 By default no trailing eigenvectors are adjusted for. However, if the trailing eigenvalues are sufficiently small, we may adjust for a considerable number of them, boosting CPU time (as the overall sample size becomes smaller), without diminishing statistical efficiency of the analysis too much (as effectively only less informative bits of data are ignored). Note that adjusting for trailing eigenvectors may require you to use `--no-intercept`, as the last eigenvector from the GRM tends to be highly multicollinear with the intercept for technical reasons.
 
-### Standard errors and variance matrix of estimates
+### Standard errors
 
-In addition to reporting the heritabilities and their standard errors, `mgreml` also automatically reports genetic and environment correlations, as well as their standard errors.
+In addition to reporting the heritabilities, and genetic and environment correlations, `mgreml` also automatically reports the standard errors of all estimates.
 
-In case you care neither about standard errors nor the covariance matrix of estimates, you can use the `--no-se` option. Especially for a large number of traits, computing the standard errors is computationally demanding, as this requires calculating the average information matrix, which has a computational complexity of the order *NT*<sup> 4</sup>, where *T* denotes the number of traits and *N* the number of observations.
+In case you do not wish `mgreml` to compute standard errors, you can use the `--no-se` option. Especially for a large number of traits, computing the standard errors is computationally demanding, as this requires calculating the average information matrix, which has a computational complexity of the order *NT*<sup> 4</sup>, where *T* denotes the number of traits and *N* the number of observations.
 
 `mgreml` also automatically reports the fixed-effect estimates (a.k.a. GLS estimates), including the covariance matrix of those estimates, and their standard errors. If the `--no-se` option is used, the estimated covariance matrix and standard errors of the GLS estimates will not be included either.
 
@@ -334,7 +350,7 @@ Notice that the option `--no-var-genetic` cannot be combined with `--rho-genetic
 
 ### Factor coefficients and variance components
 
-In case you estimate a model using `mgreml`, either according to some specific structural model (e.g. using `--genetic-model`) or the default fully saturated model we started with, `mgreml` can report the factor coefficients (i.e. the estimated effect of each factor on each trait) by using the `--factor-coefficients` option. Using this option not only reports the estimated factor coefficients, but also the covariance matrix of those estimates (unless `--no-se` is used). :warning: This covariance matrix may grow very large for large *T*.
+In case you estimate a model using `mgreml`, either according to some specific structural model (e.g. using `--genetic-model`) or the default fully saturated model we started with, `mgreml` can report the factor coefficients (i.e. the estimated effect of each factor on each trait) by using the `--factor-coefficients` option. Unless `--no-se` is used, the `--factor-coefficients` option not only reports the estimated factor coefficients, but also the complete covariance matrix of those estimates. :warning: This covariance matrix may grow very large for large *T*.
 
 E.g. the command
 
@@ -361,7 +377,7 @@ generates, amongst others, the file `factors.coeff.out`, which contains 110 esti
 
 The file `factors.coeff.var.out` contains a 110-by-110 matrix representing the covariance matrix of those estimates. 
 
-Similarly, `mgreml` can also return the estimated variance components (again either based on some structural model, or just the saturated model), including the covariance matrix of those estimated variance components (unless `--no-se` is used). To get these results, use the `--variance-components` option. E.g. the command
+Similarly, `mgreml` can also return the estimated variance components (again either based on some structural model, or just the saturated model), also including the covariance matrix of those estimated variance components (unless `--no-se` is used). To get these results, use the `--variance-components` option. E.g. the command
 
 ```
 python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
