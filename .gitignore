@@ -3,6 +3,8 @@
 **.log**
 **.out
 **.pkl
+**.pdf
+**.xlsx
 temp/**
 input/**
 output/**
