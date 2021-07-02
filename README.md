@@ -189,6 +189,10 @@ If we compare the new estimates of heritability (see below) to the true values, 
 | Some pheno 109 | 0.255 | 0.017 |
 | Some pheno 110 | 0.267 | 0.017 |
 
+Moreover, when looking at the heatmaps of the genetic correlations as estimated by `mgreml` and the true genetic correlations, we see that `mgreml` provides highly accurate estimates in this simulation:
+
+![Comparison of mgreml estimates of genetic correlations and true genetic correlations](https://github.com/devlaming/mgreml/blob/master/tutorial/rhoG_estimates_true.png?raw=true)
+
 ### Population stratification
 
 In the previous part, you may have noticed that `covar.txt` does not include any principal components (PCs) from the genetic data as fixed-effect covariates. Perhaps surprisingly, this is perfectly normal for an `mgreml` analysis. In fact, in `mgreml`, the file with your covariates should **NEVER** contain PCs from your genetic data, as `mgreml` already removes the effects of population stratification during the so-called canonical transformation. By default, `mgreml` removes the effects of 20 leading PCs from your genetic data. The effective sample size is reduced by 20 as a result of this correction for PCs.
