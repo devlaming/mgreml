@@ -654,28 +654,6 @@ class MgremlReader:
         self.logger.info('Finished reading in the ' + sData)
         self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
     
-    def SetConstrainedModels(self):
-        # for standard constrained models: set binary matrices accordingly
-        if self.bPerfectRhoG:
-            self.dfGenBinFY = MgremlReader.SetPerfectRho(self.lPhenos)
-        if self.bNoRhoG:
-            self.dfGenBinFY = MgremlReader.SetNoRho(self.lPhenos)
-        if self.bNoRhoE:
-            self.dfEnvBinFY = MgremlReader.SetNoRho(self.lPhenos)
-        if self.bNoVarG:
-            self.dfGenBinFY = MgremlReader.SetNoVar(self.lPhenos)
-        # if we have a nested model
-        if self.bNested:
-            # for standard constrained models: set binary matrices accordingly
-            if self.bPerfectRhoG0:
-                self.dfGenBinFY0 = MgremlReader.SetPerfectRho(self.lPhenos)
-            if self.bNoRhoG0:
-                self.dfGenBinFY0 = MgremlReader.SetNoRho(self.lPhenos)
-            if self.bNoRhoE0:
-                self.dfEnvBinFY0 = MgremlReader.SetNoRho(self.lPhenos)
-            if self.bNoVarG0:
-                self.dfGenBinFY0 = MgremlReader.SetNoVar(self.lPhenos)
-    
     def ReadData(self, sType):
         # figure out what type of input data we have
         # and set strings appropriately
@@ -1189,6 +1167,28 @@ class MgremlReader:
                 self.logger.warning(str(iCount*self.dfY.shape[1]) + ' additional fixed-effect covariates implied, of which ' + str(iCount*self.dfY.shape[1] - iCount) + ' are set to zero')
                 self.logger.warning('CPU time of MGREML may increase dramatically')
                 self.logger.warning('Consider running MGREML on a subset of your data with a much lower degree of missingness')
+    
+    def SetConstrainedModels(self):
+        # for standard constrained models: set binary matrices accordingly
+        if self.bPerfectRhoG:
+            self.dfGenBinFY = MgremlReader.SetPerfectRho(self.lPhenos)
+        if self.bNoRhoG:
+            self.dfGenBinFY = MgremlReader.SetNoRho(self.lPhenos)
+        if self.bNoRhoE:
+            self.dfEnvBinFY = MgremlReader.SetNoRho(self.lPhenos)
+        if self.bNoVarG:
+            self.dfGenBinFY = MgremlReader.SetNoVar(self.lPhenos)
+        # if we have a nested model
+        if self.bNested:
+            # for standard constrained models: set binary matrices accordingly
+            if self.bPerfectRhoG0:
+                self.dfGenBinFY0 = MgremlReader.SetPerfectRho(self.lPhenos)
+            if self.bNoRhoG0:
+                self.dfGenBinFY0 = MgremlReader.SetNoRho(self.lPhenos)
+            if self.bNoRhoE0:
+                self.dfEnvBinFY0 = MgremlReader.SetNoRho(self.lPhenos)
+            if self.bNoVarG0:
+                self.dfGenBinFY0 = MgremlReader.SetNoVar(self.lPhenos)
     
     def FinaliseData(self):
         # print update
