@@ -51,7 +51,7 @@ python .\mgreml.py -h
 
 ## Tutorial
 
-In this tutorial we will go over the basic functions of `mgreml`. First, go over the steps in Installation.
+In this tutorial, you will learn how to use `mgreml`. Before you start using `mgreml`, please go over the steps under [Installation](#installation).
 
 Now that you have cloned the `mgreml` repository, and `mgreml` is up-and-running, the main directory of `mgreml` should contain a subdirectory called `tutorial`. This directory in turn contains several files, including `pheno.txt` and `covar.txt`. Details on how this dataset has been generated using simulation can be found in the python script in `./tutorial/simulate.py`
 
