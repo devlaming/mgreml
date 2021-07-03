@@ -8,6 +8,7 @@ from mgreml.data import writer
 from mgreml.data import tools
 from mgreml.analysis import estimator
 from mgreml.analysis import comparison
+from mgreml.analysis import pairwise
 
 def main():
     # store starting time
@@ -24,25 +25,33 @@ def main():
         myMgremlData = reader.MgremlReader(parser, logger, process)
         # if analysis is implied by reader
         if myMgremlData.bAnalyse:
-            # if we have a nested model
-            if myMgremlData.bNested:
-                # initialise nested estimators
-                logger.info('3. INTIALISING MGREML ESTIMATORS FOR NESTED MODELS')
+            if myMgremlData.bPairwise: # if we have a pairwise model
+                # initialise pairwise estimator
+                logger.info('3. INTIALISING MGREML ESTIMATORS FOR PAIRWISE BIVARIATE MODELS')
                 logger.info('Current memory usage is ' + str(int((process.memory_info().rss)/(1024**2))) + 'MB')
-                myEstimator = comparison.NestedEstimators(myMgremlData)
+                myEstimator = pairwise.PairwiseEstimators(myMgremlData)
+                logger.info('4A. PERFORMING PAIRWISE BIVARIATE MGREML ESIMATION')
+                logger.info('Current memory usage is ' + str(int((process.memory_info().rss)/(1024**2))) + 'MB\n')
+                myEstimator.PerformEstimation()
             else:
-                # initialise estimator of the main model
-                if myMgremlData.bReinitialise:
-                    logger.info('3. REINITIALISING MGREML ESTIMATOR FOR MAIN MODEL') 
-                else:
-                    logger.info('3. INTIALISING MGREML ESTIMATOR FOR MAIN MODEL')
+                if myMgremlData.bNested: # if we have a nested model
+                    # initialise nested estimators
+                    logger.info('3. INTIALISING MGREML ESTIMATORS FOR NESTED MODELS')
+                    logger.info('Current memory usage is ' + str(int((process.memory_info().rss)/(1024**2))) + 'MB')
+                    myEstimator = comparison.NestedEstimators(myMgremlData)
+                else: # if neither nested nor pairwise
+                    # initialise estimator of the main model
+                    if myMgremlData.bReinitialise:
+                        logger.info('3. REINITIALISING MGREML ESTIMATOR FOR MAIN MODEL') 
+                    else:
+                        logger.info('3. INTIALISING MGREML ESTIMATOR FOR MAIN MODEL')
+                    logger.info('Current memory usage is ' + str(int((process.memory_info().rss)/(1024**2))) + 'MB')
+                    myEstimator = estimator.MgremlEstimator(myMgremlData)
+                logger.info('4. PERFORMING MGREML ESIMATION')
                 logger.info('Current memory usage is ' + str(int((process.memory_info().rss)/(1024**2))) + 'MB')
-                myEstimator = estimator.MgremlEstimator(myMgremlData)
-            logger.info('4. PERFORMING MGREML ESIMATION')
-            logger.info('Current memory usage is ' + str(int((process.memory_info().rss)/(1024**2))) + 'MB')
-            myEstimator.PerformEstimation()
-            myMgremlWriter = writer.DataWriter(myEstimator, myMgremlData)
-            myMgremlWriter.WriteResults()
+                myEstimator.PerformEstimation()
+                myMgremlWriter = writer.DataWriter(myEstimator, myMgremlData)
+                myMgremlWriter.WriteResults()
             logger.info('MGREML HAS FINISHED.')
         else:
             logger.warning('No MGREML analysis will be carried out.')

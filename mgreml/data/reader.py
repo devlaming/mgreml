@@ -91,128 +91,209 @@ class MgremlReader:
         dfBinFY = pd.DataFrame(data=0, index=pd.Index(lLabels), columns=pd.Index(lFactorName))
         return dfBinFY
     
-    def __init__(self, parser, logger, process):
-        # store logger, parser, and process as attributes of instance
-        self.logger = logger
-        self.parser = parser
-        self.process = process
-        # initialise arguments and logger
-        self.InitialiseArgumentsAndLogger()
-        # print welcome screen and given input args
-        self.PrintWelcome()
-        # assume we will carry out an analysis
-        self.bAnalyse = True
-        # if GRM, pheno or output has not been specified: stop analysing
-        if self.args.grm is None:
-            self.logger.error('Error: no GRM was specified.')
-            self.bAnalyse = False
-        if self.args.pheno is None:
-            self.logger.error('Error: no phenotype file was specified.')
-            self.bAnalyse = False            
-        if self.args.out is None:
-            self.logger.error('Error: no prefix for the output files was specified.')
-            self.bAnalyse = False
-        # if we can analyse, read in data
-        if self.bAnalyse:
-            self.logger.info('1. READING IN ALL DATA, MODELS, AND INPUT OPTIONS')
-            self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
-            self.logger.info('READING OPTIONS')
-            # determine whether we will drop missings
-            self.DetermineIfDropMissings()
-            # determine whether --grm-cutoff has been used
-            self.SetRelCutOff()
-            # determine how many PCs to drop
-            self.SetNumberOfPCs()
-            # determine whether SEs are desired
-            self.NeedSEs()
-            # determine whether intercept needs to be added
-            self.NeedIntercept()
-            # determine whether all coeffs are desired
-            self.NeedAllCoeffs()
-            # determine whether all variance components are desired
-            self.NeedVarianceComponents()
-            # determine whether we do BFGS or Newton
-            self.DoBFGS()
-            # set convergence threshold
-            self.SetGradTol()
-            # determine whether we story anything during iterations
-            self.SetIterStoreFreq()
-            # assert if one or two models have been specified
-            self.IsNested()
-            # determine if we need to reinitialise anything
-            self.NeedToReinitialise()
-            self.NeedToReinitialise(MgremlReader.bNull)
-            # print update
-            self.logger.info('READING MODELS')
-            # determine whether any correlations are fixed to zero or one
-            # or if genetic variances are fixed to zero
-            self.FindFixedRhoVar()
-            # if covar model has been specified: read
-            if self.args.covar_model is not None:
-                self.ReadModel(MgremlReader.sCov)
-            else:
-                self.dfBinXY = None
-            # if genetic model has been specified: read
-            if self.args.genetic_model is not None:
-                self.ReadModel(MgremlReader.sGen)
+    def __init__(self, parser, logger, process, bCopy=False, mdData=None):
+        if not(bCopy):
+            # store logger, parser, and process as attributes of instance
+            self.logger = logger
+            self.parser = parser
+            self.process = process
+            # initialise arguments and logger
+            self.InitialiseArgumentsAndLogger()
+            # print welcome screen and given input args
+            self.PrintWelcome()
+            # assume we will carry out an analysis
+            self.bAnalyse = True
+            # if GRM, pheno or output has not been specified: stop analysing
+            if self.args.grm is None:
+                self.logger.error('Error: no GRM was specified.')
+                self.bAnalyse = False
+            if self.args.pheno is None:
+                self.logger.error('Error: no phenotype file was specified.')
+                self.bAnalyse = False            
+            if self.args.out is None:
+                self.logger.error('Error: no prefix for the output files was specified.')
+                self.bAnalyse = False
+            # if we can analyse, read in data
+            if self.bAnalyse:
+                self.logger.info('1. READING IN ALL DATA, MODELS, AND INPUT OPTIONS')
+                self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
+                self.logger.info('READING OPTIONS')
+                # determine whether we will drop missings
+                self.DetermineIfDropMissings()
+                # determine whether --grm-cutoff has been used
+                self.SetRelCutOff()
+                # determine how many PCs to drop
+                self.SetNumberOfPCs()
+                # determine whether SEs are desired
+                self.NeedSEs()
+                # determine whether intercept needs to be added
+                self.NeedIntercept()
+                # determine whether all coeffs are desired
+                self.NeedAllCoeffs()
+                # determine whether all variance components are desired
+                self.NeedVarianceComponents()
+                # determine whether we do BFGS or Newton
+                self.DoBFGS()
+                # set convergence threshold
+                self.SetGradTol()
+                # determine whether we story anything during iterations
+                self.SetIterStoreFreq()
+                # assert if one or two models have been specified
+                self.IsNested()
+                # determine if we need to reinitialise anything
+                self.NeedToReinitialise()
+                self.NeedToReinitialise(MgremlReader.bNull)
+                # determine if we want pairwise bivariate analyses
+                self.IsPairwise()
+                # print update
+                self.logger.info('READING MODELS')
+                # determine whether any correlations are fixed to zero or one
+                # or if genetic variances are fixed to zero
+                self.FindFixedRhoVar()
+                # if covar model has been specified: read
+                if self.args.covar_model is not None:
+                    self.ReadModel(MgremlReader.sCov)
+                else:
+                    self.dfBinXY = None
+                # if genetic model has been specified: read
+                if self.args.genetic_model is not None:
+                    if self.bPairwise:
+                        raise SyntaxError('--genetic-model cannot be combined with --pairwise')
+                    self.ReadModel(MgremlReader.sGen)
+                else:
+                    self.dfGenBinFY = None
+                # if genetic model under null has been specified: read
+                if self.args.restricted_genetic_model is not None:
+                    if self.bPairwise:
+                        raise SyntaxError('--restricted-genetic-model cannot be combined with --pairwise')
+                    self.ReadModel(MgremlReader.sGen, MgremlReader.bNull)
+                else:
+                    self.dfGenBinFY0 = None
+                # if environment model has been specified: read
+                if self.args.environment_model is not None:
+                    if self.bPairwise:
+                        raise SyntaxError('--environment-model cannot be combined with --pairwise')
+                    self.ReadModel(MgremlReader.sEnv)
+                else:
+                    self.dfEnvBinFY = None
+                # if genetic model under null has been specified: read
+                if self.args.restricted_environment_model is not None:
+                    if self.bPairwise:
+                        raise SyntaxError('--restricted-environment-model cannot be combined with --pairwise')
+                    self.ReadModel(MgremlReader.sEnv, MgremlReader.bNull)
+                else:
+                    self.dfEnvBinFY0 = None
+                # print update
+                self.logger.info('READING DATA')
+                # read phenotype file
+                self.ReadData(MgremlReader.sPhe)
+                # if covariate file specified: read
+                if self.args.covar is not None:
+                    self.ReadData(MgremlReader.sCov)
+                else: # else set covariates to NoneType
+                    self.dfX = None
+                # find out if we have covariates
+                self.DetermineIfCovsAreGiven()
+                # read GRM
+                self.ReadGRM()
+                # print update
+                self.logger.info('2. CLEANING YOUR DATA')
+                self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
+                # add intercept if required
+                self.AddIntercept()
+                # clean up the specification of the part of the model on covariates
+                self.CleanSpecificationCovariates()
+                # check if there are duplicates and/or rank defficiency
+                self.CheckDuplicatesAndRank()
+                # find overlapping individuals and sort data
+                self.FindOverlapAndSort()
+                # drop observations where missingness affects all traits or any trait
+                self.DropMissings()
+                # apply relatedness pruning
+                self.PruneByRelatedness()
+                # contruct pheno-specific dummies to address remaining missingness
+                self.CreateDummies()
+                # store variable names
+                self.lPhenos = self.dfY.columns.tolist()
+                if self.bCovs:
+                    self.lCovs = self.dfX.columns.tolist()
+                # set constrained models if needed
+                self.SetConstrainedModels()
+                # finalise Mgreml data using canonical transformation
+                self.FinaliseData()
+                # print update
+                self.logger.info('Data cleaning completed')
+                self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB\n')
+        else:
+            self.logger = mdData.logger
+            self.parser = mdData.parser
+            self.process = mdData.process
+            self.sPrefix = mdData.sPrefix
+            self.bDropMissings = mdData.bDropMissings
+            self.bRelCutoff = mdData.bRelCutoff
+            self.dRelCutoff = mdData.dRelCutoff
+            self.bPairwise = mdData.bPairwise
+            self.bCovs = mdData.bCovs
+            self.bSameCovs = mdData.bSameCovs
+            self.bNested = mdData.bNested
+            self.bAnalyse = mdData.bAnalyse
+            self.dLogDetXTX = mdData.dLogDetXTX
+            self.iT = mdData.iT
+            self.iK = mdData.iK
+            self.iN = mdData.iN
+            self.iDropLeadPCs = mdData.iDropLeadPCs
+            self.iDropTrailPCs = mdData.iDropTrailPCs
+            self.bSEs = mdData.bSEs
+            self.bIntercept = mdData.bIntercept
+            self.bAllCoeffs = mdData.bAllCoeffs
+            self.bVarComp = mdData.bVarComp
+            self.bBFGS = mdData.bBFGS
+            self.dGradTol = mdData.dGradTol
+            self.bStoreIter = mdData.bStoreIter
+            self.iStoreIterFreq = mdData.iStoreIterFreq
+            self.bReinitialise = mdData.bReinitialise
+            self.bReinitialise0 = mdData.bReinitialise0
+            self.sInitValsFile = mdData.sInitValsFile
+            self.sInitValsFile0 = mdData.sInitValsFile0
+            self.bPerfectRhoG = mdData.bPerfectRhoG
+            self.bNoRhoG = mdData.bNoRhoG
+            self.bPerfectRhoG0 = mdData.bPerfectRhoG0
+            self.bNoRhoG0 = mdData.bNoRhoG0
+            self.bNoRhoE = mdData.bNoRhoE
+            self.bNoRhoE0 = mdData.bNoRhoE0
+            self.bNoVarG = mdData.bNoVarG
+            self.bNoVarG0 = mdData.bNoVarG0
+            self.mY = mdData.mY.copy()
+            self.mYT = mdData.mYT.copy()
+            self.vD = mdData.vD.copy()
+            self.vDSq = mdData.vDSq.copy()
+            if mdData.dfGenBinFY is not None:
+                self.dfGenBinFY = mdData.dfGenBinFY.copy()
             else:
                 self.dfGenBinFY = None
-            # if genetic model under null has been specified: read
-            if self.args.restricted_genetic_model is not None:
-                self.ReadModel(MgremlReader.sGen, MgremlReader.bNull)
-            else:
-                self.dfGenBinFY0 = None
-            # if environment model has been specified: read
-            if self.args.environment_model is not None:
-                self.ReadModel(MgremlReader.sEnv)
+            if mdData.dfEnvBinFY is not None:
+                self.dfEnvBinFY = mdData.dfEnvBinFY.copy()
             else:
                 self.dfEnvBinFY = None
-            # if genetic model under null has been specified: read
-            if self.args.restricted_environment_model is not None:
-                self.ReadModel(MgremlReader.sEnv, MgremlReader.bNull)
+            if mdData.dfGenBinFY0 is not None:
+                self.dfGenBinFY0 = mdData.dfGenBinFY0.copy()
+            else:
+                self.dfGenBinFY0 = None
+            if mdData.dfEnvBinFY0 is not None:
+                self.dfEnvBinFY0 = mdData.dfEnvBinFY0.copy()
             else:
                 self.dfEnvBinFY0 = None
-            # print update
-            self.logger.info('READING DATA')
-            # read phenotype file
-            self.ReadData(MgremlReader.sPhe)
-            # if covariate file specified: read
-            if self.args.covar is not None:
-                self.ReadData(MgremlReader.sCov)
-            else: # else set covariates to NoneType
-                self.dfX = None
-            # find out if we have covariates
-            self.DetermineIfCovsAreGiven()
-            # read GRM
-            self.ReadGRM()
-            # print update
-            self.logger.info('2. CLEANING YOUR DATA')
-            self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB')
-            # add intercept if required
-            self.AddIntercept()
-            # clean up the specification of the part of the model on covariates
-            self.CleanSpecificationCovariates()
-            # check if there are duplicates and/or rank defficiency
-            self.CheckDuplicatesAndRank()
-            # find overlapping individuals and sort data
-            self.FindOverlapAndSort()
-            # drop observations where missingness affects all traits or any trait
-            self.DropMissings()
-            # apply relatedness pruning
-            self.PruneByRelatedness()
-            # contruct pheno-specific dummies to address remaining missingness
-            self.CreateDummies()
-            # store variable names
-            self.lPhenos = self.dfY.columns.tolist()
+            self.mCovY = mdData.mCovY.copy()
+            self.lPhenos = mdData.lPhenos.copy()
             if self.bCovs:
-                self.lCovs = self.dfX.columns.tolist()
-            # set constrained models if needed
-            self.SetConstrainedModels()
-            # finalise Mgreml data using canonical transformation
-            self.FinaliseData()
-            # print update
-            self.logger.info('Data cleaning completed')
-            self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB\n')
+                self.mX = mdData.mX.copy()
+                self.mXT = mdData.mXT.copy()
+                self.lCovs = mdData.lCovs.copy()
+                if not(self.bSameCovs):
+                    self.mBinXY = mdData.mBinXY.copy()
+                    self.vLogDetXTX = mdData.vLogDetXTX.copy()
+                    self.vIndCovs = np.array(np.where(np.array(self.mBinXY).ravel()==1)).ravel()
+                    self.iKtotal = self.mBinXY.sum()
     
     def InitialiseArgumentsAndLogger(self):
         #create mutually exclusive groups
@@ -273,6 +354,8 @@ class MgremlReader:
                             help = 'option to reinitialise mgreml for a model and its estimates from a .pkl file stored by --store-iter')
         self.parser.add_argument('--restricted-reinitialise', metavar = 'FILENAME', default = None, type = str,  
                             help = 'option to reinitialise mgreml for a restricted model and its estimates from a .pkl file generated by --store-iter')
+        self.parser.add_argument('--pairwise', action = 'store_true',
+                            help = 'option to perform pairwise bivariate estimation instead of multivariate estimation; cannot be combined with --(restricted-)genetic-model, --(restricted-)no-var-genetic, --(restricted-)environment-model, --factor-coefficients, --variance-components, --store-iter, and/or --(restricted-)reinitialise')
         self.parser.add_argument('--out', metavar = 'PREFIX', default = None, type = str,
                             help = 'prefix of output files')
         # try to parse the input arguments
@@ -482,6 +565,23 @@ class MgremlReader:
                 self.bReinitialise = False
                 self.sInitValsFile = None
     
+    def IsPairwise(self):
+        if self.args.pairwise:
+            if self.bAllCoeffs:
+                raise SyntaxError('--pairwise cannot be combined with --factor-coefficients')
+            elif self.bVarComp:
+                raise SyntaxError('--pairwise cannot be combined with --variance-components')
+            elif self.bStoreIter:
+                raise SyntaxError('--pairwise cannot be combined with --store-iter')
+            elif self.bReinitialise:
+                raise SyntaxError('--pairwise cannot be combined with --reinitialise')
+            elif self.bReinitialise0:
+                raise SyntaxError('--pairwise cannot be combined with --restricted-reinitialise')
+            self.bPairwise = True
+            self.logger.info('MGREML will perform pairwise bivariate estimation instead of multivariate estimation.')
+        else:
+            self.bPairwise = False
+    
     def FindFixedRhoVar(self):
         # set all booleans for fixed rhoG and rhoE to False
         self.bPerfectRhoG = False
@@ -529,12 +629,16 @@ class MgremlReader:
         if self.args.no_var_genetic:
             if self.bReinitialise:
                 raise SyntaxError('--no-var-genetic cannot be combined with --reinitialise, as the .pkl file is used to set the model')
+            elif self.bPairwise:
+                raise SyntaxError('--no-var-genetic cannot be combined with --pairwise')
             self.logger.info('Genetic variance in the main model set to zero.')
             self.bNoVarG = True
         # assess whether genetic variance is zero in the restricted model
         if self.args.restricted_no_var_genetic:
             if self.bReinitialise0:
                 raise SyntaxError('--restricted-no-var-genetic cannot be combined with --restricted-reinitialise, as the .pkl file is used to set the restricted model')
+            elif self.bPairwise:
+                raise SyntaxError('--restricted-no-var-genetic cannot be combined with --pairwise')
             self.logger.info('Genetic variance in the null model set to zero.')
             self.bNoVarG0 = True
     
@@ -1243,6 +1347,11 @@ class MgremlReader:
         # count sample size and number of phenotypes, and store
         self.iN = self.mY.shape[0]
         self.iT = self.mY.shape[1]
+        # if less than three traits and --pairwise used
+        if (self.iT < 3) and self.bPairwise:
+            # print warning and adjust bPairwise
+            self.logger.warning('Warning: --pairwise ignored when analysing less than three traits')
+            self.bPairwise = False
         # initialise log|X'X|
         self.dLogDetXTX = 0
         # if we have covariates
@@ -1277,6 +1386,8 @@ class MgremlReader:
                 self.vIndCovs = np.array(np.where(np.array(self.mBinXY).ravel()==1)).ravel()
                 # count total number of covariates across traits
                 self.iKtotal = self.mBinXY.sum()
+                # initialise vector of log|X'X| per trait
+                self.vLogDetXTX = np.zeros(self.iT)
                 # for each trait
                 for it in range(0,self.iT):
                     # get binary vector indicating which covariates affect current trait
@@ -1292,8 +1403,10 @@ class MgremlReader:
                     if any(vDXTX < abs(np.finfo(float).eps)):
                         # raise an error with a proper explanation of the likely cause
                         raise ValueError('Your covariates are rank deficient after the canonical transformation (i.e. perfectly multicollinear). Likely reason: you specified principal components (PCs) from your genetic data as fixed-effect covariates. MGREML already controls for population stratification in the canonical transformation. Please do not control for PCs manually as well. Rather, use --adjust-pcs INTEGER, to indicate for how many PCs you want to control via the canonical transformation.')
-                    # compute log|X'X| and add to grand total
-                    self.dLogDetXTX = self.dLogDetXTX + np.log(vDXTX).sum()
+                    # compute log|X'X| and insert in vector
+                    self.vLogDetXTX[it] = np.log(vDXTX).sum()
+                # compute log|X'X| and store
+                self.dLogDetXTX = self.vLogDetXTX.sum()
             # use residuals to initialise empirical covariance of Y
             self.mCovY = (mR.T@mR)/self.iN
         # otherwise get raw covariance of Y
@@ -1310,3 +1423,45 @@ class MgremlReader:
             else:
                 self.logger.info('Final number of fixed effects, K = ' + str(self.iKtotal))
 
+class PairwiseMgremlReader(MgremlReader):
+    
+    def __init__(self, mdData, i, j):
+        self.bCopy = True
+        # create a copy of the the mgregml reader data
+        super().__init__(None,None,None,self.bCopy,mdData)
+        # set prefix
+        self.sPrefix = self.sPrefix + str(i) + '.' + str(j) + '.'
+        # get right phenotypes
+        self.mY = self.mY[:,[i,j]]
+        self.mYT = self.mYT[[i,j],:]
+        self.lPhenos = [self.lPhenos[i], self.lPhenos[j]]
+        # get right logL constant
+        if self.bSameCovs:
+            self.dLogDetXTX = (self.dLogDetXTX)*(2/self.iT)
+        else:
+            self.dLogDetXTX = (self.vLogDetXTX[[i,j]]).sum()
+        # set number of traits now considered
+        self.iT = 2
+        # if covs, but not same across traits
+        if self.bCovs and not(self.bSameCovs):
+            # get right active covariates
+            self.mBinXY = self.mBinXY[[i,j],:]
+            self.vIndCovs = np.array(np.where(np.array(self.mBinXY).ravel()==1)).ravel()
+            self.iKtotal = self.mBinXY.sum()
+        if self.dfGenBinFY is not None:
+            # get genetic model for active traits; select first two genetic factors
+            # these perfectly reflect either rhoG = 0 or rhoG = 1
+            self.dfGenBinFY = self.dfGenBinFY.iloc[[i,j],0:1]
+        if self.dfEnvBinFY is not None:
+            # get environment model for active traits; select first two environment factors
+            # these perfectly reflect rhoE = 0
+            self.dfEnvBinFY = self.dfEnvBinFY.iloc[[i,j],0:1]
+        if self.bNested:
+            if self.dfGenBinFY0 is not None:
+                # get genetic model for active traits; select first two genetic factors
+                # these perfectly reflect either rhoG = 0 or rhoG = 1
+                self.dfGenBinFY0 = self.dfGenBinFY0.iloc[[i,j],0:1]
+            if self.dfEnvBinFY0 is not None:
+                # get environment model for active traits; select first two environment factors
+                # these perfectly reflect rhoE = 0
+                self.dfEnvBinFY0 = self.dfEnvBinFY0.iloc[[i,j],0:1]
