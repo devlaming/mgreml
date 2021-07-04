@@ -23,13 +23,13 @@ class PairwiseEstimators:
                 sLabelJ = self.mdData.lPhenos[j]
                 # print update
                 self.mdData.logger.info('4B. PERFORMING ESIMATION FOR ' + sLabelI + ' AND ' + sLabelJ)
-                self.mdData.logger.info('Fetching relevant subset of data')
+                self.mdData.logger.info('Fetching relevant subset of data\n')
                 # copy data on all traits
                 mdThisData = reader.PairwiseMgremlReader(self.mdData,i,j)
                 # if nested analysis
                 if mdThisData.bNested:
-                    # initialise nested estimators
-                    myEstimator = comparison.NestedEstimators(mdThisData)
+                    # initialise nested estimators: no check on nestedness required given setup of this model
+                    myEstimator = comparison.NestedEstimators(mdThisData, bCheck=False)
                 else: # else
                     # initialise main estimator
                     myEstimator = estimator.MgremlEstimator(mdThisData)

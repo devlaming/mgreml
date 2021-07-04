@@ -262,8 +262,8 @@ class MgremlReader:
             self.bNoRhoE0 = mdData.bNoRhoE0
             self.bNoVarG = mdData.bNoVarG
             self.bNoVarG0 = mdData.bNoVarG0
-            self.mY = mdData.mY.copy()
             self.mYT = mdData.mYT.copy()
+            self.mY = self.mYT.T
             self.vD = mdData.vD.copy()
             self.vDSq = mdData.vDSq.copy()
             if mdData.dfGenBinFY is not None:
@@ -286,8 +286,8 @@ class MgremlReader:
             self.lPhenos = mdData.lPhenos.copy()
             if self.bCovs:
                 self.iK = mdData.iK
-                self.mX = mdData.mX.copy()
                 self.mXT = mdData.mXT.copy()
+                self.mX = self.mXT.T
                 self.lCovs = mdData.lCovs.copy()
                 if not(self.bSameCovs):
                     self.mBinXY = mdData.mBinXY.copy()
@@ -641,6 +641,12 @@ class MgremlReader:
                 raise SyntaxError('--restricted-no-var-genetic cannot be combined with --pairwise')
             self.logger.info('Genetic variance in the null model set to zero.')
             self.bNoVarG0 = True
+        # assess if --rho-genetic 1 and --restricted-rho-genetic 0: non-nested
+        if self.bPerfectRhoG and self.bNoRhoG0:
+            raise ValueError('--rho-genetic 1 and --restricted-rho-genetic 0 are not nested')
+        # assess if --rho-genetic 0 and --restricted-rho-genetic 1: non-nested
+        if self.bNoRhoG and self.bPerfectRhoG0:
+            raise ValueError('--rho-genetic 0 and --restricted-rho-genetic 1 are not nested')
     
     def ReadModel(self, sType, bNull = False):
         # set no label string for phenotypes (in rows of all models)
@@ -1432,14 +1438,15 @@ class PairwiseMgremlReader(MgremlReader):
         # set prefix
         self.sPrefix = self.sPrefix + str(i) + '.' + str(j) + '.'
         # get right phenotypes
-        self.mY = self.mY[:,[i,j]]
         self.mYT = self.mYT[[i,j],:]
+        self.mY = self.mYT.T
         self.lPhenos = [self.lPhenos[i], self.lPhenos[j]]
         # get right logL constant
         if self.bSameCovs:
             self.dLogDetXTX = (self.dLogDetXTX)*(2/self.iT)
         else:
-            self.dLogDetXTX = (self.vLogDetXTX[[i,j]]).sum()
+            self.vLogDetXTX = self.vLogDetXTX[[i,j]]
+            self.dLogDetXTX = self.vLogDetXTX.sum()
         # set number of traits now considered
         self.iT = 2
         # if covs, but not same across traits
@@ -1449,19 +1456,39 @@ class PairwiseMgremlReader(MgremlReader):
             self.vIndCovs = np.array(np.where(np.array(self.mBinXY).ravel()==1)).ravel()
             self.iKtotal = self.mBinXY.sum()
         if self.dfGenBinFY is not None:
-            # get genetic model for active traits; select first two genetic factors
-            # these perfectly reflect either rhoG = 0 or rhoG = 1
-            self.dfGenBinFY = self.dfGenBinFY.iloc[[i,j],0:1]
+            if self.bPerfectRhoG:
+                # get genetic model for active traits; selecting all factors;
+                # this perfectly reflects rhoG = 1
+                self.dfGenBinFY = self.dfGenBinFY.iloc[[i,j],:]
+            elif self.bNoRhoG:
+                # get genetic model for active traits; select corresponding factors
+                # this perfectly reflects rhoG = 0
+                self.dfGenBinFY = (self.dfGenBinFY.iloc[[i,j],:]).iloc[:,[i,j]]
+            else:
+                raise SyntaxError('--pairwise cannot be combined with genetic model other than fully saturated, perfect genetic correlations, or no genetic correlations')
         if self.dfEnvBinFY is not None:
-            # get environment model for active traits; select first two environment factors
-            # these perfectly reflect rhoE = 0
-            self.dfEnvBinFY = self.dfEnvBinFY.iloc[[i,j],0:1]
+            if self.bNoRhoE:
+                # get environment model for active traits; select corresponding factors
+                # this perfectly reflects rhoE = 0
+                self.dfEnvBinFY = (self.dfEnvBinFY.iloc[[i,j],:]).iloc[:,[i,j]]
+            else:
+                raise SyntaxError('--pairwise cannot be combined with environment model other than fully saturated or no environment correlations')
         if self.bNested:
             if self.dfGenBinFY0 is not None:
-                # get genetic model for active traits; select first two genetic factors
-                # these perfectly reflect either rhoG = 0 or rhoG = 1
-                self.dfGenBinFY0 = self.dfGenBinFY0.iloc[[i,j],0:1]
+                if self.bPerfectRhoG0:
+                    # get genetic model for active traits; selecting all factors;
+                    # this perfectly reflects rhoG = 1
+                    self.dfGenBinFY0 = self.dfGenBinFY0.iloc[[i,j],:]
+                elif self.bNoRhoG0:
+                    # get genetic model for active traits; select corresponding factors
+                    # this perfectly reflects rhoG = 0
+                    self.dfGenBinFY0 = (self.dfGenBinFY0.iloc[[i,j],:]).iloc[:,[i,j]]
+                else:
+                    raise SyntaxError('--pairwise cannot be combined with restricted genetic model other than fully saturated, perfect genetic correlations, or no genetic correlations')
             if self.dfEnvBinFY0 is not None:
-                # get environment model for active traits; select first two environment factors
-                # these perfectly reflect rhoE = 0
-                self.dfEnvBinFY0 = self.dfEnvBinFY0.iloc[[i,j],0:1]
+                if self.bNoRhoE0:
+                    # get environment model for active traits; select corresponding factors
+                    # this perfectly reflects rhoE = 0
+                    self.dfEnvBinFY0 = (self.dfEnvBinFY0.iloc[[i,j],:]).iloc[:,[i,j]]
+                else:
+                    raise SyntaxError('--pairwise cannot be combined with restricted environment model other than fully saturated or no environment correlations')
