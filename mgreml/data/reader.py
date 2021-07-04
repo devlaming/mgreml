@@ -239,7 +239,6 @@ class MgremlReader:
             self.bAnalyse = mdData.bAnalyse
             self.dLogDetXTX = mdData.dLogDetXTX
             self.iT = mdData.iT
-            self.iK = mdData.iK
             self.iN = mdData.iN
             self.iDropLeadPCs = mdData.iDropLeadPCs
             self.iDropTrailPCs = mdData.iDropTrailPCs
@@ -286,6 +285,7 @@ class MgremlReader:
             self.mCovY = mdData.mCovY.copy()
             self.lPhenos = mdData.lPhenos.copy()
             if self.bCovs:
+                self.iK = mdData.iK
                 self.mX = mdData.mX.copy()
                 self.mXT = mdData.mXT.copy()
                 self.lCovs = mdData.lCovs.copy()
