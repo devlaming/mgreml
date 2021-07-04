@@ -37,7 +37,7 @@ def main():
                 if myMgremlData.bNested: # if we have a nested model
                     # initialise nested estimators
                     logger.info('3. INTIALISING MGREML ESTIMATORS FOR NESTED MODELS')
-                    logger.info('Current memory usage is ' + str(int((process.memory_info().rss)/(1024**2))) + 'MB')
+                    logger.info('Current memory usage is ' + str(int((process.memory_info().rss)/(1024**2))) + 'MB\n')
                     myEstimator = comparison.NestedEstimators(myMgremlData)
                 else: # if neither nested nor pairwise
                     # initialise estimator of the main model
