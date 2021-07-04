@@ -861,6 +861,9 @@ class MgremlReader:
         tuples = list(zip(*arrays))
         index = pd.MultiIndex.from_tuples(tuples, names=MgremlReader.lLabelsFID_IID)
         iN = len(ids.index)
+        # raise error when trying to control for too many PCs
+        if iN < (self.iDropLeadPCs+self.iDropTrailPCs):
+            raise ValueError('you cannot use --adjust-pcs to adjust for more eigenvectors than there are individuals in your GRM')
         self.logger.info('{iN} individuals in {f}'.format(iN=iN, f=IDFileName))
         self.logger.info('Reading GRM files {f}.*'.format(f=self.args.grm))
         self.logger.info('This may take some time...')
