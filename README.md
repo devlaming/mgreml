@@ -625,7 +625,7 @@ git pull
 ```
 If `mgreml` is up to date, you will see 
 ```
-Already up to date.
+Already up-to-date.
 ```
 otherwise, you will see `git` output similar to 
 ```
