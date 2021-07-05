@@ -71,7 +71,7 @@ In this tutorial, you will learn how to use `mgreml`. Before you start using `mg
 
 Now that you have cloned the `mgreml` repository, and `mgreml` is up-and-running, the main directory of `mgreml` should contain a subdirectory called `tutorial`. This directory in turn contains several files, including `pheno.txt` and `covar.txt`. Details on how this dataset has been generated using simulation can be found in the python script in `./tutorial/simulate.py`
 
-Let's first inspect the `pheno.txt` file. This file contains data in tab-separated format on ten phenotypes observed in a set of 5,000 individuals. The first two columns list family and individual ID, followed by the phenotypes:
+Let us first inspect the `pheno.txt` file. This file contains data in tab-separated format on ten phenotypes observed in a set of 5,000 individuals. The first two columns list family and individual ID, followed by the phenotypes:
 
 | FID | IID | Some pheno 101 | Some pheno 102 | ... | Some pheno 109 | Some pheno 110 |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -531,7 +531,7 @@ reinitialises estimation for the null and alternative model from appropriate `.p
 
 ### Data formats and management
 
-Input files following the options `--pheno`, `--covar`, `--covar-model`, `--genetic-model`, `--environment-model`, `--restricted-genetic-model`, `--restricted-environment-model` can be comma, tab, or space-separated. Just make sure to be consistent within each file. Also, (1) when your labels (e.g. phenotype labels or FID and IIDs) contain spaces, make sure the file is not space-separated and (2) when those labels contain commas, make sure the file is not comma-separated.
+The input files that follow the options `--pheno`, `--covar`, `--covar-model`, `--genetic-model`, `--environment-model`, `--restricted-genetic-model`, `--restricted-environment-model` can be comma-, tab-, or space-separated. Just make sure to be completely consistent within each file. :warning: Please make sure your labels (e.g. phenotype labels, covariate labels, etc.) do not contain commas.
 
 The options `--pheno`, `--covar`, `--covar-model`, `--genetic-model`, `--environment-model`, `--restricted-genetic-model`, `--restricted-environment-model` have modifiers `nolabelpheno`, `nolabelcovar`, and `nolabelfactor` to indicate when headers (e.g. phenotype labels) are absent. E.g. the following options are possible in `mgreml`: `--pheno myphen.txt nolabelpheno` and `--covar-model mycovmodel.txt nolabelpheno nolabelcovar`). However, as `mgreml` is a multivariate method, we strongly recommend always providing headers to `mgreml`, so everything is labelled in terms of input as well as output.
 
