@@ -217,7 +217,7 @@ class GeneticModel(StructuralModel):
 class EnvironmentModel(StructuralModel):
     
     # set weight of environment factors to square root of 80%
-    # as to emulate initial heritabilities of 80%
+    # as to emulate initial heritabilities of 20%
     dWeight = math.sqrt(0.8)
     # string describing type of model
     sType = 'environment '
