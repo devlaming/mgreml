@@ -29,6 +29,9 @@ class MgremlEstimator:
     iMaxIter = 2000
     # need to compute gradient and AI matrix after three strikes of failed BFGS
     bAllAtStrike3 = True
+    # set mediator and phenotype indices
+    iMedM = 0
+    iMedY = 1
     
     def __init__(self, mdData, bNested = False):
         # if null model, read out appropriate attributes
@@ -61,6 +64,8 @@ class MgremlEstimator:
         self.bSEs = mdData.bSEs
         # set whether we are estimating a nested model
         self.bNested = bNested
+        # set whether we are doing a mediation analysis
+        self.bMediation = mdData.bMediation
         # set whether to return all parameters estimates
         # and sampling variance when done
         self.bAllCoeffs = mdData.bAllCoeffs
@@ -492,8 +497,17 @@ class MgremlEstimator:
                                    np.matmul(vGradRhoEY,np.matmul(mSamplingVEYY,vGradRhoEY.T)))
                     self.mRhoGSE[j,i] = self.mRhoGSE[i,j]
                     self.mRhoESE[j,i] = self.mRhoESE[i,j]
-        # if variance components are needed
-        if self.bVarComp:
+        # if mediation analysis needed:
+        if self.bMediation:
+            dVarGM = mVG[MgremlEstimator.iMedM,MgremlEstimator.iMedM]
+            dVarGY = mVG[MgremlEstimator.iMedY,MgremlEstimator.iMedY]
+            dVarEM = mVE[MgremlEstimator.iMedM,MgremlEstimator.iMedM]
+            dCovEMY = mVE[MgremlEstimator.iMedM,MgremlEstimator.iMedY]
+            self.dBetaMY = dCovEMY/dVarEM
+            self.dMediatedVGY = dVarGM*(self.dBetaMY**2)
+            self.dTotalVGY = dVarGY
+        # if variance components are needed and/or mediation analysis performed together with requirement of standard errors
+        if self.bVarComp or (self.bMediation and self.bSEs):
             # get indices and parameters
             (vIndTG, vIndFG, vParamG, vIndTE, vIndFE, vParamE) = self.mgreml_model.model.GetSplitParamsAndIndices()
             # compute how many VCs there are
@@ -527,6 +541,9 @@ class MgremlEstimator:
                     iRowE += 1
             # if SEs are needed:
             if self.bSEs:
+                # if mediation:
+                if self.bMediation:
+                    self.mMediationSamplingV = np.zeros((iSize,iSize))
                 # re-initialise row indices
                 iRowG = 0
                 iRowE = int(iSize/2)
@@ -623,6 +640,44 @@ class MgremlEstimator:
                                 if iRowG == iColG:
                                     self.mVCs[iRowG,3] = np.sqrt(self.mSamplingVarVCs[iRowG,iColG])
                                     self.mVCs[iRowE,3] = np.sqrt(self.mSamplingVarVCs[iRowE,iColE])
+                                # if mediation results are needed:
+                                if self.bMediation
+                                    if i == MgremlEstimator.iMedM
+                                        if j == i:
+                                            if k == i:
+                                                if l == i:
+                                                    #Store Cov(GMM,GMM)=1vs1
+                                                    #Store Cov(GMM,EMM)=1vs4
+                                                    #Store Cov(EMM,EMM)=4vs4
+                                                elif l == MgremlEstimator.iMedY:
+                                                    #Store Cov(GMM,GMY)=1vs2
+                                                    #Store Cov(GMM,EMY)=1vs5
+                                                    #Store Cov(EMM,EMY)=4vs5
+                                            elif k == MgremlEstimator.iMedY
+                                                if l == k
+                                                    #Store Cov(GMM,GYY)=1vs3
+                                                    #Store Cov(GMM,EYY)=1vs6
+                                                    #Store Cov(EMM,EYY)=4vs6
+                                        elif j == MgremlEstimator.iMedY:
+                                            if k == i:
+                                                if l == j:
+                                                    #Store Cov(GMY,GMY)=2vs2
+                                                    #Store Cov(GMY,EMY)=2vs5
+                                                    #Store Cov(EMY,EMY)=5vs5
+                                            if k == j:
+                                                if l == j:
+                                                    #Store Cov(GMY,GYY)=2vs3
+                                                    #Store Cov(GMY,EYY)=2vs6
+                                                    #Store Cov(EMY,EYY)=5vs6
+                                    elif i == MgremlEstimator.iMedY
+                                        if j == i:
+                                            if k == i:
+                                                if l == i:
+                                                    #Store Cov(GYY,GYY)=3vs3
+                                                    #Store Cov(GYY,EYY)=3vs6
+                                                    #Store Cov(EYY,EYY)=6vs6
+                                    #missing is lower triangle in covariance matrix of VCs for genetic VCs versus environmental VCs:
+                                    #i.e. 2vs4, 3vs4, and 3vs5; reconsider indexing for l: (e.g. when l<max(k,j) only look at G(ij) versus E(kl)
                                 # update column indices
                                 iColG += 1
                                 iColE += 1
