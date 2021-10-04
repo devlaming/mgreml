@@ -641,43 +641,53 @@ class MgremlEstimator:
                                     self.mVCs[iRowG,3] = np.sqrt(self.mSamplingVarVCs[iRowG,iColG])
                                     self.mVCs[iRowE,3] = np.sqrt(self.mSamplingVarVCs[iRowE,iColE])
                                 # if mediation results are needed:
-                                if self.bMediation
-                                    if i == MgremlEstimator.iMedM
+                                if self.bMediation:
+                                    if i == MgremlEstimator.iMedM:
                                         if j == i:
                                             if k == i:
                                                 if l == i:
                                                     #Store Cov(GMM,GMM)=1vs1
-                                                    #Store Cov(GMM,EMM)=1vs4
+                                                    #Store Cov(EMM,GMM)=4vs1
+                                                    #Store Cov(GMM,EMM)=1vs4==Cov(EMM,GMM)=4vs1
                                                     #Store Cov(EMM,EMM)=4vs4
+                                                    1
                                                 elif l == MgremlEstimator.iMedY:
                                                     #Store Cov(GMM,GMY)=1vs2
+                                                    #Store Cov(EMM,GMY)=4vs2
                                                     #Store Cov(GMM,EMY)=1vs5
                                                     #Store Cov(EMM,EMY)=4vs5
-                                            elif k == MgremlEstimator.iMedY
-                                                if l == k
+                                                    1
+                                            elif k == MgremlEstimator.iMedY:
+                                                if l == k:
                                                     #Store Cov(GMM,GYY)=1vs3
+                                                    #Store Cov(EMM,GYY)=4vs3
                                                     #Store Cov(GMM,EYY)=1vs6
                                                     #Store Cov(EMM,EYY)=4vs6
+                                                    1
                                         elif j == MgremlEstimator.iMedY:
                                             if k == i:
                                                 if l == j:
                                                     #Store Cov(GMY,GMY)=2vs2
-                                                    #Store Cov(GMY,EMY)=2vs5
+                                                    #Store Cov(EMY,GMY)=5vs2
+                                                    #Store Cov(GMY,EMY)=2vs5==Cov(EMY,GMY)=5vs2
                                                     #Store Cov(EMY,EMY)=5vs5
+                                                    1
                                             if k == j:
                                                 if l == j:
                                                     #Store Cov(GMY,GYY)=2vs3
+                                                    #Store Cov(EMY,GYY)=5vs3
                                                     #Store Cov(GMY,EYY)=2vs6
                                                     #Store Cov(EMY,EYY)=5vs6
-                                    elif i == MgremlEstimator.iMedY
+                                                    1
+                                    elif i == MgremlEstimator.iMedY:
                                         if j == i:
                                             if k == i:
                                                 if l == i:
                                                     #Store Cov(GYY,GYY)=3vs3
-                                                    #Store Cov(GYY,EYY)=3vs6
+                                                    #Store Cov(EYY,GYY)=6vs3
+                                                    #Store Cov(GYY,EYY)=3vs6==Cov(EYY,GYY)=6vs3
                                                     #Store Cov(EYY,EYY)=6vs6
-                                    #missing is lower triangle in covariance matrix of VCs for genetic VCs versus environmental VCs:
-                                    #i.e. 2vs4, 3vs4, and 3vs5; reconsider indexing for l: (e.g. when l<max(k,j) only look at G(ij) versus E(kl)
+                                                    1
                                 # update column indices
                                 iColG += 1
                                 iColE += 1
