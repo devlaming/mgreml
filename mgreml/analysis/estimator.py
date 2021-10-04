@@ -543,7 +543,7 @@ class MgremlEstimator:
             if self.bSEs:
                 # if mediation:
                 if self.bMediation:
-                    self.mMediationSamplingV = np.zeros((iSize,iSize))
+                    mMediationV = np.zeros((iSize,iSize))
                 # re-initialise row indices
                 iRowG = 0
                 iRowE = int(iSize/2)
@@ -646,53 +646,83 @@ class MgremlEstimator:
                                         if j == i:
                                             if k == i:
                                                 if l == i:
-                                                    #Store Cov(GMM,GMM)=1vs1
-                                                    #Store Cov(EMM,GMM)=4vs1
-                                                    #Store Cov(GMM,EMM)=1vs4==Cov(EMM,GMM)=4vs1
-                                                    #Store Cov(EMM,EMM)=4vs4
-                                                    1
+                                                    mMediationV[0,0]=self.mSamplingVarVCs[iRowG,iColG]
+                                                    mMediationV[3,0]=self.mSamplingVarVCs[iRowE,iColG]
+                                                    mMediationV[3,3]=self.mSamplingVarVCs[iRowE,iColE]
+                                                    mMediationV[0,3]=mMediationV[3,0]
                                                 elif l == MgremlEstimator.iMedY:
-                                                    #Store Cov(GMM,GMY)=1vs2
-                                                    #Store Cov(EMM,GMY)=4vs2
-                                                    #Store Cov(GMM,EMY)=1vs5
-                                                    #Store Cov(EMM,EMY)=4vs5
-                                                    1
+                                                    mMediationV[0,1]=self.mSamplingVarVCs[iRowG,iColG]
+                                                    mMediationV[3,1]=self.mSamplingVarVCs[iRowE,iColG]
+                                                    mMediationV[0,4]=self.mSamplingVarVCs[iRowG,iColE]
+                                                    mMediationV[3,4]=self.mSamplingVarVCs[iRowE,iColE]
+                                                    mMediationV[1,0]=mMediationV[0,1]
+                                                    mMediationV[1,3]=mMediationV[3,1]
+                                                    mMediationV[4,0]=mMediationV[0,4]
+                                                    mMediationV[4,3]=mMediationV[3,4]
                                             elif k == MgremlEstimator.iMedY:
                                                 if l == k:
-                                                    #Store Cov(GMM,GYY)=1vs3
-                                                    #Store Cov(EMM,GYY)=4vs3
-                                                    #Store Cov(GMM,EYY)=1vs6
-                                                    #Store Cov(EMM,EYY)=4vs6
-                                                    1
+                                                    mMediationV[0,2]=self.mSamplingVarVCs[iRowG,iColG]
+                                                    mMediationV[3,2]=self.mSamplingVarVCs[iRowE,iColG]
+                                                    mMediationV[0,5]=self.mSamplingVarVCs[iRowG,iColE]
+                                                    mMediationV[3,5]=self.mSamplingVarVCs[iRowE,iColE]
+                                                    mMediationV[2,0]=mMediationV[0,2]
+                                                    mMediationV[2,3]=mMediationV[3,2]
+                                                    mMediationV[5,0]=mMediationV[0,5]
+                                                    mMediationV[5,3]=mMediationV[3,5]
                                         elif j == MgremlEstimator.iMedY:
                                             if k == i:
                                                 if l == j:
-                                                    #Store Cov(GMY,GMY)=2vs2
-                                                    #Store Cov(EMY,GMY)=5vs2
-                                                    #Store Cov(GMY,EMY)=2vs5==Cov(EMY,GMY)=5vs2
-                                                    #Store Cov(EMY,EMY)=5vs5
-                                                    1
+                                                    mMediationV[1,1]=self.mSamplingVarVCs[iRowG,iColG]
+                                                    mMediationV[4,1]=self.mSamplingVarVCs[iRowE,iColG]
+                                                    mMediationV[4,4]=self.mSamplingVarVCs[iRowE,iColE]
+                                                    mMediationV[1,4]=mMediationV[4,1]
                                             if k == j:
                                                 if l == j:
-                                                    #Store Cov(GMY,GYY)=2vs3
-                                                    #Store Cov(EMY,GYY)=5vs3
-                                                    #Store Cov(GMY,EYY)=2vs6
-                                                    #Store Cov(EMY,EYY)=5vs6
-                                                    1
+                                                    mMediationV[1,2]=self.mSamplingVarVCs[iRowG,iColG]
+                                                    mMediationV[4,2]=self.mSamplingVarVCs[iRowE,iColG]
+                                                    mMediationV[1,5]=self.mSamplingVarVCs[iRowG,iColE]
+                                                    mMediationV[4,5]=self.mSamplingVarVCs[iRowE,iColE]
+                                                    mMediationV[2,1]=mMediationV[1,2]
+                                                    mMediationV[2,4]=mMediationV[4,2]
+                                                    mMediationV[5,1]=mMediationV[1,5]
+                                                    mMediationV[5,4]=mMediationV[4,5]
                                     elif i == MgremlEstimator.iMedY:
                                         if j == i:
                                             if k == i:
                                                 if l == i:
-                                                    #Store Cov(GYY,GYY)=3vs3
-                                                    #Store Cov(EYY,GYY)=6vs3
-                                                    #Store Cov(GYY,EYY)=3vs6==Cov(EYY,GYY)=6vs3
-                                                    #Store Cov(EYY,EYY)=6vs6
-                                                    1
+                                                    mMediationV[2,2]=self.mSamplingVarVCs[iRowG,iColG]
+                                                    mMediationV[5,2]=self.mSamplingVarVCs[iRowE,iColG]
+                                                    mMediationV[5,5]=self.mSamplingVarVCs[iRowE,iColE]
+                                                    mMediationV[2,5]=mMediationV[5,2]
                                 # update column indices
                                 iColG += 1
                                 iColE += 1
                         # update row indices
                         iRowG += 1
                         iRowE += 1
+                # if mediation:
+                if self.bMediation:
+                    # compute gradient effect M on Y w.r.t. parameters
+                    vGradBetaMY = np.zeros((iSize,1))
+                    vGradBetaMY[3]= -self.dBetaMY/dVarEM
+                    vGradBetaMY[4]= 1/dVarEM
+                    # compute gradient genetic variance of Y mediated by M w.r.t. parameters
+                    vGradMediatedVGY = np.zeros((iSize,1))
+                    vGradMediatedVGY[0] = self.dBetaMY**2
+                    vGradMediatedVGY[3] = -2*self.dMediatedVGY/dVarEM
+                    vGradMediatedVGY[4] = 2*self.dMediatedVGY/dCovEMY
+                    # compute gradient genetic variance of Y w.r.t. parameters
+                    vGradTotalVGY = np.zeros((iSize,1))
+                    vGradTotalVGY[2] = 1
+                    # compute standard error of relevant parameters
+                    self.dBetaMY_SE=np.sqrt(vGradBetaMY.T@mMediationV@vGradBetaMY)
+                    self.dMediatedVGY_SE=np.sqrt(vGradMediatedVGY.T@mMediationV@vGradMediatedVGY)
+                    self.dTotalVGY_SE=np.sqrt(vGradTotalVGY.T@mMediationV@vGradTotalVGY)
+                    print(self.dBetaMY)
+                    print(self.dBetaMY_SE)
+                    print(self.dMediatedVGY)
+                    print(self.dMediatedVGY_SE)
+                    print(self.dTotalVGY)
+                    print(self.dTotalVGY_SE)
         # indicate estimates are now done
         self.bDone = True
