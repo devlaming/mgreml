@@ -13,6 +13,7 @@ class DataWriter:
     sHA = 'alt.'
     sSE = 'SE.'
     sLL = 'loglik.'
+    sMD = 'mediation.'
     sGLSest = 'GLS.est.'
     sGLSvar = 'GLS.var.'
     sCoeff = 'coeff.'
@@ -25,6 +26,8 @@ class DataWriter:
     lBetaSE = ['beta hat', 'standard error']
     lEstimateSE = ['estimate', 'standard error']
     lEstimate = ['estimate']
+    iMedM = 0
+    iMedY = 1
     
     def __init__(self, estimates, data):
         self.logger = data.logger
@@ -36,6 +39,7 @@ class DataWriter:
         self.bAllCoeffs = data.bAllCoeffs
         self.bCovs = data.bCovs
         self.estimates = estimates
+        self.bMediation = data.bMediation
     
     def WriteResults(self):
         self.logger.info('5. WRITING MGREML RESULTS')
@@ -62,9 +66,39 @@ class DataWriter:
         if self.bNested:
             self.logger.info('WRITING RESULTS LIKELIHOOD-RATIO TEST')
             self.WriteLRT()
+        if self.bMediation:
+            self.logger.info('WRITING RESULTS MEDIATION ANALYSIS')
+            self.WriteMediation()
         self.logger.info('Done writing results')
         self.logger.info('Current memory usage is ' + str(int((self.process.memory_info().rss)/(1024**2))) + 'MB\n')
-       
+    
+    def WriteMediation(self):
+        # set filenames
+        sMF = self.sPrefix + DataWriter.sMD + DataWriter.sExtension
+        # get trait labels
+        lPhenos = self.estimates.mgreml_model.data.lPhenos
+        sM = lPhenos[DataWriter.iMedM]
+        sY = lPhenos[DataWriter.iMedY]
+        # if SEs are desired, store them together with mediation estimates
+        if (self.bSEs):
+            with open(sMF, 'w') as oMFfile:
+                oMFfile.write('Mediation analysis in line with Rietveld et al. (2021):\n')
+                oMFfile.write('Mediator M = ' + sM + '; Outcome Y = ' + sY + '\n')
+                oMFfile.write('Estimated effect M on Y (S.E.) = ' + str(self.estimates.dBetaMY) + ' (' + str(self.estimates.dBetaMY_SE) + ')\n')
+                oMFfile.write('Total genetic variance of M (S.E.) = ' + str(self.estimates.dVGM) + ' (' + str(self.estimates.dVGM_SE) + ')\n')
+                oMFfile.write('Total genetic variance of Y (S.E.) = ' + str(self.estimates.dVGY) + ' (' + str(self.estimates.dVGY_SE) + ')\n')
+                oMFfile.write('Genetic variance Y mediated by M (S.E.) = ' + str(self.estimates.dMediatedVGY) + ' (' + str(self.estimates.dMediatedVGY_SE) + ')\n')
+                oMFfile.write('Proportion of genetic variance Y mediated by M (S.E.) = ' + str(self.estimates.dPropMediatedVGY) + ' (' + str(self.estimates.dPropMediatedVGY_SE) + ')\n')
+        else:
+            with open(sMF, 'w') as oMFfile:
+                oMFfile.write('Mediation analysis in line with Rietveld et al. (2021):\n')
+                oMFfile.write('Mediator M = ' + sM + '; Outcome Y = ' + sY + '\n')
+                oMFfile.write('Estimated effect M on Y = ' + str(self.estimates.dBetaMY) + '\n')
+                oMFfile.write('Total genetic variance of M = ' + str(self.estimates.dVGM) + '\n')
+                oMFfile.write('Total genetic variance of Y = ' + str(self.estimates.dVGY) + '\n')
+                oMFfile.write('Genetic variance Y mediated by M = ' + str(self.estimates.dMediatedVGY) + '\n')
+                oMFfile.write('Proportion of genetic variance Y mediated by M = ' + str(self.estimates.dPropMediatedVGY) + '\n')
+    
     def WriteHSq(self):
         if self.bNested:
             # get heritabilities 
