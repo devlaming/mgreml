@@ -537,7 +537,17 @@ reinitialises estimation for the null and alternative model from appropriate `.p
 
 ### Genetic mediation analysis
 
-*tba*
+Rietveld et al. (2021; see [Citation](#citation)) propose a structural equations model (SEM), which can be used to answer the question to which degree the genetic variance of outcome *Y* is mediated by supposed mediator *M*.
+
+`mgreml` has a `--mediation` option, which estimates the relevant parameters from this SEM by, first, fitting a bivariate saturated model for *M* and *Y* and, second, by transforming the estimated variance components and their sampling variance matrix to estimates and standard errors of the parameters in the SEM.
+
+The `--mediation` option forces `mgreml` to only consider the first two phenotypes in your phenotype file, where the first phenotype is treated as mediator *M* and the second phenotype as outcome *Y*. Any subsequent phenotypes will be ignored.
+
+In case you do not wish standard errors to be reported, you can combine `--mediation` with the `--no-se` option.
+
+Results will be stored in an output file ending in `.mediation.out`.
+
+Please note that `--mediation` cannot be combined with any of the following options: `--(restricted-)genetic-model`, `--(restricted-)rho-genetic`, `--(restricted-)no-var-genetic`, `--(restricted-)environment-model`, `--(restricted-)rho-environment`, and `--(restricted-)reinitialise`.
 
 ### Data formats and management
 
@@ -670,7 +680,7 @@ conda env update --file mgreml.yml
 Before contacting us, please try the following:
 
 1. Go over the tutorial in this `README.md` file
-2. Go over the method, described in detail in the supplementary information of the paper (citation below)
+2. Go over the method, described in detail in the supplementary information of the paper (see [Citation](#citation))
 
 ### Contact
 
