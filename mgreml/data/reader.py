@@ -866,8 +866,11 @@ class MgremlReader:
         self.logger.info('The ' + sData + ' file contains data on {N} individuals and {T} '.format(N=iN,T=iT) + sData + 's')
         # if we only conisder first two phenotypes because of mediation analysis
         if bTwoOnly:
-            # do so, and report
-            self.logger.info('Selecting only first two '.format(N=iN,T=iT) + sData + 's for mediation analysis')
+            # throw error if too few phenotypes
+            if iT<2:
+                raise ValueError('cannot perform mediation analysis, because your phenotype file contains fewer than two phenotypes')
+            elif iT>2:
+                self.logger.warning('More than two phenotypes supplied for mediation analysis; selecting only first two phenotypes for mediation analysis')
             dfData=dfData.iloc[:,0:2]
             (iN,iT) = dfData.shape
             self.logger.info('We now have data on {N} individuals and {T} '.format(N=iN,T=iT) + sData + 's')
@@ -883,6 +886,9 @@ class MgremlReader:
             dfData.columns = [sData + ' ' + str(x) for x in range(0,iT)]
         # store data as appropriate attribute of MgremlReader instance
         if sType == MgremlReader.sPhe:
+            # if no phenotypes
+            if (dfData.shape[1] < 1):
+                raise ValueError('your phenotype file does not contain any phenotypes')
             self.dfY = dfData
         else:
             self.dfX = dfData
