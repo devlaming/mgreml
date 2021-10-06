@@ -7,7 +7,7 @@ from numpy.matlib import repmat
 from tqdm import tqdm
 pd.options.mode.chained_assignment = None
 
-__version__ = '0.03'
+__version__ = 'v1.0.1'
 MASTHEAD  = "\n"
 MASTHEAD += "########################################################################\n"
 MASTHEAD += "##                                                                    ##\n"
@@ -24,7 +24,7 @@ MASTHEAD += "##                                                                 
 MASTHEAD += "##                                                                    ##\n"
 MASTHEAD += "########################################################################\n"
 MASTHEAD += "##                                                                    ##\n"
-MASTHEAD += "##  BETA VERSION {V}                                                 ##\n".format(V=__version__)
+MASTHEAD += "##  BETA {V}                                                       ##\n".format(V=__version__)
 MASTHEAD += "##                                                                    ##\n"
 MASTHEAD += "##  (C) 2021 Ronald de Vlaming and Eric Slob                          ##\n"
 MASTHEAD += "##                                                                    ##\n"
