@@ -331,11 +331,12 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 Inspection of the log-likelihoods in `custom_model.loglik.out` and `rhoG1_rhoE0.loglik.out` indeed reveal that these models yield an identical fit to the data:
 
 ```
-Log-likelihood of model = -103463.59460195125,
+Log-likelihood of model = -103463.59460195134,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 1 genetic factors and 10 environment factors,
 comprising 10 free genetic factor coefficients and 10 free environment factor coefficients in turn.
-Estimates converged after 36 BFGS iterations 
+Controlled for 100 fixed-effect covariates in total in this model.
+Estimates converged after 36 BFGS iterations. 
 ```
 
 Notice that the option `--rho-genetic` cannot be combined with `--genetic-model` and, similarly, that `--rho-environment` cannot be combined with `--environment-model`.
@@ -422,20 +423,22 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 Inspection of `restricted_rhoG1_rhoE0.loglik.out` reveals that the saturated model fits the data significantly better than this restricted model:
 
 ```
-Log-likelihood of nested model (null hypothesis) = -103463.59460195125,
+Log-likelihood of nested model (null hypothesis) = -103463.59460195134,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 1 genetic factors and 10 environment factors,
 comprising 10 free genetic factor coefficients and 10 free environment factor coefficients in turn.
-Estimates converged after 36 BFGS iterations 
+Controlled for 100 fixed-effect covariates in total in this model.
+Estimates converged after 36 BFGS iterations.
 
-Log-likelihood of parent model (alternative hypothesis) = -85227.3677092077,
+Log-likelihood of parent model (alternative hypothesis) = -85227.36770921224,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 10 genetic factors and 10 environment factors,
 comprising 55 free genetic factor coefficients and 55 free environment factor coefficients in turn.
-Estimates converged after 53 BFGS iterations 
+Controlled for 100 fixed-effect covariates in total in this model.
+Estimates converged after 53 BFGS iterations.
 
 Results of likelihood-ratio test with 90 degrees of freedom:
-Chi-square test statistic is 36472.4537854871
+Chi-square test statistic is 36472.453785478196
 with P-value = 0.0
 ```
 
@@ -463,20 +466,22 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 where output file `restricted_novarG.loglik.out` reveals that allowing for genetic variance significantly improves the fit of the model:
 
 ```
-Log-likelihood of nested model (null hypothesis) = -94524.01375204921,
+Log-likelihood of nested model (null hypothesis) = -94524.0137520493,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 1 genetic factors and 10 environment factors,
 comprising 0 free genetic factor coefficients and 55 free environment factor coefficients in turn.
-Estimates converged after 20 BFGS iterations 
+Controlled for 100 fixed-effect covariates in total in this model.
+Estimates converged after 20 BFGS iterations.
 
-Log-likelihood of parent model (alternative hypothesis) = -85227.3677092077,
+Log-likelihood of parent model (alternative hypothesis) = -85227.36770921224,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 10 genetic factors and 10 environment factors,
 comprising 55 free genetic factor coefficients and 55 free environment factor coefficients in turn.
-Estimates converged after 53 BFGS iterations 
+Controlled for 100 fixed-effect covariates in total in this model.
+Estimates converged after 53 BFGS iterations.
 
 Results of likelihood-ratio test with 55 degrees of freedom:
-Chi-square test statistic is 18593.29208568303
+Chi-square test statistic is 18593.292085674126
 with P-value = 0.0
 ```
 
