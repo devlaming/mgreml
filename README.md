@@ -547,7 +547,7 @@ In case you do not wish standard errors to be reported, you can combine `--media
 
 Results will be stored in an output file ending in `.mediation.out`.
 
-As an example, consider `mediation.txt` in the directory tutorial. This file comprises two phenotypes, labelled Mediator and Outcome. A few lines from this file are shown below:
+As an example, consider `mediation.txt` in the subdirectory `tutorial`. This file comprises two phenotypes, labelled Mediator and Outcome. A few lines from this file are shown below:
 
 | FID | IID | Mediator | Outcome |
 | --- | --- | --- | --- |
