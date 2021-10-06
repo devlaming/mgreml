@@ -71,6 +71,10 @@ def SimulateData():
     mLiabE = np.sqrt((1-dHSq)/dHSq)*(mLiabE - repmat(mLiabE.mean(axis=0),iN,1))/repmat(mLiabE.std(axis=0),iN,1)
     # generate phenotypes with set heritability
     mY = mLiabG + mLiabE + mX@mBeta
+    # generate phenotypes for mediation analysis, both with SNP heritability of 50%
+    vM = mLiabG[:,0]*np.sqrt(2) + mLiabG[:,iT-1]*np.sqrt(2) + 2*np.random.normal(0,1,iN) + mX@mBeta[:,0]
+    vY = vM + mLiabG[:,iT-1]*(np.sqrt(3)-np.sqrt(2)) + np.random.normal(0,1,iN) + mX@mBeta[:,iT-1]
+    mM = np.vstack((vM,vY)).T
     # generate FIDs and IIDs
     lFID = ['FID ' + str(i) for i in range(1,iN+1)]
     lIID = ['IID ' + str(iN+i) for i in range(1,iN+1)]
@@ -78,8 +82,9 @@ def SimulateData():
     # make multiindex
     lLabelsFID_IID = ['FID', 'IID']
     miID = pd.MultiIndex.from_arrays(lID,names=lLabelsFID_IID)
-    # generate names of phenotypes
+    # generate names of phenotype
     lPheno = ['Some pheno ' + str(100+t) for t in range(1,iT+1)]
+    lMediation = ['Mediator','Outcome']
     # generate names of covariates
     lCov = ['my covar ' + str(300+k) for k in range(0,iK)]
     lCov[0] = 'intercept'
@@ -87,11 +92,14 @@ def SimulateData():
     dfX = pd.DataFrame(mX, index = miID, columns = lCov)
     dfA = pd.DataFrame(mA, index = miID, columns = lID)
     dfY = pd.DataFrame(mY, index = miID, columns = lPheno)
+    dfM = pd.DataFrame(mM, index = miID, columns = lMediation)
     # write phenotype and covariate data to tab separated files
     sFileX = 'covar.txt'
     sFileY = 'pheno.txt'
+    sFileM = 'mediation.txt'
     dfX.to_csv(sFileX, sep='\t')
     dfY.to_csv(sFileY, sep='\t')
+    dfM.to_csv(sFileM, sep='\t')
     # compute true heritabilities and store
     vHSq = mLiabG.var(axis=0) / ((mLiabG+mLiabE).var(axis=0))
     dfHSq = pd.DataFrame(vHSq,index=lPheno,columns=['heritability'])
