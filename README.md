@@ -1,4 +1,4 @@
-# MGREML (Multivariate GREML) `v1.0.0`
+# MGREML (Multivariate GREML) `beta v1.0.1`
 
 [![DOI](https://zenodo.org/badge/176773372.svg)](https://zenodo.org/badge/latestdoi/176773372)
 
@@ -6,7 +6,7 @@
 
 `mgreml` can easily handle estimation of the full genetic correlation matrix for up to 100 traits observed in 20,000 individuals. `mgreml` allows users to specify structural models and test hypotheses regarding nested models (e.g. no genetic correlations). In addition, the tool can handle a considerable amount of fixed-effect covariates and a very minor degree of phenotypic missingness.
 
-Finally, `mgreml` has options to return the full set of factor coefficients and variance components, as well as the complete covariance matrix of those estimates.
+Finally, `mgreml` has built-in options to (i) return the full set of factor coefficients and (ii) variance components, as well as (iii) the complete covariance matrix of those estimates, and (iv) estimates of a genetic mediation model for two traits as discussed by Rietveld et al. (2021).
 
 ## Installation
 
@@ -63,9 +63,10 @@ In this tutorial, you will learn how to use `mgreml`. Before you start using `mg
 8. [Factor coefficients and variance components](#factor-coefficients-and-variance-components)
 9. [Nested models and likelihood-ratio tests](#nested-models-and-likelihood-ratio-tests)
 10. [Estimation reinitialisation](#estimation-reinitialisation)
-11. [Data formats and management](#data-formats-and-management)
-12. [Missing data and unbalancedness](#missing-data-and-unbalancedness)
-13. [Advanced options](#advanced-options)
+11. [Genetic mediation analysis](#genetic-mediation-analysis)
+12. [Data formats and management](#data-formats-and-management)
+13. [Missing data and unbalancedness](#missing-data-and-unbalancedness)
+14. [Advanced options](#advanced-options)
 
 ### Tutorial data
 
@@ -529,6 +530,10 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 ```
 reinitialises estimation for the null and alternative model from appropriate `.pkl` files. Notice that analogous to `--reinitialise`, the `--restricted-reinitialise` option cannot be combined with options such as `--restricted-environment-model` and `--restricted-rho-genetic`, as the `.pkl` file already contains the full model specification.
 
+### Genetic mediation analysis
+
+*tba*
+
 ### Data formats and management
 
 The input files that follow the options `--pheno`, `--covar`, `--covar-model`, `--genetic-model`, `--environment-model`, `--restricted-genetic-model`, `--restricted-environment-model` can be comma-, tab-, or space-separated. Just make sure to be completely consistent within each file. :warning: Please make sure your labels (e.g. phenotype labels, covariate labels, etc.) do not contain commas.
@@ -594,6 +599,7 @@ An overview of all `mgreml` commands is listed below:
 | `--grm-cutoff THRESHOLD` | option to drop individuals using a greedy algorithm, such that there is no relatedness in GRM in excess of threshold for remaining individuals |
 | `--adjust-pcs INTEGER [INTEGER]` | option to specify for how many leading principal components (PCs) from genetic data to adjust (to control for population stratification) and for how many trailing PCs to adjust (for computational efficiency); if just one non-negative integer is specified this is taken as the number of leading PCs to adjust for |
 | `--pheno FILENAME [nolabelpheno]` | phenotype file: should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per phenotype; can be followed by optional flag `nolabelpheno`, e.g. `--pheno` `mypheno.txt nolabelpheno`, but we recommend to label phenotypes |
+| `--mediation` | option to perform a genetic mediation analysis, in line with the structural equations model proposed by Rietveld et al. (2021) and based on estimates from a saturated bivariate model; the first phenotype in the phenotype file is assumed to act as mediator for the genetic component of the second phenotype in the phenotype file; all further phenotypes are ignored; cannot be combined with `--(restricted-)genetic-model`, `--(restricted-)rho-genetic`, `--(restricted-)no-var-genetic`, `--(restricted-)environment-model`, `--(restricted-)rho-environment`, and `--(restricted-)reinitialise` |
 | `--drop-missings` | option to drop all observations from data with at least one missing phenotype or at least one missing covariate |
 | `--no-intercept` | option to indicate an intercept should not be included automatically as covariate |
 | `--covar FILENAME [nolabelcovar]` | optional covariate file: should be comma-, space-, or tab- separated, with one row per individual, with FID and IID as first two fields, followed by a field per covariate; can be followed by optional flag `nolabelcovar`, e.g. `--covar mycovar.txt nolabelcovar`, but we recommend to label covariates; :warning: do not include principal components from genetic data as covariates, use `--adjust-pcs` instead |
@@ -667,13 +673,19 @@ In case you have a question that is not resolved by going over the preceding two
 
 ## Citation
 
-If you use the software, please cite
+In general, if you use the software, please cite
 
 [R. de Vlaming, E.A.W. Slob, P.R. Jansen, A. Dagher, P.D. Koellinger, P.J.F. Groenen, and C.A. Rietveld (2021). Multivariate analysis reveals shared genetic architecture of brain morphology and human behavior. *bioRxiv*: **440478**.](https://www.biorxiv.org/content/early/2021/04/19/2021.04.19.440478)
 
+In addition, if you use the `--mediation` option, please also cite
+
+[C.A. Rietveld, R. de Vlaming, E.A.W. Slob (2021). *tba*]
+
 ## Derivations
 
-For full details on the derivation of the method, see the [Supplementary Information](https://www.biorxiv.org/content/biorxiv/early/2021/04/19/2021.04.19.440478/DC1/embed/media-1.pdf), available on bioRxiv.
+For full details on the derivation of the MGREML method, see the [Supplementary Information](https://www.biorxiv.org/content/biorxiv/early/2021/04/19/2021.04.19.440478/DC1/embed/media-1.pdf), available on bioRxiv.
+
+For derivations on the structural model used in the mediation analysis, see *tba*.
 
 ## License
 
