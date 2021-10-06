@@ -330,19 +330,31 @@ class DataWriter:
                 oLLfile.write('based on data on ' + str(self.estimates.estimator0.mgreml_model.data.iT) + ' traits and ' + str(self.estimates.estimator0.mgreml_model.data.iN) + ' observations,\n')
                 oLLfile.write('with a model consisting of ' + str(self.estimates.estimator0.mgreml_model.model.genmod.iF) + ' genetic factors and ' + str(self.estimates.estimator0.mgreml_model.model.envmod.iF) + ' environment factors,\n')
                 oLLfile.write('comprising ' + str(self.estimates.estimator0.mgreml_model.model.iParamsG) + ' free genetic factor coefficients and ' + str(self.estimates.estimator0.mgreml_model.model.iParamsE) + ' free environment factor coefficients in turn.\n')
+                if self.bCovs:
+                    if not(self.estimates.estimator0.mgreml_model.data.bSameCovs):
+                        iK = self.estimates.estimator0.mgreml_model.data.iKtotal
+                    else:
+                        iK = self.estimates.estimator0.mgreml_model.data.iK*self.estimates.estimator0.mgreml_model.data.iT
+                    oLLfile.write('Controlled for ' + str(iK) + ' fixed-effect covariates in total in this model.\n')
                 if self.estimates.estimator0.bBFGS:
-                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator0.iIter) + ' BFGS iterations \n\n')
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator0.iIter) + ' BFGS iterations.\n\n')
                 else:
-                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator0.iIter) + ' Newton iterations \n\n')
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimator0.iIter) + ' Newton iterations.\n\n')
             with open(sLL, 'a') as oLLfile:
                 oLLfile.write('Log-likelihood of parent model (alternative hypothesis) = ' + str(self.estimates.estimatorA.dLogL) + ',\n')
                 oLLfile.write('based on data on ' + str(self.estimates.estimatorA.mgreml_model.data.iT) + ' traits and ' + str(self.estimates.estimatorA.mgreml_model.data.iN) + ' observations,\n')
                 oLLfile.write('with a model consisting of ' + str(self.estimates.estimatorA.mgreml_model.model.genmod.iF) + ' genetic factors and ' + str(self.estimates.estimatorA.mgreml_model.model.envmod.iF) + ' environment factors,\n')
                 oLLfile.write('comprising ' + str(self.estimates.estimatorA.mgreml_model.model.iParamsG) + ' free genetic factor coefficients and ' + str(self.estimates.estimatorA.mgreml_model.model.iParamsE) + ' free environment factor coefficients in turn.\n')
+                if self.bCovs:
+                    if not(self.estimates.estimatorA.mgreml_model.data.bSameCovs):
+                        iK = self.estimates.estimatorA.mgreml_model.data.iKtotal
+                    else:
+                        iK = self.estimates.estimatorA.mgreml_model.data.iK*self.estimates.estimatorA.mgreml_model.data.iT
+                    oLLfile.write('Controlled for ' + str(iK) + ' fixed-effect covariates in total in this model.\n')
                 if self.estimates.estimatorA.bBFGS:
-                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimatorA.iIter) + ' BFGS iterations \n\n')
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimatorA.iIter) + ' BFGS iterations.\n\n')
                 else:
-                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimatorA.iIter) + ' Newton iterations \n\n')
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.estimatorA.iIter) + ' Newton iterations.\n\n')
         else:
             # set filenames
             sLL = self.sPrefix + DataWriter.sLL + DataWriter.sExtension
@@ -351,10 +363,16 @@ class DataWriter:
                 oLLfile.write('based on data on ' + str(self.estimates.mgreml_model.data.iT) + ' traits and ' + str(self.estimates.mgreml_model.data.iN) + ' observations,\n')
                 oLLfile.write('with a model consisting of ' + str(self.estimates.mgreml_model.model.genmod.iF) + ' genetic factors and ' + str(self.estimates.mgreml_model.model.envmod.iF) + ' environment factors,\n')
                 oLLfile.write('comprising ' + str(self.estimates.mgreml_model.model.iParamsG) + ' free genetic factor coefficients and ' + str(self.estimates.mgreml_model.model.iParamsE) + ' free environment factor coefficients in turn.\n')
+                if self.bCovs:
+                    if not(self.estimates.mgreml_model.data.bSameCovs):
+                        iK = self.estimates.mgreml_model.data.iKtotal
+                    else:
+                        iK = self.estimates.mgreml_model.data.iK*self.estimates.mgreml_model.data.iT
+                    oLLfile.write('Controlled for ' + str(iK) + ' fixed-effect covariates in total in this model.\n')
                 if self.estimates.bBFGS:
-                    oLLfile.write('Estimates converged after ' + str(self.estimates.iIter) + ' BFGS iterations \n')
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.iIter) + ' BFGS iterations.\n\n')
                 else:
-                    oLLfile.write('Estimates converged after ' + str(self.estimates.iIter) + ' Newton iterations \n')
+                    oLLfile.write('Estimates converged after ' + str(self.estimates.iIter) + ' Newton iterations.\n\n')
     
     def WriteEstimatesGLS(self):
         if self.bNested:
