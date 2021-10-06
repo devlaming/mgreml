@@ -543,9 +543,9 @@ Rietveld et al. (2021; see [Citation](#citation)) propose a structural equations
 
 The `--mediation` option forces `mgreml` to only consider the first two phenotypes in your phenotype file, where the first phenotype is treated as mediator *M* and the second phenotype as outcome *Y*. Any subsequent phenotypes will be ignored.
 
-In case you do not wish standard errors to be reported, you can combine `--mediation` with the `--no-se` option.
+In case you do not wish standard errors to be reported, you can combine `--mediation` with the `--no-se` option. Please note that `--mediation` cannot be combined with any of the following options: `--(restricted-)genetic-model`, `--(restricted-)rho-genetic`, `--(restricted-)no-var-genetic`, `--(restricted-)environment-model`, `--(restricted-)rho-environment`, and `--(restricted-)reinitialise`.
 
-Results will be stored in an output file ending in `.mediation.out`.
+The resulting SEM estimates will be stored in an output file ending in `.mediation.out`.
 
 As an example, consider `mediation.txt` in the subdirectory `tutorial`. This file comprises two phenotypes, labelled Mediator and Outcome. A few lines from this file are shown below:
 
@@ -586,8 +586,6 @@ Proportion of genetic variance Y mediated by M (S.E.) = 0.7633982619290363 (0.02
 ```
 
 Estimates are all less than two standard errors away from the true parameters of the structural model. Moreover, estimates in `try_mediation.HSq.out` also show that the estimated heritabilities are less than two standard errors removed from the true value (50% for both).
-
-Please note that `--mediation` cannot be combined with any of the following options: `--(restricted-)genetic-model`, `--(restricted-)rho-genetic`, `--(restricted-)no-var-genetic`, `--(restricted-)environment-model`, `--(restricted-)rho-environment`, and `--(restricted-)reinitialise`.
 
 ### Data formats and management
 
