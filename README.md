@@ -547,6 +547,46 @@ In case you do not wish standard errors to be reported, you can combine `--media
 
 Results will be stored in an output file ending in `.mediation.out`.
 
+As an example, consider `mediation.txt` in the directory tutorial. This file comprises two phenotypes, labelled Mediator and Outcome. A few lines from this file are shown below:
+
+| FID | IID | Mediator | Outcome |
+| --- | --- | --- | --- |
+| FID 1 | IID 5001 | -3.647 | -1.332 |
+| FID 2 | IID 5002 | -0.686 | 0.263 |
+| FID 3 | IID 5003 | 2.019 | 2.266 |
+| ... | ... | ... | ... |
+| FID 4998 | IID 9998 | -6.313 | -4.073 |
+| FID 4999 | IID 9999 | -1.133 | -0.627 |
+| FID 5000 | IID 10000 | -6.854 | -3.250 |
+
+The mediator *M* has a genetic variance of four, of which half is caused by a genetic factor that also has a direct effect on the outcome *Y*. The other half of its genetic variance is caused by a genetic factor that has no direct bearing on *Y*. In addition, *M* has an environment variance of four. Thus, the SNP-based heritability of *M* is 50%. Finally, *M* is affected by the fixed-effect covariates in `covariates.txt`.
+
+The outcome *Y* is affected by *M* (with weight one). Moreover, the aforementioned genetic factor that directly affects both *M* and *Y* has weight 0.318 with respect to *Y*, adding 0.1 to the variance of *Y* via its direct effect. Moreover, *Y* has an idiosyncratic environment factor, adding 1 to its variance. Finally, *Y* is also affected by the fixed-effect covariates in `covariates.txt`. An overview of the SEM is shown in the figure below:
+
+![Structural equations model used to generate phenotypes `mediation.txt`](https://github.com/devlaming/mgreml/blob/development/tutorial/sem.png?raw=true)
+
+Under this SEM, the total genetic variance of *M* equals 4, the total genetic variance of *Y* equals 5. Moreover, under this model, where the true effect of *M* on *Y* equals one, the genetic variance of *Y* that is mediated by *M* equals 4. Thus, in total 4/5=80% of the genetic variance of the outcome is mediated by *M*. Bearing these considerations, let's run the following `mgreml` command:
+
+```
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/mediation.txt \
+                   --covar ./tutorial/covar.txt --mediation \
+				   --out ./tutorial/try_mediation
+```
+
+Now, let's have a look at the output file `try_mediation.mediation.out`:
+
+```
+Mediation analysis in line with Rietveld et al. (2021):
+Mediator M = Mediator; Outcome Y = Outcome
+Estimated effect M on Y (S.E.) = 0.9906143203164648 (0.009370158370684407)
+Total genetic variance of M (S.E.) = 4.00429360801156 (0.19271074957769138)
+Total genetic variance of Y (S.E.) = 5.147352976564972 (0.2442505819425745)
+Genetic variance Y mediated by M (S.E.) = 3.9294803158449505 (0.20131668458175742)
+Proportion of genetic variance Y mediated by M (S.E.) = 0.7633982619290363 (0.02299924166057646)
+```
+
+Estimates are all less than two standard errors away from the true parameters of the structural model. Moreover, estimates in `try_mediation.HSq.out` also show that the estimated heritabilities are less than two standard errors removed from their true value of 50%.
+
 Please note that `--mediation` cannot be combined with any of the following options: `--(restricted-)genetic-model`, `--(restricted-)rho-genetic`, `--(restricted-)no-var-genetic`, `--(restricted-)environment-model`, `--(restricted-)rho-environment`, and `--(restricted-)reinitialise`.
 
 ### Data formats and management
