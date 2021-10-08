@@ -582,11 +582,11 @@ Now, let's have a look at the output file `try_mediation.mediation.out`:
 ```
 Mediation analysis in line with Rietveld et al. (2021):
 Mediator M = Mediator; Outcome Y = Outcome
-Estimated effect M on Y (S.E.) = 0.9906143203164648 (0.009370158370684407)
-Total genetic variance of M (S.E.) = 4.00429360801156 (0.19271074957769138)
-Total genetic variance of Y (S.E.) = 5.147352976564972 (0.2442505819425745)
-Genetic variance Y mediated by M (S.E.) = 3.9294803158449505 (0.20131668458175742)
-Proportion of genetic variance Y mediated by M (S.E.) = 0.7633982619290363 (0.02299924166057646)
+Estimated effect M on Y (S.E.) = 0.9852870680810544 (0.015112109159582332)
+Total genetic variance of M (S.E.) = 24.8423686340792 (1.1967344113325025)
+Total genetic variance of Y (S.E.) = 42.454460580886554 (2.005691624715034)
+Genetic variance Y mediated by M (S.E.) = 24.116738113863956 (1.3575913489626268)
+Proportion of genetic variance Y mediated by M (S.E.) = 0.5680613481807273 (0.026707056710479304)
 ```
 
 Estimates are all less than two standard errors away from the true parameters of the structural model. Moreover, estimates in `try_mediation.HSq.out` also show that the estimated heritabilities are less than two standard errors removed from the true value (50% for both).
