@@ -551,21 +551,25 @@ As an example, consider `mediation.txt` in the subdirectory `tutorial`. This fil
 
 | FID | IID | Mediator | Outcome |
 | --- | --- | --- | --- |
-| FID 1 | IID 5001 | -3.647 | -1.332 |
-| FID 2 | IID 5002 | -0.686 | 0.263 |
-| FID 3 | IID 5003 | 2.019 | 2.266 |
+| FID 1 | IID 5001 | -10.670 | -11.437 |
+| FID 2 | IID 5002 | 1.947 | 2.618 |
+| FID 3 | IID 5003 | 5.800 | 10.586 |
 | ... | ... | ... | ... |
-| FID 4998 | IID 9998 | -6.313 | -4.073 |
-| FID 4999 | IID 9999 | -1.133 | -0.627 |
-| FID 5000 | IID 10000 | -6.854 | -3.250 |
+| FID 4998 | IID 9998 | -12.892 | -11.536 |
+| FID 4999 | IID 9999 | -2.089 | -3.536 |
+| FID 5000 | IID 10000 | -13.177 | -9.323 |
 
-The mediator *M* has a genetic variance of four, of which half is caused by a genetic factor that also has a direct effect on the outcome *Y*. The other half of its genetic variance is caused by a genetic factor that has no direct bearing on *Y*. In addition, *M* has an environment variance of four. Thus, the SNP-based heritability of *M* is 50%. Finally, *M* is affected by the fixed-effect covariates in `covariates.txt`.
-
-The outcome *Y* is affected by *M* (with weight one). Moreover, the aforementioned genetic factor that directly affects both *M* and *Y* has weight 0.318 with respect to *Y*, adding 0.1 to the variance of *Y* via its direct effect. Moreover, *Y* has an idiosyncratic environment factor, adding 1 to its variance. Finally, *Y* is also affected by the fixed-effect covariates in `covariates.txt`. An overview of the SEM is shown in the figure below:
+An overview of the SEM that underlies this data is shown in the figure below:
 
 ![Structural equations model used to generate phenotypes `mediation.txt`](https://github.com/devlaming/mgreml/blob/development/tutorial/sem.png?raw=true)
 
-Under this SEM, the total genetic variance of *M* equals 4, the total genetic variance of *Y* equals 5. Moreover, under this model, where the true effect of *M* on *Y* equals one, the genetic variance of *Y* that is mediated by *M* equals 4. Thus, in total 4/5=80% of the genetic variance of the outcome is mediated by *M*. Bearing these considerations, let's run the following `mgreml` command:
+This SEM for *M* and *Y* is equivalent to the following two equations: (1) *M* = 3*G* + 4*G*<sup>\*</sup> + 5*E*<sup>\*</sup> and (2) *Y* = *M* + 2*G* + 4*E* = 5*G* + 4*G*<sup>\*</sup> + 5*E*<sup>\*</sup> + 4*E*. The last expression in Equation (2) is found by substituting *M* by its underlying terms.
+
+In this model, *M* has a genetic variance of 25, of which 9 is caused by a genetic factor that also has a direct effect on the outcome *Y*. The remaining genetic variance is caused by a genetic factor that has no direct bearing on *Y*. In addition, *M* has an environment variance of 25. Thus, the SNP-based heritability of *M* is 50%. Finally, *M* is affected by the fixed-effect covariates in `covariates.txt`.
+
+Moreover, in this model, *M* has a direct effect on *Y* equal to 1. Moreover, the aforementioned genetic factor *G* that directly affects both *M* and *Y*, has a direct effect of 3 on *Y*. Moreover, *Y* has an idiosyncratic environment factor, which adds 16 to its variance. The total genetic variance and environment variance of *Y* are both equal 41, putting the SNP-based heritability of *Y* also at 50%. Finally, *Y* is also affected by the fixed-effect covariates in `covariates.txt`.
+
+Under this model, the genetic variance of *Y* that is mediated by *M* equals 25. Thus, in total 25/41=61% of the genetic variance of the outcome is mediated by *M*. Bearing these considerations, let's run the following `mgreml` command:
 
 ```
 python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/mediation.txt \
