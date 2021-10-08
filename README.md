@@ -567,14 +567,14 @@ This SEM for *M* and *Y* is equivalent to the following two equations: (1) *M* =
 
 In this model, *M* has a genetic variance of 25, of which 9 is caused by a genetic factor that also has a direct effect on the outcome *Y*. The remaining genetic variance is caused by a genetic factor that has no direct bearing on *Y*. In addition, *M* has an environment variance of 25. Thus, the SNP-based heritability of *M* is 50%. Finally, *M* is affected by the fixed-effect covariates in `covariates.txt`.
 
-Moreover, in this model, *M* has a direct effect on *Y* equal to 1. Moreover, the aforementioned genetic factor *G* that directly affects both *M* and *Y*, has a direct effect of 3 on *Y*. Moreover, *Y* has an idiosyncratic environment factor, which adds 16 to its variance. The total genetic variance and environment variance of *Y* are both equal 41, putting the SNP-based heritability of *Y* also at 50%. Finally, *Y* is also affected by the fixed-effect covariates in `covariates.txt`.
+Also, under this model, *M* has a direct effect on *Y* equal to 1. Moreover, the aforementioned genetic factor *G* that directly affects both *M* and *Y*, has a direct effect of 2 on *Y*. Moreover, *Y* has an idiosyncratic environment factor, which adds 16 to its variance. The total genetic variance and environment variance of *Y* are both equal 41, putting the SNP-based heritability of *Y* also at 50%. Finally, *Y* is also affected by the fixed-effect covariates in `covariates.txt`.
 
 Under this model, the genetic variance of *Y* that is mediated by *M* equals 25. Thus, in total 25/41=61% of the genetic variance of the outcome is mediated by *M*. Bearing these considerations, let's run the following `mgreml` command:
 
 ```
 python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/mediation.txt \
                    --covar ./tutorial/covar.txt --mediation \
-				   --out ./tutorial/try_mediation
+                   --out ./tutorial/try_mediation
 ```
 
 Now, let's have a look at the output file `try_mediation.mediation.out`:
