@@ -72,8 +72,8 @@ def SimulateData():
     # generate phenotypes with set heritability
     mY = mLiabG + mLiabE + mX@mBeta
     # generate phenotypes for mediation analysis, both with SNP heritability of 50%
-    vM = mLiabG[:,0]*np.sqrt(2) + mLiabG[:,iT-1]*np.sqrt(2) + 2*np.random.normal(0,1,iN) + mX@mBeta[:,0]
-    vY = vM + mLiabG[:,iT-1]*(np.sqrt(3)-np.sqrt(2)) + np.random.normal(0,1,iN) + mX@mBeta[:,iT-1]
+    vM = mLiabG[:,0]*4 + mLiabG[:,iT-1]*3 + np.random.normal(0,1,iN)*5 + mX@mBeta[:,0]
+    vY = vM + mLiabG[:,iT-1]*2 + np.random.normal(0,1,iN)*4 + mX@mBeta[:,iT-1]
     mM = np.vstack((vM,vY)).T
     # generate FIDs and IIDs
     lFID = ['FID ' + str(i) for i in range(1,iN+1)]
