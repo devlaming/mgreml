@@ -61,7 +61,7 @@ def SimulatePhenotypes(mG,miID,iRun,rng):
     dGSM = 4
     dESM = 5
     dB = 1
-    dGY = 2
+    dGY = 4
     dEY = 4
     # get no. of SNPs and sample size
     iN = mG.shape[0]
