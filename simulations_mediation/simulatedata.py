@@ -57,11 +57,11 @@ def SimulatePhenotypes(mG,miID,iRun,rng):
     # set total no. of confounders (including intercept)
     iK = 10
     # set model parameters
-    dGM = 3
-    dGSM = 4
-    dESM = 5
+    dGM = 1
+    dGSM = 1
+    dESM = 2
     dB = 1
-    dGY = 4
+    dGY = 2
     dEY = 4
     # get no. of SNPs and sample size
     iN = mG.shape[0]
