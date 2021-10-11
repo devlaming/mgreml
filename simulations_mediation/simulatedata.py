@@ -93,16 +93,29 @@ def SimulatePhenotypes(mG,miID,iRun,rng):
     mY_no = np.hstack((vM,vY_no))
     mY_partial = np.hstack((vM,vY_partial))
     mY_full = np.hstack((vM,vY_full))
+    # set matrix of covariates including mediator
+    mXM = np.hstack((mX,vM))
     # generate names of phenotypes and covariates
     lPheno = ['Mediator','Outcome']
     lCovar = ['Covariate ' + str(i) for i in range(1,iK)]
+    lCovarM = ['Covariate ' + str(i) for i in range(1,iK)]
+    lCovarM.append('Mediator')
     # construct DataFrames phenotypes
     dfY_no = pd.DataFrame(mY_no, index = miID, columns = lPheno)
     dfY_partial = pd.DataFrame(mY_partial, index = miID, columns = lPheno)
     dfY_full = pd.DataFrame(mY_full, index = miID, columns = lPheno)
+    # construct DataFrame mediator only
+    dfM = pd.DataFrame(vM, index = miID, columns = [lPheno[0]])
+    # construct DataFrames outcome only
+    dfO_no = pd.DataFrame(vY_no, index = miID, columns = [lPheno[1]])
+    dfO_partial = pd.DataFrame(vY_partial, index = miID, columns = [lPheno[1]])
+    dfO_full = pd.DataFrame(vY_full, index = miID, columns = [lPheno[1]])
     # construct DataFrame covariates, ignoring the intercept
     # as MGREML takes care of that by itself
     dfX = pd.DataFrame(mX[:,1:], index = miID, columns = lCovar)
+    # construct DataFrame covariates + mediator, ignoring the intercept
+    # as MGREML takes care of that by itself
+    dfXM = pd.DataFrame(mXM[:,1:], index = miID, columns = lCovarM)
     # create filenames
     sFile_no = 'no_mediation.run.' + str(iRun) + '.pheno.txt'
     sFile_partial = 'partial_mediation.run.' + str(iRun) + '.pheno.txt'
@@ -113,6 +126,20 @@ def SimulatePhenotypes(mG,miID,iRun,rng):
     dfY_partial.to_csv(sFile_partial, sep='\t')
     dfY_full.to_csv(sFile_full, sep='\t')
     dfX.to_csv(sFile_covar, sep='\t')
+    # create filenames for mediator only and covariates with mediator
+    sFile = 'run.' + str(iRun) + '.mediator.txt'
+    sFile_covar = 'run.' + str(iRun) + '.covar_mediator.txt'
+    # write mediator only and covariates with mediator as tab separated files
+    dfM.to_csv(sFile, sep='\t')
+    dfXM.to_csv(sFile_covar, sep='\t')
+    # create filenames for outcome only
+    sFile_no = 'no_mediation.run.' + str(iRun) + '.outcome.txt'
+    sFile_partial = 'partial_mediation.run.' + str(iRun) + '.outcome.txt'
+    sFile_full = 'full_mediation.run.' + str(iRun) + '.outcome.txt'
+    # write outcome only tab separated files
+    dfO_no.to_csv(sFile_no, sep='\t')
+    dfO_partial.to_csv(sFile_partial, sep='\t')
+    dfO_full.to_csv(sFile_full, sep='\t')
 
 def SimulateData(iRun,iN,iM):
     # set main seed for np.random

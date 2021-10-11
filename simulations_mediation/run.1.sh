@@ -22,8 +22,18 @@ gzip ./run.${iRun}.grm
 # 4. remove redundant files
 rm ./run.${iRun}.grm.gz
 rm ./run.${iRun}.grm.id
-# 5. perform MGREML analyses
+# 5. perform MGREML --mediation analyses
 python ./mgreml/mgreml.py --grm run.${iRun}.bin --pheno no_mediation.run.${iRun}.pheno.txt --covar run.${iRun}.covar.txt --mediation --out no_mediation.run.${iRun}
 python ./mgreml/mgreml.py --grm run.${iRun}.bin --pheno partial_mediation.run.${iRun}.pheno.txt --covar run.${iRun}.covar.txt --mediation --out partial_mediation.run.${iRun}
 python ./mgreml/mgreml.py --grm run.${iRun}.bin --pheno full_mediation.run.${iRun}.pheno.txt --covar run.${iRun}.covar.txt --mediation --out full_mediation.run.${iRun}
-
+# 6. perform univariate greml analysis for mediator
+python ./mgreml/mgreml.py --grm run.${iRun}.bin --pheno run.${iRun}.mediator.txt --covar run.${iRun}.covar.txt --variance-components --out run.${iRun}.mediator
+# 7. perform univariate greml analyses for outcome with no mediation
+python ./mgreml/mgreml.py --grm run.${iRun}.bin --pheno no_mediation.run.${iRun}.outcome.txt --covar run.${iRun}.covar.txt --variance-components --out no_mediation.run.${iRun}.outcome
+python ./mgreml/mgreml.py --grm run.${iRun}.bin --pheno no_mediation.run.${iRun}.outcome.txt --covar run.${iRun}.covar_mediator.txt --variance-components --out no_mediation.run.${iRun}.outcome.controlled_for_mediator
+# 8. perform univariate greml analyses for outcome with partial mediation
+python ./mgreml/mgreml.py --grm run.${iRun}.bin --pheno partial_mediation.run.${iRun}.outcome.txt --covar run.${iRun}.covar.txt --variance-components --out partial_mediation.run.${iRun}.outcome
+python ./mgreml/mgreml.py --grm run.${iRun}.bin --pheno partial_mediation.run.${iRun}.outcome.txt --covar run.${iRun}.covar_mediator.txt --variance-components --out partial_mediation.run.${iRun}.outcome.controlled_for_mediator
+# 9. perform univariate greml analyses for outcome with full mediation
+python ./mgreml/mgreml.py --grm run.${iRun}.bin --pheno full_mediation.run.${iRun}.outcome.txt --covar run.${iRun}.covar.txt --variance-components --out full_mediation.run.${iRun}.outcome
+python ./mgreml/mgreml.py --grm run.${iRun}.bin --pheno full_mediation.run.${iRun}.outcome.txt --covar run.${iRun}.covar_mediator.txt --variance-components --out full_mediation.run.${iRun}.outcome.controlled_for_mediator
