@@ -569,7 +569,11 @@ In this model, *M* has a genetic variance of 25, of which 9 is caused by a genet
 
 Also, under this model, *M* has a direct effect on *Y* equal to 1. Moreover, the aforementioned genetic factor *G* that directly affects both *M* and *Y*, has a direct effect of 2 on *Y*. Moreover, *Y* has an idiosyncratic environment factor, which adds 16 to its variance. The total genetic variance and environment variance of *Y* are both equal 41, putting the SNP-based heritability of *Y* also at 50%. Finally, *Y* is also affected by the fixed-effect covariates in `covariates.txt`.
 
-Under this model, the genetic variance of *Y* that is mediated by *M* equals 25. Thus, in total 25/41=61% of the genetic variance of the outcome is mediated by *M*. Bearing these considerations, let's run the following `mgreml` command:
+Under this model, the genetic variance of *Y* that is mediated by *M* equals 25. This number effectively quantifies the so-called indirect effect that is often reported in the mediation literature. Here, this indirect effect reflects (i) the total effect genes have on *M* and (ii) the effect *M*, in turn, has on *Y*.
+
+Moreover, under this model, if would consider *R* = *Y* - *M**b*, where *b* is the true effect of *M* on *Y* and, thus, *R* is the part of *Y* that remains if we would correct *Y* for *M* without any bias, then in this model *R* = 2*G* + 4*E*. In other words, *R* has an idiosyncratic genetic variance equal to four. Put differently, out of the full genetic variance of *Y* (which equals 41), only 4 is truly non-mediated. Thus, 4/41 = 9.76% of the genetic variance of *Y* is non-mediated.
+
+Bearing these considerations, let's run the following `mgreml` command:
 
 ```
 python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/mediation.txt \
@@ -586,7 +590,8 @@ Estimated effect M on Y (S.E.) = 0.9852870680810544 (0.015112109159582332)
 Total genetic variance of M (S.E.) = 24.8423686340792 (1.1967344113325025)
 Total genetic variance of Y (S.E.) = 42.454460580886554 (2.005691624715034)
 Genetic variance Y mediated by M (S.E.) = 24.116738113863956 (1.3575913489626268)
-Proportion of genetic variance Y mediated by M (S.E.) = 0.5680613481807273 (0.026707056710479304)
+Genetic variance Y not mediated by M (S.E.) = 4.465260283703529 (0.45412572093273396)
+Proportion of genetic variance Y not mediated by M (S.E.) = 0.10517764735689131 (0.00920912135286752)
 ```
 
 Estimates are all less than two standard errors away from the true parameters of the structural model. Moreover, estimates in `try_mediation.HSq.out` also show that the estimated heritabilities are less than two standard errors removed from the true value (50% for both).
