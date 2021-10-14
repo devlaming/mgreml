@@ -586,11 +586,11 @@ Now, let's have a look at the output file `try_mediation.mediation.out`:
 ```
 Mediation analysis in line with Rietveld et al. (2021):
 Mediator M = Mediator; Outcome Y = Outcome
-Estimated effect M on Y (S.E.) = 0.9852870680810544 (0.015112109159582332)
+Effect M on Y (S.E.) = 0.9852870680810544 (0.015112109159582332)
 Total genetic variance of M (S.E.) = 24.8423686340792 (1.1967344113325025)
 Total genetic variance of Y (S.E.) = 42.454460580886554 (2.005691624715034)
-Genetic variance Y mediated by M (S.E.) = 24.116738113863956 (1.3575913489626268)
-Genetic variance Y not mediated by M (S.E.) = 4.465260283703529 (0.45412572093273396)
+Indirect genetic effect = Genetic variance Y mediated by M (S.E.) = 24.116738113863956 (1.3575913489626268)
+Direct genetic effect = Genetic variance Y not mediated by M (S.E.) = 4.465260283703529 (0.45412572093273396)
 Proportion of genetic variance Y not mediated by M (S.E.) = 0.10517764735689131 (0.00920912135286752)
 ```
 
