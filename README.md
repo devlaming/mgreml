@@ -586,15 +586,16 @@ Now, let's have a look at the output file `try_mediation.mediation.out`:
 ```
 Mediation analysis in line with Rietveld et al. (2021):
 Mediator M = Mediator; Outcome Y = Outcome
-Effect M on Y (S.E.) = 0.9852870680810544 (0.015112109159582332)
+Effect M on Y (S.E.; Wald test statistic; asymptotic P value)* = 0.9852870680810544 (0.015112109159582332; 4250.8462922684685; 0.0)
 Total genetic variance of M (S.E.) = 24.8423686340792 (1.1967344113325025)
 Total genetic variance of Y (S.E.) = 42.454460580886554 (2.005691624715034)
-Indirect genetic effect = Genetic variance Y mediated by M (S.E.) = 24.116738113863956 (1.3575913489626268)
-Direct genetic effect = Genetic variance Y not mediated by M (S.E.) = 4.465260283703529 (0.45412572093273396)
+Indirect genetic effect = Genetic variance Y mediated by M (S.E.; Wald test statistic; asymptotic P value)* = 24.116738113863956 (1.3575913489626268; 315.5723987482642; 0.0)
+Direct genetic effect = Genetic variance Y not mediated by M (S.E.; Wald test statistic; asymptotic P value)* = 4.465260283703529 (0.45412572093273396; 96.68104992262884; 0.0)
 Proportion of genetic variance Y not mediated by M (S.E.) = 0.10517764735689131 (0.00920912135286752)
+* Wald test statistic and P value under null hypothesis that parameter of interest = 0
 ```
 
-Estimates are all less than two standard errors away from the true parameters of the structural model. Moreover, estimates in `try_mediation.HSq.out` also show that the estimated heritabilities are less than two standard errors removed from the true value (50% for both).
+Estimates are all less than two standard errors away from the true parameters of the structural model. Moreover, estimates in `try_mediation.HSq.out` also show that the estimated heritabilities are less than two standard errors removed from the true value (50% for both). Finally, observe that the estimated effect of *M* on *Y* is significant, the indirect effect of genes on *Y* via *M* is significant, and the direct effect of genes on *Y* is also significant.
 
 ### Data formats and management
 
