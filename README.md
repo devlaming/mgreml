@@ -571,7 +571,7 @@ Also, under this model, *M* has a direct effect on *Y* equal to 1. Moreover, the
 
 Under this model, the genetic variance of *Y* that is mediated by *M* equals 25. This number effectively quantifies the so-called indirect effect that is often reported in the mediation literature. Here, this indirect effect reflects (i) the total effect genes have on *M* and (ii) the effect *M*, in turn, has on *Y*.
 
-Moreover, under this model, if would consider *R* = *Y* - *M**b*, where *b* is the true effect of *M* on *Y* and, thus, *R* is the part of *Y* that remains if we would correct *Y* for *M* without any bias, then in this model *R* = 2*G* + 4*E*. In other words, *R* has an idiosyncratic genetic variance equal to four. Put differently, out of the full genetic variance of *Y* (which equals 41), only 4 is truly non-mediated. Thus, 4/41 = 9.76% of the genetic variance of *Y* is non-mediated.
+Moreover, under this model, if would consider *R* = *Y* - *Mb*, where *b* is the true effect of *M* on *Y* (here, *b* = 1) and, thus, *R* is the part of *Y* that remains if we would correct *Y* for *M* without any bias, then in this model *R* = 2*G* + 4*E*. In other words, *R* has an idiosyncratic genetic variance equal to four. Put differently, out of the full genetic variance of *Y* (which equals 41), only 4 is truly non-mediated. Thus, 4/41 = 9.76% of the genetic variance of *Y* is non-mediated.
 
 Bearing these considerations, let's run the following `mgreml` command:
 
