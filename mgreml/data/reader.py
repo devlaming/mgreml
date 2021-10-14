@@ -590,7 +590,7 @@ class MgremlReader:
             elif self.bReinitialise:
                 raise SyntaxError('--mediation cannot be combined with --reinitialise')
             self.bMediation = True
-            self.logger.info('MGREML will perform a mediation analysis based on results from a bivariaite model for the first two phenotypes in your phenotype file.')
+            self.logger.info('MGREML will perform a mediation analysis based on results from a bivariate model for the first two phenotypes in your phenotype file.')
         else:
             self.bMediation = False
     

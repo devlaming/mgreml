@@ -502,6 +502,7 @@ class MgremlEstimator:
             # get relevant VCs from estimated Vg and Ve matrices
             dVarGM = mVG[MgremlEstimator.iMedM,MgremlEstimator.iMedM]
             dVarGY = mVG[MgremlEstimator.iMedY,MgremlEstimator.iMedY]
+            dCovGMY = mVG[MgremlEstimator.iMedM,MgremlEstimator.iMedY]
             dVarEM = mVE[MgremlEstimator.iMedM,MgremlEstimator.iMedM]
             dCovEMY = mVE[MgremlEstimator.iMedM,MgremlEstimator.iMedY]
             # estimate effect M on Y using environmental variance
@@ -512,8 +513,10 @@ class MgremlEstimator:
             self.dVGY = dVarGY
             # estimate genetic variance of Y that is mediated by M
             self.dMediatedVGY = self.dVGM*(self.dBetaMY**2)
-            # estimate proporition of genetic variance Y that is mediated by M
-            self.dPropMediatedVGY = self.dMediatedVGY/self.dVGY
+            # estimate genetic variance of Y that is not mediated by M
+            self.dNonMediatedVGY = self.dVGY + self.dMediatedVGY - 2*dCovGMY*self.dBetaMY
+            # estimate proportion of genetic variance Y that is not mediated by M
+            self.dPropNonMediatedVGY = self.dNonMediatedVGY/self.dVGY
         # if variance components are needed and/or mediation analysis performed together with requirement of standard errors
         if self.bVarComp or (self.bMediation and self.bSEs):
             # get indices and parameters
@@ -721,9 +724,16 @@ class MgremlEstimator:
                     vGradMediatedVGY[0] = self.dBetaMY**2
                     vGradMediatedVGY[3] = -2*self.dMediatedVGY/dVarEM
                     vGradMediatedVGY[4] = 2*self.dMediatedVGY/dCovEMY
-                    # compute gradient of proportion of genetic variance of Y that is mediated
-                    vGradPropMediatedVGY = (vGradMediatedVGY.copy())/self.dVGY
-                    vGradPropMediatedVGY[2] = -self.dPropMediatedVGY/self.dVGY
+                    # compute gradient genetic variance of Y not mediated by M w.r.t. parameters
+                    vGradNonMediatedVGY = np.zeros((iSize,1))
+                    vGradNonMediatedVGY[0] = self.dBetaMY**2
+                    vGradNonMediatedVGY[1] = -2*self.dBetaMY
+                    vGradNonMediatedVGY[2] = 1
+                    vGradNonMediatedVGY[3] = 2*(((dCovGMY*self.dBetaMY)-self.dMediatedVGY)/dVarEM)
+                    vGradNonMediatedVGY[4] = 2*((self.dMediatedVGY - dCovGMY*self.dBetaMY)/dCovEMY)
+                    # compute gradient of proportion of genetic variance of Y that is not mediated
+                    vGradPropNonMediatedVGY = (vGradNonMediatedVGY.copy())/self.dVGY
+                    vGradPropNonMediatedVGY[2] = ((2*dCovGMY*self.dBetaMY)-self.dMediatedVGY)/(self.dVGY**2)
                     # compute gradient genetic variance of Y w.r.t. parameters
                     vGradVGY = np.zeros((iSize,1))
                     vGradVGY[2] = 1
@@ -733,7 +743,8 @@ class MgremlEstimator:
                     # compute standard error of relevant parameters
                     self.dBetaMY_SE=((vGradBetaMY.T@mMediationV@vGradBetaMY)[0,0])**0.5
                     self.dMediatedVGY_SE=((vGradMediatedVGY.T@mMediationV@vGradMediatedVGY)[0,0])**0.5
-                    self.dPropMediatedVGY_SE=((vGradPropMediatedVGY.T@mMediationV@vGradPropMediatedVGY)[0,0])**0.5
+                    self.dNonMediatedVGY_SE=((vGradNonMediatedVGY.T@mMediationV@vGradNonMediatedVGY)[0,0])**0.5
+                    self.dPropNonMediatedVGY_SE=((vGradPropNonMediatedVGY.T@mMediationV@vGradPropNonMediatedVGY)[0,0])**0.5
                     self.dVGY_SE=((vGradVGY.T@mMediationV@vGradVGY)[0,0])**0.5
                     self.dVGM_SE=((vGradVGM.T@mMediationV@vGradVGM)[0,0])**0.5
         # indicate estimates are now done

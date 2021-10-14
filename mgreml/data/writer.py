@@ -88,7 +88,8 @@ class DataWriter:
                 oMFfile.write('Total genetic variance of M (S.E.) = ' + str(self.estimates.dVGM) + ' (' + str(self.estimates.dVGM_SE) + ')\n')
                 oMFfile.write('Total genetic variance of Y (S.E.) = ' + str(self.estimates.dVGY) + ' (' + str(self.estimates.dVGY_SE) + ')\n')
                 oMFfile.write('Genetic variance Y mediated by M (S.E.) = ' + str(self.estimates.dMediatedVGY) + ' (' + str(self.estimates.dMediatedVGY_SE) + ')\n')
-                oMFfile.write('Proportion of genetic variance Y mediated by M (S.E.) = ' + str(self.estimates.dPropMediatedVGY) + ' (' + str(self.estimates.dPropMediatedVGY_SE) + ')\n')
+                oMFfile.write('Genetic variance Y not mediated by M (S.E.) = ' + str(self.estimates.dNonMediatedVGY) + ' (' + str(self.estimates.dNonMediatedVGY_SE) + ')\n')
+                oMFfile.write('Proportion of genetic variance Y not mediated by M (S.E.) = ' + str(self.estimates.dPropNonMediatedVGY) + ' (' + str(self.estimates.dPropNonMediatedVGY_SE) + ')\n')
         else:
             with open(sMF, 'w') as oMFfile:
                 oMFfile.write('Mediation analysis in line with Rietveld et al. (2021):\n')
@@ -97,7 +98,8 @@ class DataWriter:
                 oMFfile.write('Total genetic variance of M = ' + str(self.estimates.dVGM) + '\n')
                 oMFfile.write('Total genetic variance of Y = ' + str(self.estimates.dVGY) + '\n')
                 oMFfile.write('Genetic variance Y mediated by M = ' + str(self.estimates.dMediatedVGY) + '\n')
-                oMFfile.write('Proportion of genetic variance Y mediated by M = ' + str(self.estimates.dPropMediatedVGY) + '\n')
+                oMFfile.write('Genetic variance Y not mediated by M = ' + str(self.estimates.dNonMediatedVGY) + '\n')
+                oMFfile.write('Proportion of genetic variance Y not mediated by M = ' + str(self.estimates.dPropNonMediatedVGY) + '\n')
     
     def WriteHSq(self):
         if self.bNested:
