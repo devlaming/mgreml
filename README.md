@@ -70,7 +70,7 @@ In this tutorial, you will learn how to use `mgreml`. Before you start using `mg
 
 ### Tutorial data
 
-Now that you have cloned the `mgreml` repository, and `mgreml` is up-and-running, the main directory of `mgreml` should contain a subdirectory called `tutorial`. This directory in turn contains several files, including `pheno.txt` and `covar.txt`. Details on how this dataset has been generated using simulation can be found in the python script in `./tutorial/simulate.py`
+Now that you have cloned the `mgreml` repository, and `mgreml` is up-and-running, the main directory of `mgreml` should contain a subdirectory called `tutorial`. This directory in turn contains several files, including `pheno.txt` and `covar.txt`. Details on how this dataset has been generated using simulation can be found in the python script in `./tutorial/simulate.py`.
 
 Let us first inspect the `pheno.txt` file. This file contains data in tab-separated format on ten phenotypes observed in a set of 5,000 individuals. The first two columns list family and individual ID, followed by the phenotypes:
 
@@ -96,6 +96,8 @@ The command for running an `mgreml` analysis on this data without correcting for
 python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \ 
                    --no-intercept --out ./tutorial/nocovs
 ```
+
+:warning: The phenotypic data itself may only be numerical. E.g., values such as `yes` and `no` are not permitted as phenotypic values. Instead, please use values such as `1` and `0`. Please notice that the labels of the phenotypes (i.e., in the header row) do **not** need to be numerical, of course.
 
 When carrying out this command, `mgreml` will first show the welcome screen and directly after that summarise the input options that you specified:
 
@@ -172,6 +174,8 @@ The reasons this bias persists is that more fixed-effect covariates are at play 
 python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                    --covar ./tutorial/covar.txt --out ./tutorial/covs
 ```
+
+:warning: As with the phenotypic data, the actual data on the covariates may also only be numerical. E.g., values such as `female` and `male` are not permitted as values of covariates. Instead, please use values such as `1` and `0`. Please notice that the labels of the covariates (i.e., in the header row) do **not** need to be numerical, of course.
 
 Notice that analyses including covariates are computationally slightly more demanding. E.g. in this case we have 10 covariates (i.e. the intercept + 9 additional covariates in `./tutorial/covar.txt`), each of which is allowed to have a different effect on each trait. As we have 10 traits, this means we have 100 fixed effects in total, which our model needs to take into account.
 
