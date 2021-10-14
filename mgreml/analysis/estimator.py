@@ -2,6 +2,7 @@ import numpy as np
 import pickle
 import math
 from numpy.matlib import repmat
+from scipy.stats import chi2
 from mgreml.model import model
 
 class MgremlEstimator:
@@ -747,5 +748,13 @@ class MgremlEstimator:
                     self.dPropNonMediatedVGY_SE=((vGradPropNonMediatedVGY.T@mMediationV@vGradPropNonMediatedVGY)[0,0])**0.5
                     self.dVGY_SE=((vGradVGY.T@mMediationV@vGradVGY)[0,0])**0.5
                     self.dVGM_SE=((vGradVGM.T@mMediationV@vGradVGM)[0,0])**0.5
+                    # compute wald test statistics 
+                    self.dWaldBetaMY = (self.dBetaMY/self.dBetaMY_SE)**2
+                    self.dWaldMediatedVGY = (self.dMediatedVGY/self.dMediatedVGY_SE)**2
+                    self.dWaldNonMediatedVGY = (self.dNonMediatedVGY/self.dNonMediatedVGY_SE)**2
+                    # compute p-values
+                    self.dPvalBetaMY = 1-chi2.cdf(self.dWaldBetaMY,df=1)
+                    self.dPvalMediatedVGY = 1-chi2.cdf(self.dWaldMediatedVGY,df=1)
+                    self.dPvalNonMediatedVGY = 1-chi2.cdf(self.dWaldNonMediatedVGY,df=1)
         # indicate estimates are now done
         self.bDone = True
