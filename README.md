@@ -737,7 +737,7 @@ In case you have a question that is not resolved by going over the preceding two
 
 In general, if you use the software, please cite
 
-[R. de Vlaming, E.A.W. Slob, P.R. Jansen, A. Dagher, P.D. Koellinger, P.J.F. Groenen, and C.A. Rietveld (2021). Multivariate analysis reveals shared genetic architecture of brain morphology and human behavior. *bioRxiv*: **440478**.](https://www.biorxiv.org/content/early/2021/04/19/2021.04.19.440478)
+[R. de Vlaming, E.A.W. Slob, P.R. Jansen, A. Dagher, P.D. Koellinger, P.J.F. Groenen, and C.A. Rietveld (2021). Multivariate analysis reveals shared genetic architecture of brain morphology and human behavior. *Commun Biol* **4**, 1180](https://doi.org/10.1038/s42003-021-02712-y)
 
 In addition, if you use the `--mediation` option, please also cite
 
