@@ -1296,7 +1296,7 @@ class MgremlReader:
                 # get all observations with missing values for this trait
                 miIDs = self.dfY.loc[self.dfY[t].isnull() | self.dfY[t].isna(),t].index
                 # create labels of dummies for this trait
-                lLabels = ['dummy trait_' + str(t) + '_obs_' + str(i) for i in miIDs]
+                lLabels = ['dummy trait_' + str(t) + '_obs_' + str(miIDs[i]) for i in range(len(miIDs))]
                 # initialise dummy variables
                 dfXadd = pd.DataFrame(data=0, index=self.dfX.index, columns=lLabels)
                 dfBinXYadd = pd.DataFrame(data=0, index=self.dfY.columns, columns=lLabels)
@@ -1306,12 +1306,14 @@ class MgremlReader:
                     # set missing phenotype to zero
                     self.dfY.loc[i,t] = 0
                     # set appropriate entry of dummy to zero
-                    dfXadd.loc[i,iCountInner] = 1
-                    dfBinXYadd.loc[t,iCountInner] = 1
+                    dfXadd.loc[i,lLabels[iCountInner]] = 1
+                    dfBinXYadd.loc[t,lLabels[iCountInner]] = 1
                     # update counters
                     iCount += 1
                     iCountInner += 1
                 # append to existing set of covariates
+                print(dfXadd)
+                print(dfBinXYadd)
                 self.dfX = pd.concat([self.dfX, dfXadd], axis=1, join='inner')
                 self.dfBinXY = pd.concat([self.dfBinXY, dfBinXYadd], axis=1, join='inner')
             # replace missing in dfX by 0
