@@ -1293,29 +1293,31 @@ class MgremlReader:
             iCount = 0
             # for each trait
             for t in self.dfY.columns:
-                # get all observations with missing values
+                # get all observations with missing values for this trait
                 miIDs = self.dfY.loc[self.dfY[t].isnull() | self.dfY[t].isna(),t].index
+                # create labels of dummies for this trait
+                lLabels = ['dummy trait_' + str(t) + '_obs_' + str(i) for i in miIDs]
+                # initialise dummy variables
+                dfXadd = pd.DataFrame(data=0, index=self.dfX.index, columns=lLabels)
+                dfBinXYadd = pd.DataFrame(data=0, index=self.dfY.columns, columns=lLabels)
+                iCountInner = 0
                 # for each observation with missing value
                 for i in miIDs:
                     # set missing phenotype to zero
                     self.dfY.loc[i,t] = 0
-                    # construct label for new dummy variable
-                    lLabel = ['dummy_trait_' + str(t) + '_obs_' + str(i)]
-                    # create dummy variable
-                    dfXadd = pd.DataFrame(data=0, index=self.dfX.index, columns=lLabel)
-                    dfXadd.loc[i] = 1
-                    # append to existing set of covariates
-                    self.dfX = pd.concat([self.dfX, dfXadd], axis=1, join='inner')
-                    # create corresponding entry for dfBinXY
-                    dfBinXYadd = pd.DataFrame(data=0, index=self.dfY.columns, columns=lLabel)
-                    dfBinXYadd.loc[t] = 1
-                    # append to existing specification which covs apply to which phenos
-                    self.dfBinXY = pd.concat([self.dfBinXY, dfBinXYadd], axis=1, join='inner')
+                    # set appropriate entry of dummy to zero
+                    dfXadd.loc[i,iCountInner] = 1
+                    dfBinXYadd.loc[t,iCountInner] = 1
+                    # update counters
                     iCount += 1
+                    iCountInner += 1
+                # append to existing set of covariates
+                self.dfX = pd.concat([self.dfX, dfXadd], axis=1, join='inner')
+                self.dfBinXY = pd.concat([self.dfBinXY, dfBinXYadd], axis=1, join='inner')
             # replace missing in dfX by 0
             self.dfX = self.dfX.fillna(0)
             self.logger.info('Added ' + str(iCount) + ' phenotype-specific dummies to your covariate model')
-            if iCount*self.dfY.shape[1] > MgremlData.iManyDummies:
+            if iCount*self.dfY.shape[1] > MgremlReader.iManyDummies:
                 self.logger.warning('This is a large number of phenotype-specific covariates, given you have ' + str(self.dfY.shape[1]) + ' traits in your data')
                 self.logger.warning(str(iCount*self.dfY.shape[1]) + ' additional fixed-effect covariates implied, of which ' + str(iCount*self.dfY.shape[1] - iCount) + ' are set to zero')
                 self.logger.warning('CPU time of MGREML may increase dramatically')
