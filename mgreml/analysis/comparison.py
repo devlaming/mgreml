@@ -21,6 +21,14 @@ class NestedEstimators:
         else:
             self.logger.info('INITIALISING ALTERNATIVE MODEL')
         self.estimatorA = estimator.MgremlEstimator(mdData)
+        if mdData.dfGenBinFY is not None:
+            self.dfGenBinFY = mdData.dfGenBinFY.copy()
+        else:
+            self.dfGenBinFY = None
+        if mdData.dfEnvBinFY is not None:
+            self.dfEnvBinFY = mdData.dfEnvBinFY.copy()
+        else:
+            self.dfEnvBinFY = None
         # initialisation of StructuralModel instances using
         # same mdData guarantees that the these StructuralModels
         # consider the same set of traits, in the same order
@@ -46,24 +54,32 @@ class NestedEstimators:
             indFEA = pd.Index(self.estimatorA.mgreml_model.model.envmod.lFactors)
             indFG0 = pd.Index(self.estimator0.mgreml_model.model.genmod.lFactors)        
             indFE0 = pd.Index(self.estimator0.mgreml_model.model.envmod.lFactors)
-            # find out if all factors in restricted genetic model
-            # appear in unrestricted genetic model
-            if not(indFG0.isin(indFGA).all()):
-                raise ValueError('There is at least one genetic factor in your nested model that does not appear in your alternative model')        
-            # find out if all factors in restricted environment model
-            # appear in unrestricted environment model
-            if not(indFE0.isin(indFEA).all()):
-                raise ValueError('There is at least one environment factor in your nested model that does not appear in your alternative model')
-            # select submatrices of free coeffs of unrestricted models
-            # that align with free coeffs of restricted model
-            mBGA_aligned = np.array(pd.DataFrame(mBGA,columns=indFGA)[indFG0])
-            mBEA_aligned = np.array(pd.DataFrame(mBEA,columns=indFEA)[indFE0])
-            # if there is at least one coefficient there where the altnerative
-            # model is restricted, while the null model is free: not nested!
-            if ((mBGA_aligned - mBG0) < 0).any():
-                raise ValueError('There is at least one genetic coefficient where the nested model is free and the alternative model is not')
-            if ((mBEA_aligned - mBE0) < 0).any():
-                raise ValueError('There is at least one environment coefficient where the nested model is free and the alternative model is not')
+            # if alternative for genetic model is not saturated
+            if self.dfGenBinFY is not None:
+                # find out if all factors in restricted genetic model
+                # appear in unrestricted genetic model
+                if not(indFG0.isin(indFGA).all()):
+                    raise ValueError('There is at least one genetic factor in your nested model that does not appear in your alternative model')
+                # select submatrices of free coeffs of unrestricted models
+                # that align with free coeffs of restricted model
+                mBGA_aligned = np.array(pd.DataFrame(mBGA,columns=indFGA)[indFG0])
+                # if there is at least one coefficient there where the altnerative
+                # model is restricted, while the null model is free: not nested!
+                if ((mBGA_aligned - mBG0) < 0).any():
+                    raise ValueError('There is at least one genetic coefficient where the nested model is free and the alternative model is not')
+            # if alternative for environment model is not saturated
+            if self.dfEnvBinFY is not None:
+                # find out if all factors in restricted environment model
+                # appear in unrestricted environment model
+                if not(indFE0.isin(indFEA).all()):
+                    raise ValueError('There is at least one environment factor in your nested model that does not appear in your alternative model')
+                # select submatrices of free coeffs of unrestricted models
+                # that align with free coeffs of restricted model
+                mBEA_aligned = np.array(pd.DataFrame(mBEA,columns=indFEA)[indFE0])
+                # if there is at least one coefficient there where the altnerative
+                # model is restricted, while the null model is free: not nested!
+                if ((mBEA_aligned - mBE0) < 0).any():
+                    raise ValueError('There is at least one environment coefficient where the nested model is free and the alternative model is not')
             self.logger.info('The model under the null hypothesis is nested with respect to the alternative model\n')
         # compute degrees of freedom
         self.iDF = int((mBGA.sum() + mBEA.sum()) - (mBG0.sum() + mBE0.sum()))
