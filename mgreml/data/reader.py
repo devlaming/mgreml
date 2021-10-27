@@ -1312,8 +1312,6 @@ class MgremlReader:
                     iCount += 1
                     iCountInner += 1
                 # append to existing set of covariates
-                print(dfXadd)
-                print(dfBinXYadd)
                 self.dfX = pd.concat([self.dfX, dfXadd], axis=1, join='inner')
                 self.dfBinXY = pd.concat([self.dfBinXY, dfBinXYadd], axis=1, join='inner')
             # replace missing in dfX by 0
