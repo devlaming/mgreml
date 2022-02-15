@@ -643,6 +643,14 @@ Introducing dummies to control for gaps in the data can become computationally h
 
 Therefore, `mgreml` has a `--drop-missings` option, whereby all individuals are dropped that have at least one missing phenotype and/or at least one missing covariate that is relevant (either because `--covar-model` has not been used, or because the file following `--covar-model` indicates the covariate with a missing value for a given individual affects at least one trait).
 
+MGREML can handle missing values in the phenotype and/or covariate file when encoded using one of the following formats (comma-separated list of formats, with each format between single quotation marks):
+
+‘’, ‘#N/A’, ‘#N/A N/A’, ‘#NA’, ‘-1.#IND’, ‘-1.#QNAN’, ‘-NaN’, ‘-nan’, ‘1.#IND’, ‘1.#QNAN’, ‘’, ‘N/A’, ‘NA’, ‘NULL’, ‘NaN’, ‘n/a’, ‘nan’, ‘null’.
+
+This list is based on https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html, which is the reference manual of the pandas function that MGREML uses to read in phenotype and covariate data.
+
+:warning: Your phenotypes and covariates should not contain non-numeric stuff other than missing values!
+
 ### Advanced options
 
 Note that `mgreml` has a few advanced options regarding the estimation algorithm. First, `--newton` forces `mgreml` to use a Newton algorithm for solving the optimisation problem instead of BFGS. Although in theory this approach requires fewer iterations than BFGS to converge, we recommend using BFGS: especially for large *T*, single BFGS iterations are so much faster than single Newton iterations, that the overall runtime of the BFGS algorithm is much lower than the runtime of the Newton algorithm.
