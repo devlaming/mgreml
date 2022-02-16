@@ -1395,7 +1395,6 @@ class MgremlReader:
                 # ignore trailing and leading values from eigenvalue vector
                 self.vD = vD[self.iDropTrailPCs:-self.iDropLeadPCs]
         # count number of significantly negative eigenvalues
-        print(min(self.vD))
         iNegativeEVs=(self.vD<MgremlReader.dEigValThreshold).sum()
         if iNegativeEVs>0:
             # raise an error with a proper explanation of the likely cause
