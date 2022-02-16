@@ -58,6 +58,9 @@ class MgremlReader:
     # set default convergence treshold
     dGradTol = 1E-5
     
+    # set threshold for too big negative eigenvalue GRM
+    dEigValThreshold = -1E-3
+    
     # highest condition number per trait allowed in phenotypic
     # correlation matrix; threshold corresponds all correlations >=0.95
     dCondThreshold = 19 
@@ -1375,8 +1378,11 @@ class MgremlReader:
             if self.iDropTrailPCs > 0:
                 # ignore trailing columns and leading columns from eigenvector matrix
                 mP = mP[:,self.iDropTrailPCs:]
-                # ignore trailing and leading values from eigenvalue vector
+                # ignore trailing values from eigenvalue vector
                 self.vD = vD[self.iDropTrailPCs:]
+            else:
+                # keep all values from eigenvalue vector
+                self.vD = vD
         else:
             if self.iDropTrailPCs == 0:
                 # ignore trailing columns and leading columns from eigenvector matrix
@@ -1388,6 +1394,19 @@ class MgremlReader:
                 mP = mP[:,self.iDropTrailPCs:-self.iDropLeadPCs]
                 # ignore trailing and leading values from eigenvalue vector
                 self.vD = vD[self.iDropTrailPCs:-self.iDropLeadPCs]
+        # count number of significantly negative eigenvalues
+        print(min(self.vD))
+        iNegativeEVs=(self.vD<MgremlReader.dEigValThreshold).sum()
+        if iNegativeEVs>0:
+            # raise an error with a proper explanation of the likely cause
+            raise ValueError('your GRM is invalid: it has '+str(iNegativeEVs)+' considerably negative eigenvalues')
+        # count number of eigenvalues that are negligibly negative
+        iNegativeEVs=(self.vD<0).sum()
+        if iNegativeEVs>0:
+            # print wa
+            self.logger.info('There are '+str(iNegativeEVs)+' negligibly negative eigenvalues in GRM')
+            self.logger.info('Setting these eigenvalues to zero')
+            self.vD[self.vD<0]=0
         # store squared eigenvalues
         self.vDSq = (self.vD)**2
         # apply canonical transform to phenotypes and store that and its transpose
