@@ -40,9 +40,6 @@ class StructuralModel:
             self.InitialiseSaturatedModel(mdData)
         
     def CheckModelSpecification(self, mdData, dfBinFY):
-        # raise error if there are more factors than traits
-        if self.iF > self.iT:
-            raise ValueError('You have specified more factors than traits. This model is not identified.') 
         # raise error if number of traits does not match no. of trais in data
         if self.iT != mdData.mY.shape[1]:
             raise ValueError('The number of traits in your structural model does not match the number of traits in your data.')
@@ -77,9 +74,6 @@ class StructuralModel:
         self.lFactors = dfBinFY.columns.tolist()
         # read out structural model as numpy as array
         mB = np.array(dfBinFY)
-        # if rank falls below self.iF and self.iF > 1 (i.e. not a model with only zeros) : abort
-        if (np.linalg.matrix_rank(mB) < self.iF) and (self.iF > 1):
-            raise ValueError('Your structural model is rank deficient. Please change your specification.')
         # get trait and factor indices based on mB
         (self.vIndT,self.vIndF) = np.where(mB==1)
         # get regularised phenotypic covariance matrix
