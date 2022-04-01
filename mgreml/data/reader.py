@@ -1250,7 +1250,7 @@ class MgremlReader:
                     # add an edge for each related pair
                     myGraph.add_edges_from(tuple(map(tuple, mRelated)))
                     # use Boppana & Halldorsso 1992 algorithm: keeping large subset with no edges
-                    lKeepIDs = nx.maximal_independent_set(myGraph)
+                    lKeepIDs = nx.maximal_independent_set(myGraph,seed=MgremlReader.iSeed)
                     # find IDs to drop
                     setDropIDs = set(vUnique) - set(lKeepIDs)
                     # take full set of IDs and remove the ones to drop
