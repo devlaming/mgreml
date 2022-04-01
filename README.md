@@ -645,7 +645,7 @@ Therefore, `mgreml` has a `--drop-missings` option, whereby all individuals are 
 
 MGREML can handle missing values in the phenotype and/or covariate file when encoded using one of the following formats (comma-separated list of formats, with each format between single quotation marks):
 
-‘’, ‘#N/A’, ‘#N/A N/A’, ‘#NA’, ‘-1.#IND’, ‘-1.#QNAN’, ‘-NaN’, ‘-nan’, ‘1.#IND’, ‘1.#QNAN’, ‘’, ‘N/A’, ‘NA’, ‘NULL’, ‘NaN’, ‘n/a’, ‘nan’, ‘null’.
+‘’, ‘-999’, ‘#N/A’, ‘#N/A N/A’, ‘#NA’, ‘-1.#IND’, ‘-1.#QNAN’, ‘-NaN’, ‘-nan’, ‘1.#IND’, ‘1.#QNAN’, ‘’, ‘N/A’, ‘NA’, ‘NULL’, ‘NaN’, ‘n/a’, ‘nan’, ‘null’.
 
 This list is based on https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html, which is the reference manual of the pandas function that MGREML uses to read in phenotype and covariate data.
 

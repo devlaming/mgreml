@@ -864,6 +864,8 @@ class MgremlReader:
         dfData = pd.read_csv(lArgs[0], index_col = MgremlReader.lIndFID_IID, header = iHeader, sep = None, engine='python')
         # force missings to NaN
         dfData.apply(pd.to_numeric, errors='coerce')
+        # set -999 to NaN
+        dfData=dfData.replace(-999,np.nan)
         # get number of observations and traits, and report
         (iN,iT) = dfData.shape
         self.logger.info('The ' + sData + ' file contains data on {N} individuals and {T} '.format(N=iN,T=iT) + sData + 's')
