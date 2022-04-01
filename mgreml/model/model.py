@@ -16,6 +16,8 @@ class StructuralModel:
     # set maximum Rsq of coefficients for each factor w.r.t. all other factors
     # when diagnosing issues
     dRSqTOL = 0.99
+    # define seed for random-number generator used to initialise factor weights
+    iSeed = 249341427
     
     def __init__(self, mdData, dfBinFY = None, sType=''):
         # store logger
@@ -80,6 +82,8 @@ class StructuralModel:
         mV = self.InitialiseV(mdData)
         # initialise parameters
         self.vParam = np.zeros(self.vIndT.shape)
+        # set random number generator
+        rng=np.random.RandomState(StructuralModel.iSeed)
         # for each trait
         for t in range(0,self.iT):
             # find indices of all factors affecting current trait
@@ -89,8 +93,11 @@ class StructuralModel:
             if iThisF > 0: # if this trait affected by at least 1 factor
                 # set coefficient weights such that each phenotype t
                 # has implied variance equal to mV[t,t]
-                self.vParam[vParamIndThisTrait] = math.sqrt(mV[t,t]/iThisF)
-        
+                vSign=np.ones(iThisF)
+                vSign[rng.normal(size=iThisF)<0]=-1
+                vVAF=rng.dirichlet(iThisF*np.ones(iThisF))*mV[t,t]
+                self.vParam[vParamIndThisTrait] = (vVAF**(0.5))*vSign
+    
     def InitialiseSaturatedModel(self, mdData):
         # get regularised phenotypic covariance matrix
         mV = self.InitialiseV(mdData)
