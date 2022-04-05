@@ -9,6 +9,7 @@ from mgreml.data import tools
 from mgreml.analysis import estimator
 from mgreml.analysis import comparison
 from mgreml.analysis import pairwise
+from mgreml.analysis import mediation
 
 def main():
     # store starting time
@@ -39,7 +40,12 @@ def main():
                     logger.info('3. INTIALISING MGREML ESTIMATORS FOR NESTED MODELS')
                     logger.info('Current memory usage is ' + str(int((process.memory_info().rss)/(1024**2))) + 'MB\n')
                     myEstimator = comparison.NestedEstimators(myMgremlData)
-                else: # if neither nested nor pairwise
+                elif myMgremlData.bMediation: # if we have mediation analysis
+                    # initialise mediation estimators
+                    logger.info('3. INTIALISING MGREML ESTIMATORS FOR MEDIATION MODEL')
+                    logger.info('Current memory usage is ' + str(int((process.memory_info().rss)/(1024**2))) + 'MB\n')
+                    myEstimator = mediation.ThreeEstimators(myMgremlData)
+                else: # if neither nested, pairwise, nor mediation
                     # initialise estimator of the main model
                     if myMgremlData.bReinitialise:
                         logger.info('3. REINITIALISING MGREML ESTIMATOR FOR MAIN MODEL') 

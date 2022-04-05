@@ -38,8 +38,15 @@ class DataWriter:
         self.bVarComp = data.bVarComp
         self.bAllCoeffs = data.bAllCoeffs
         self.bCovs = data.bCovs
-        self.estimates = estimates
         self.bMediation = data.bMediation
+        if self.bMediation:
+            self.dTestStat = estimates.dTestStat
+            self.dPval = estimates.dPval
+            self.estimates = estimates.estimator3
+            self.estimates1 = estimates.estimator1
+            self.estimates2 = estimates.estimator2
+        else:
+            self.estimates = estimates
     
     def WriteResults(self):
         self.logger.info('5. WRITING MGREML RESULTS')
@@ -101,6 +108,16 @@ class DataWriter:
                 oMFfile.write('Indirect genetic effect = Genetic variance Y mediated by M = ' + str(self.estimates.dMediatedVGY) + '\n')
                 oMFfile.write('Direct genetic effect = Genetic variance Y not mediated by M = ' + str(self.estimates.dNonMediatedVGY) + '\n')
                 oMFfile.write('Proportion of genetic variance Y not mediated by M = ' + str(self.estimates.dPropNonMediatedVGY) + '\n')
+        with open(sMF, 'a') as oMFfile:
+            oMFfile.write('Log-likelihood restricted model with no genetic variance of mediator = ' + str(self.estimates1.dLogL) + '\n')
+            oMFfile.write('Log-likelihood restricted model with no effect mediator on outcome = ' + str(self.estimates2.dLogL) + '\n')
+            if self.estimates1.dLogL > self.estimates2.dLogL:
+                oMFfile.write('Supremum restricted models is achieved under model with no genetic variance of mediator: test has 2 degrees of freedom \n')
+            else:
+                oMFfile.write('Supremum restricted models is achieved under model with no effect mediator on outcome: test has 1 degree of freedom \n')
+            oMFfile.write('Log-likelihood unrestricted model with genetic mediation = ' + str(self.estimates.dLogL) + '\n')
+            oMFfile.write('Chi-square test statistic for presence of genetic mediation = ' + str(self.dTestStat) + '\n')
+            oMFfile.write('with P-value = ' + str(self.dPval) + '\n')
     
     def WriteHSq(self):
         if self.bNested:

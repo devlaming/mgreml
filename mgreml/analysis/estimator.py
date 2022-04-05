@@ -34,7 +34,7 @@ class MgremlEstimator:
     iMedM = 0
     iMedY = 1
     
-    def __init__(self, mdData, bNested = False):
+    def __init__(self, mdData, bNested = False, bMedVarGM0 = False, bMedBeta0 = False):
         # if null model, read out appropriate attributes
         if bNested:
             dfGenBinFY = mdData.dfGenBinFY0
@@ -46,7 +46,7 @@ class MgremlEstimator:
         self.logger = mdData.logger
         self.process = mdData.process
         # initialise mgreml model
-        self.mgreml_model = model.MgremlModel(mdData, dfGenBinFY, dfEnvBinFY, bNested)
+        self.mgreml_model = model.MgremlModel(mdData, dfGenBinFY, dfEnvBinFY, bNested, bMedVarGM0, bMedBeta0)
         # set iteration counter
         self.iIter = 0
         # indicate convergence has not occurred yet
@@ -65,8 +65,11 @@ class MgremlEstimator:
         self.bSEs = mdData.bSEs
         # set whether we are estimating a nested model
         self.bNested = bNested
-        # set whether we are doing a mediation analysis
+        # set whether we are doing a mediation analysis and now at the unrestricted model
         self.bMediation = mdData.bMediation
+        if bMedVarGM0 or bMedBeta0:
+            self.bMediation = False
+            self.bSEs = False
         # set whether to return all parameters estimates
         # and sampling variance when done
         self.bAllCoeffs = mdData.bAllCoeffs

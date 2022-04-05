@@ -19,7 +19,7 @@ class StructuralModel:
     # define seed for random-number generator used to initialise factor weights
     iSeed = 249341427
     
-    def __init__(self, mdData, dfBinFY = None, sType=''):
+    def __init__(self, mdData, dfBinFY = None, sType='', bNoVar1 = False, bNoCov12 = False):
         # store logger
         self.logger = mdData.logger
         # check if model has been specified
@@ -39,7 +39,7 @@ class StructuralModel:
             self.iF = self.iT
             self.logger.info('Assuming saturated ' + sType + 'model')
             # initialise saturated model
-            self.InitialiseSaturatedModel(mdData)
+            self.InitialiseSaturatedModel(mdData, bNoVar1, bNoCov12)
         
     def CheckModelSpecification(self, mdData, dfBinFY):
         # raise error if number of traits does not match no. of trais in data
@@ -98,39 +98,69 @@ class StructuralModel:
                 vVAF=rng.dirichlet(iThisF*np.ones(iThisF))*mV[t,t]
                 self.vParam[vParamIndThisTrait] = (vVAF**(0.5))*vSign
     
-    def InitialiseSaturatedModel(self, mdData):
+    def InitialiseSaturatedModel(self, mdData, bNoVar1 = False, bNoCov12 = False):
         # get regularised phenotypic covariance matrix
         mV = self.InitialiseV(mdData)
-        # get cholesky decomposition (lower triangular)
-        mC = np.linalg.cholesky(mV)
+        if bNoVar1:
+            mC = np.zeros((2,1))
+            mC[1,0] = (mV[1,1])**0.5
+        elif bNoCov12:
+            mC = np.zeros((2,2))
+            mC[0,0] = (mV[0,0])**0.5
+            mC[1,1] = (mV[1,1])**0.5
+            mC = np.linalg.cholesky(mV)
+        else:
+            # get cholesky decomposition (lower triangular)
+            mC = np.linalg.cholesky(mV)
         # set trait and factor indices of saturated model
-        self.InitialiseIndicesSaturated()
+        self.InitialiseIndicesSaturated(bNoVar1, bNoCov12)
         # set parameters
         self.vParam = mC[self.vIndT,self.vIndF]
         # set labels for the factors
-        self.lFactors = ['factor ' + str(x) for x in np.arange(self.iT)]
+        if bNoVar1:
+            self.lFactors = ['factor 0']
+        elif bNoCov12:
+            self.lFactors = ['factor 0', 'factor 1']
+        else:
+            self.lFactors = ['factor ' + str(x) for x in np.arange(self.iT)]
 
     def InitialiseV(self, mdData):
         mV = (1-StructuralModel.dLambdaInit)*mdData.mCovY + StructuralModel.dLambdaInit*np.diag(np.diag(mdData.mCovY))
         return mV
     
-    def InitialiseIndicesSaturated(self):
-        # compute no. of parameters for satured model
-        iParam = int((self.iT+1)*self.iT/2)
+    def InitialiseIndicesSaturated(self, bNoVar1 = False, bNoCov12 = False):
+        if bNoVar1:
+            # set no. of parameters to 1
+            iParam = 1
+        elif bNoCov12:
+            # set no. of parameters to 2
+            iParam = 2
+        else:
+            # compute no. of parameters for satured model
+            iParam = int((self.iT+1)*self.iT/2)
         # set conformable vectors for trait and factor indices
         self.vIndT = np.zeros(iParam)
-        self.vIndF = np.zeros(iParam)
-        # set counter for parameters
-        iCount = 0
-        # for each factor
-        for f in range(0,self.iT):
-            # for each trait
-            for t in range(f,self.iT):
-                # update vectors with trait and factor indices
-                self.vIndT[iCount] = t
-                self.vIndF[iCount] = f
-                # update parameter count
-                iCount = iCount + 1
+        self.vIndF = np.zeros(iParam)        
+        if bNoVar1:
+            self.vIndT[0] = 1
+            self.vIndF[0] = 0
+        elif bNoCov12:
+            self.vIndT[0] = 0
+            self.vIndF[0] = 0
+            self.vIndT[1] = 1
+            self.vIndF[1] = 1
+        else:
+            # set counter for parameters
+            iCount = 0
+            # for each factor
+            for f in range(0,self.iT):
+                # for each trait
+                for t in range(f,self.iT):
+                    # update vectors with trait and factor indices
+                    self.vIndT[iCount] = t
+                    self.vIndF[iCount] = f
+                    # update parameter count
+                    iCount = iCount + 1
         # make sure trait and factor indices are integer vectors
         self.vIndT = self.vIndT.astype(int)
         self.vIndF = self.vIndF.astype(int)
@@ -210,8 +240,8 @@ class GeneticModel(StructuralModel):
     # string describing type of model
     sType = 'genetic '
     
-    def __init__(self, mdData, dfBinFY = None):
-        super().__init__(mdData, dfBinFY, GeneticModel.sType)
+    def __init__(self, mdData, dfBinFY = None, bMedVarGM0 = False):
+        super().__init__(mdData, dfBinFY, GeneticModel.sType, bNoVar1 = bMedVarGM0)
         self.vParam = GeneticModel.dWeight*self.vParam
         self.lFactors = [GeneticModel.sType + str(x) for x in self.lFactors]
 
@@ -223,8 +253,8 @@ class EnvironmentModel(StructuralModel):
     # string describing type of model
     sType = 'environment '
     
-    def __init__(self, mdData, dfBinFY = None):
-        super().__init__(mdData, dfBinFY, EnvironmentModel.sType)
+    def __init__(self, mdData, dfBinFY = None, bMedBeta0 = False):
+        super().__init__(mdData, dfBinFY, EnvironmentModel.sType, bNoCov12 = bMedBeta0)
         self.vParam = EnvironmentModel.dWeight*self.vParam
         self.lFactors = [EnvironmentModel.sType + str(x) for x in self.lFactors]
         # if less environment factors than traits: crash, as this is incompatible with MGREML
@@ -240,9 +270,9 @@ class EnvironmentModel(StructuralModel):
 
 class CombinedModel:
     
-    def __init__(self, mdData, dfGenBinFY = None, dfEnvBinFY = None):
-        self.genmod = GeneticModel(mdData, dfGenBinFY)
-        self.envmod = EnvironmentModel(mdData, dfEnvBinFY)
+    def __init__(self, mdData, dfGenBinFY = None, dfEnvBinFY = None, bMedVarGM0 = False, bMedBeta0 = False):
+        self.genmod = GeneticModel(mdData, dfGenBinFY, bMedVarGM0)
+        self.envmod = EnvironmentModel(mdData, dfEnvBinFY, bMedBeta0)
         # count the number of parameters and parameter combinations
         self.iParamsG = self.genmod.vParam.shape[0]
         self.iParamsE = self.envmod.vParam.shape[0]
@@ -304,7 +334,7 @@ class MgremlModel:
     # 2 returning dLogL = -infinity in case of golden section step
     dMinEigVal = 1E-9
     
-    def __init__(self, mdData, dfGenBinFY = None, dfEnvBinFY = None, bNested = False):
+    def __init__(self, mdData, dfGenBinFY = None, dfEnvBinFY = None, bNested = False, bMedVarGM0 = False, bMedBeta0 = False):
         self.logger = mdData.logger
         if bNested:
             if mdData.bReinitialise0:
@@ -319,7 +349,7 @@ class MgremlModel:
                     dictIter = pickle.load(handle)
                 self.model = dictIter['currentCombinedModel']
             else:
-                self.model = CombinedModel(mdData, dfGenBinFY, dfEnvBinFY)
+                self.model = CombinedModel(mdData, dfGenBinFY, dfEnvBinFY, bMedVarGM0, bMedBeta0)
         self.data = mdData
         self.vBetaGLS = None
         self.mVarGLS = None
