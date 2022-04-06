@@ -798,11 +798,15 @@ class MgremlReader:
         if sType == MgremlReader.sCov:
             self.dfBinXY = dfBin
         elif sType == MgremlReader.sGen:
+            if dfBin.values.sum()>(iT*(iT+1)/2):
+                raise SyntaxError('You specified more than T(T+1)/2 free genetic coefficients: this model is not identified')
             if bNull:
                 self.dfGenBinFY0 = dfBin
             else:
                 self.dfGenBinFY = dfBin
         else:
+            if dfBin.values.sum()>(iT*(iT+1)/2):
+                raise SyntaxError('You specified more than T(T+1)/2 free environment coefficients: this model is not identified')
             if bNull:
                 self.dfEnvBinFY0 = dfBin
             else:
