@@ -65,11 +65,16 @@ class MgremlEstimator:
         self.bSEs = mdData.bSEs
         # set whether we are estimating a nested model
         self.bNested = bNested
-        # set whether we are doing a mediation analysis and now at the unrestricted model
-        self.bMediation = mdData.bMediation
+        # if estimating restricted mediation model
         if bMedVarGM0 or bMedBeta0:
+            # ignore mediation and SE flag
             self.bMediation = False
             self.bSEs = False
+        else:
+            # get mediation flag
+            self.bMediation = mdData.bMediation
+        # store empirical covariance matrix Y
+        self.mCovY = mdData.mCovY
         # set whether to return all parameters estimates
         # and sampling variance when done
         self.bAllCoeffs = mdData.bAllCoeffs
@@ -426,6 +431,28 @@ class MgremlEstimator:
             (self.mSamplingV,_) = self.PseudoInvertSymmetricMat(self.mInfo, dMinEigVal)
             # get indices and parameters
             (vIndTG, vIndFG, vParamG, vIndTE, vIndFE, vParamE) = self.mgreml_model.model.GetSplitParamsAndIndices()
+            # get variance of all estimated coefficients and variance of corresponding traits
+            vVarCoeff = np.diag(self.mSamplingV)
+            vVarCoeffG = vVarCoeff[0:len(vIndTG)]
+            vVarCoeffE = vVarCoeff[len(vIndTG):]
+            vVarTraits = np.diag(self.mgreml_model.data.mCovY)
+            vVarTraitsG = vVarTraits[vIndTG]
+            vVarTraitsE = vVarTraits[vIndTE]
+            # find coefficients for which variance is unreasonably high
+            vLargeSEG = vVarCoeffG>vVarTraitsG
+            vLargeSEE = vVarCoeffE>vVarTraitsE
+            self.vLargeSE = np.hstack((vLargeSEG,vLargeSEE))
+            # print warning
+            if vLargeSEG.sum() > 0:
+                self.logger.warning('WARNING! There are ' + str(vLargeSEG.sum()) + ' genetic path coefficients with unreasonably high standard errors')
+                self.logger.warning('Your model may be poorly identified. Inferences may be unreliable. Please consider constraining your genetic factor model')
+            if vLargeSEE.sum() > 0:
+                self.logger.warning('WARNING! There are ' + str(vLargeSEE.sum()) + ' environment path coefficients with unreasonably high standard errors')
+                self.logger.warning('Your model may be poorly identified. Inferences may be unreliable. Please consider constraining your environment factor model')
+            if (self.vLargeSE.sum())==0:
+                self.logger.info('Standard errors of the path coefficients suggest your model is identified')
+            else:
+                self.logger.warning('To gain more insight in factors and traits involved in high standard errors: include the --factor-coefficients option')
             # compute gradient of heritability w.r.t. each parameter
             vGradHSqG = 2*((1-self.vHSq[vIndTG])/vVY[vIndTG])*vParamG
             vGradHSqE = -2*(self.vHSq[vIndTE]/vVY[vIndTE])*vParamE
@@ -501,6 +528,8 @@ class MgremlEstimator:
                                    np.matmul(vGradRhoEY,np.matmul(mSamplingVEYY,vGradRhoEY.T)))
                     self.mRhoGSE[j,i] = self.mRhoGSE[i,j]
                     self.mRhoESE[j,i] = self.mRhoESE[i,j]
+        else:
+            self.logger.info('MGREML cannot assess degree of identification as standard errors are not calculated in this model')
         # if mediation analysis needed:
         if self.bMediation:
             # get relevant VCs from estimated Vg and Ve matrices

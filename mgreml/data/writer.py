@@ -25,6 +25,7 @@ class DataWriter:
     lBeta = ['beta hat']
     lBetaSE = ['beta hat', 'standard error']
     lEstimateSE = ['estimate', 'standard error']
+    lEstimateCoeffSE = ['estimate', 'standard error', 'large (1=yes)']
     lEstimate = ['estimate']
     iMedM = 0
     iMedY = 1
@@ -211,12 +212,15 @@ class DataWriter:
                 # compute standard errors
                 vSEA = np.diag(self.estimates.estimatorA.mSamplingV)**0.5
                 vSE0 = np.diag(self.estimates.estimator0.mSamplingV)**0.5
+                # get binary vectors indicating coefficients with large SE
+                vLargeA = self.estimates.estimatorA.vLargeSE
+                vLarge0 = self.estimates.estimator0.vLargeSE
                 # concatenate estimates and SEs
-                mParamA = np.stack((vParamA,vSEA)).T
-                mParam0 = np.stack((vParam0,vSE0)).T
+                mParamA = np.stack((vParamA,vSEA,vLargeA)).T
+                mParam0 = np.stack((vParam0,vSE0,vLarge0)).T
                 # construct dataframes
-                dfParamsA = pd.DataFrame(mParamA, index=[lAllPhenosA,lAllFA], columns=DataWriter.lEstimateSE)
-                dfParams0 = pd.DataFrame(mParam0, index=[lAllPhenos0,lAllF0], columns=DataWriter.lEstimateSE)
+                dfParamsA = pd.DataFrame(mParamA, index=[lAllPhenosA,lAllFA], columns=DataWriter.lEstimateCoeffSE)
+                dfParams0 = pd.DataFrame(mParam0, index=[lAllPhenos0,lAllF0], columns=DataWriter.lEstimateCoeffSE)
                 dfSamplingVA = pd.DataFrame(self.estimates.estimatorA.mSamplingV, index=[lAllPhenosA,lAllFA], columns=[lAllPhenosA,lAllFA])
                 dfSamplingV0 = pd.DataFrame(self.estimates.estimator0.mSamplingV, index=[lAllPhenos0,lAllF0], columns=[lAllPhenos0,lAllF0])
                 # set output names for covariance of coefficients
@@ -258,10 +262,12 @@ class DataWriter:
             if self.bSEs:
                 # compute standard errors
                 vSE = np.diag(self.estimates.mSamplingV)**0.5
+                # get binary vector indicating coefficients with large SE
+                vLarge = self.estimates.vLargeSE
                 # concatenate estimates and SEs
-                mParam = np.stack((vParam,vSE)).T
+                mParam = np.stack((vParam,vSE,vLarge)).T
                 # construct dataframes
-                dfParams = pd.DataFrame(mParam, index=[lAllPhenos,lAllF], columns=DataWriter.lEstimateSE)
+                dfParams = pd.DataFrame(mParam, index=[lAllPhenos,lAllF], columns=DataWriter.lEstimateCoeffSE)
                 dfSamplingV = pd.DataFrame(self.estimates.mSamplingV, index=[lAllPhenos,lAllF], columns=[lAllPhenos,lAllF])
                 # set output name for covariance of coefficients
                 sSamplingV = self.sPrefix + DataWriter.sCoeffvar + DataWriter.sExtension
