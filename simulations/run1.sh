@@ -1,6 +1,6 @@
 # BASH SCRIPT FOR SIMULATION STUDY OF MGREML
 # AUTHOR: R. DE VLAMING
-# DATE: June 4, 2021
+# DATE: April 14, 2022
 # REQUIREMENTS:
 #  - clone of MGREML repository in working directory
 #  - PLINK 1.90 in working directory
@@ -28,3 +28,4 @@ python ./mgreml/mgreml.py --grm run${iRun}bin --pheno rhoGzero.run${iRun}.pheno.
 python ./mgreml/mgreml.py --grm run${iRun}bin --pheno rhoGhalf.run${iRun}.pheno.txt --no-intercept --out rhoGhalf.run${iRun}.results
 python ./mgreml/mgreml.py --grm run${iRun}bin --pheno rhoGone.run${iRun}.pheno.txt --no-intercept --out rhoGone.run${iRun}.results
 python ./mgreml/mgreml.py --grm run${iRun}bin --pheno blocks.run${iRun}.pheno.txt --no-intercept --genetic-model factors.gen.unres.txt --environment-model factors.env.unres.txt --restricted-genetic-model factors.gen.res.txt --restricted-environment-model factors.env.res.txt --out blocks.run${iRun}.results
+python ./mgreml/mgreml.py --grm run${iRun}bin --pheno rhoGzero.run${iRun}.pheno.txt --restricted-rho-genetic 0 --out rhoGzero.run${iRun}.runtime.comparison.results
