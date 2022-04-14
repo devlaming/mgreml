@@ -90,7 +90,7 @@ class DataWriter:
         # if SEs are desired, store them together with mediation estimates
         if (self.bSEs):
             with open(sMF, 'w') as oMFfile:
-                oMFfile.write('Mediation analysis in line with Rietveld et al. (2021):\n')
+                oMFfile.write('Mediation analysis in line with Rietveld et al. (2022):\n')
                 oMFfile.write('Mediator M = ' + sM + '; Outcome Y = ' + sY + '\n')
                 oMFfile.write('Effect M on Y (S.E.; Wald test statistic; asymptotic P value)* = ' + str(self.estimates.dBetaMY) + ' (' + str(self.estimates.dBetaMY_SE) + '; ' + str(self.estimates.dWaldBetaMY) + '; ' + str(self.estimates.dPvalBetaMY) + ')\n')
                 oMFfile.write('Total genetic variance of M (S.E.) = ' + str(self.estimates.dVGM) + ' (' + str(self.estimates.dVGM_SE) + ')\n')
