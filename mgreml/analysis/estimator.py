@@ -452,7 +452,7 @@ class MgremlEstimator:
             if (self.vLargeSE.sum())==0:
                 self.logger.info('Standard errors of the path coefficients suggest your model is identified')
             else:
-                self.logger.warning('To gain more insight in factors and traits involved in high standard errors: include the --factor-coefficients option')
+                self.logger.warning('The --factor-coefficients option may give you clues about poorly identified factor(s) and path coefficient(s)')
             # compute gradient of heritability w.r.t. each parameter
             vGradHSqG = 2*((1-self.vHSq[vIndTG])/vVY[vIndTG])*vParamG
             vGradHSqE = -2*(self.vHSq[vIndTE]/vVY[vIndTE])*vParamE
