@@ -97,9 +97,8 @@ def SimulatePhenotypes(mG,miID,mWeightG,mWeightE,dHSq,sPrefix,rng):
     dfRhoG.to_csv(sRhoG, sep='\t')
     dfRhoE.to_csv(sRhoE, sep='\t')
 
-def SimulateData(iRun=0,iN=20000,iM=50000):
-    # set no. of traits, and HSq
-    iT = 10
+def SimulateData(iRun=0,iN=20000,iM=20000,iT=10):
+    # set HSq
     dHSq = 0.5
     # set main seed for np.random
     iMainSeed = 81239616
@@ -195,9 +194,10 @@ def main(argv):
     iRun = int(argv[1])
     iN = int(argv[2])
     iM = int(argv[3])
+    iT = int(argv[4])
     print('SIMULATING DATA FOR RUN ' + str(iRun))
-    print('WITH N = ' + str(iN) + ' AND M = ' + str(iM))
-    SimulateData(iRun,iN,iM)
+    print('WITH N = ' + str(iN) + ', M = ' + str(iM) + ', T = ' + str(iT))
+    SimulateData(iRun,iN,iM,iT)
 
 if __name__ == "__main__":
     main(sys.argv)
