@@ -1,4 +1,4 @@
-# MGREML (Multivariate GREML) `beta v1.0.1`
+# MGREML (Multivariate GREML) `beta v1.1.0`
 
 [![DOI](https://zenodo.org/badge/176773372.svg)](https://zenodo.org/badge/latestdoi/176773372)
 

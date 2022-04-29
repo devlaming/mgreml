@@ -7,7 +7,7 @@ from numpy.matlib import repmat
 from tqdm import tqdm
 pd.options.mode.chained_assignment = None
 
-__version__ = 'v1.0.1'
+__version__ = 'v1.1.0'
 MASTHEAD  = "\n"
 MASTHEAD += "########################################################################\n"
 MASTHEAD += "##                                                                    ##\n"
@@ -26,7 +26,7 @@ MASTHEAD += "###################################################################
 MASTHEAD += "##                                                                    ##\n"
 MASTHEAD += "##  BETA {V}                                                       ##\n".format(V=__version__)
 MASTHEAD += "##                                                                    ##\n"
-MASTHEAD += "##  (C) 2021 Ronald de Vlaming and Eric Slob                          ##\n"
+MASTHEAD += "##  (C) 2022 Ronald de Vlaming and Eric Slob                          ##\n"
 MASTHEAD += "##                                                                    ##\n"
 MASTHEAD += "##  Vrije Universiteit Amsterdam and University of Cambridge          ##\n"
 MASTHEAD += "##  GNU General Public License v3                                     ##\n"
@@ -161,43 +161,15 @@ class MgremlReader:
                 # determine whether any correlations are fixed to zero or one
                 # or if genetic variances are fixed to zero
                 self.FindFixedRhoVar()
+                # read custom factor models (in as far as specified)
+                self.ReadCustomFactorModels()
+                # find remaining bad input combinations
+                self.FindWrongInputCombos()
                 # if covar model has been specified: read
                 if self.args.covar_model is not None:
                     self.ReadModel(MgremlReader.sCov)
                 else:
                     self.dfBinXY = None
-                # if genetic model has been specified: read
-                if self.args.genetic_model is not None:
-                    if self.bPairwise:
-                        raise SyntaxError('--genetic-model cannot be combined with --pairwise')
-                    elif self.bMediation:
-                        raise SyntaxError('--mediation cannot be combined with --genetic-model')
-                    self.ReadModel(MgremlReader.sGen)
-                else:
-                    self.dfGenBinFY = None
-                # if genetic model under null has been specified: read
-                if self.args.restricted_genetic_model is not None:
-                    if self.bPairwise:
-                        raise SyntaxError('--restricted-genetic-model cannot be combined with --pairwise')
-                    self.ReadModel(MgremlReader.sGen, MgremlReader.bNull)
-                else:
-                    self.dfGenBinFY0 = None
-                # if environment model has been specified: read
-                if self.args.environment_model is not None:
-                    if self.bPairwise:
-                        raise SyntaxError('--environment-model cannot be combined with --pairwise')
-                    elif self.bMediation:
-                        raise SyntaxError('--mediation cannot be combined with --environment-model')
-                    self.ReadModel(MgremlReader.sEnv)
-                else:
-                    self.dfEnvBinFY = None
-                # if genetic model under null has been specified: read
-                if self.args.restricted_environment_model is not None:
-                    if self.bPairwise:
-                        raise SyntaxError('--restricted-environment-model cannot be combined with --pairwise')
-                    self.ReadModel(MgremlReader.sEnv, MgremlReader.bNull)
-                else:
-                    self.dfEnvBinFY0 = None
                 # print update
                 self.logger.info('READING DATA')
                 # read phenotype file
@@ -312,6 +284,92 @@ class MgremlReader:
                     self.vIndCovs = np.array(np.where(np.array(self.mBinXY).ravel()==1)).ravel()
                     self.iKtotal = self.mBinXY.sum()
     
+    def ReadCustomFactorModels(self):
+        # if genetic model has been specified: read
+        if self.args.genetic_model is not None:
+            if self.bPairwise:
+                raise SyntaxError('--pairwise cannot be combined with --genetic-model')
+            elif self.bMediation:
+                raise SyntaxError('--mediation cannot be combined with --genetic-model')
+            self.ReadModel(MgremlReader.sGen)
+        else:
+            self.dfGenBinFY = None
+        # if environment model has been specified: read
+        if self.args.environment_model is not None:
+            if self.bPairwise:
+                raise SyntaxError('--pairwise cannot be combined with --environment-model')
+            elif self.bMediation:
+                raise SyntaxError('--mediation cannot be combined with --environment-model')
+            self.ReadModel(MgremlReader.sEnv)
+        else:
+            self.dfEnvBinFY = None
+        # if genetic model under null has been specified: read
+        if self.args.restricted_genetic_model is not None:
+            if self.bPairwise:
+                raise SyntaxError('--pairwise cannot be combined with --restricted-genetic-model')
+            self.ReadModel(MgremlReader.sGen, MgremlReader.bNull)
+        else:
+            self.dfGenBinFY0 = None
+        # if environment model under null has been specified: read
+        if self.args.restricted_environment_model is not None:
+            if self.bPairwise:
+                raise SyntaxError('--pairwise cannot be combined with --restricted-environment-model')
+            self.ReadModel(MgremlReader.sEnv, MgremlReader.bNull)
+        else:
+            self.dfEnvBinFY0 = None
+    
+    def FindWrongInputCombos(self):
+        if self.bNested:
+            # determine if main and restricted genetic model are the same
+            bSameG = False
+            if (self.bPerfectRhoG and self.bPerfectRhoG0) or (self.bNoRhoG and self.bNoRhoG0) or (self.bNoVarG and self.bNoVarG0):
+                bSameG = True
+            if (self.args.genetic_model is not None) and (self.args.restricted_genetic_model is not None):
+                if self.args.genetic_model[0] == self.args.restricted_genetic_model[0]:
+                    bSameG = True
+            # determine if main and restricted environment model are the same
+            bSameE = False
+            if self.bNoRhoE and self.bNoRhoE0:
+                bSameE = True
+            if (self.args.environment_model is not None) and (self.args.restricted_environment_model is not None):
+                if self.args.environment_model[0] == self.args.restricted_environment_model[0]:
+                    bSameE = True
+            # if main and restricted models are completely indetical: throw error
+            if bSameG and bSameE:
+                raise SyntaxError('main model and restricted model are completely identical (both on environment and genetic side)')
+            # if there is main user-specified genetic factor model: print warning except when self.bNoVarG0
+            if self.args.genetic_model is not None:
+                if self.args.restricted_genetic_model is not None:
+                    logger.warning('you combined --genetic-model and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                elif self.bPerfectRhoG0 or self.bNoRhoG0:
+                    logger.warning('you combined --genetic-model and --restricted-rho-genetic: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                elif not(self.bNoVarG0):
+                    logger.warning('a saturated genetic model is assumed as restricted model, while you also specified a main genetic model using --genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+            # if the main genetic model assumes perfect rhoG
+            if self.bPerfectRhoG:
+                if self.args.restricted_genetic_model is not None:
+                    logger.warning('you combined --rho-genetic 1 and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                elif self.bNoRhoG0:
+                    raise SyntaxError('you combined --rho-genetic 1 and --restricted-rho-genetic 0: that is not nested!')
+                elif not(self.bNoVarG0) and not(self.bPerfectRhoG0):
+                    raise SyntaxError('a saturated genetic model is assumed as restricted model, while you also --rho-genetic 1: that is not nested!')
+            # if the main genetic model assumes no rhoG
+            if self.bNoRhoG:
+                if self.args.restricted_genetic_model is not None:
+                    logger.warning('you combined --rho-genetic 0 and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                elif self.bPerfectRhoG0:
+                    raise SyntaxError('you combined --rho-genetic 0 and --restricted-rho-genetic 1: that is not nested!')
+                elif not(self.bNoVarG0) and not(self.bNoRhoG0):
+                    raise SyntaxError('a saturated genetic model is assumed as restricted model, while you also --rho-genetic 0: that is not nested!')
+            # if the main genetic model assumes no genetic variance
+            if self.bNoVarG:
+                if self.args.restricted_genetic_model is not None:
+                    logger.warning('you combined --no-var-genetic and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                elif self.bPerfectRhoG0 or self.bNoRhoG0:
+                    raise SyntaxError('you combined --no-var-genetic and --restricted-rho-genetic: that is not nested!')
+                elif not(self.bNoVarG0):
+                    raise SyntaxError('a saturated genetic model is assumed as restricted model, while you also --no-var-genetic: that is not nested!')    
+    
     def InitialiseArgumentsAndLogger(self):
         #create mutually exclusive groups
         groupGenetic = self.parser.add_mutually_exclusive_group()
@@ -328,7 +386,7 @@ class MgremlReader:
         self.parser.add_argument('--pheno', metavar = '', default = None, type = str, nargs = '+',
                             help = '\b\b\b\b\b\b\b\b\b\b\b\b\b\bFILENAME [nolabelpheno] phenotype file: should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per phenotype; can be followed by optional flag nolabelpheno, e.g. --pheno mypheno.txt nolabelpheno, but we recommend to label phenotypes')
         self.parser.add_argument('--mediation', action = 'store_true',
-                            help = 'option to perform a genetic mediation analysis, in line with the structural equations model proposed by Rietveld et al. (2021) and based on estimates from a saturated bivariate model; the first phenotype in the phenotype file is assumed to act as mediator for the genetic component of the second phenotype in the phenotype file; all further phenotypes are ignored; this flag cannot be combined with --(restricted-)genetic-model, --(restricted-)rho-genetic, --(restricted-)no-var-genetic, --(restricted-)environment-model, --(restricted-)rho-environment, and --(restricted-)reinitialise')
+                            help = 'option to perform a genetic mediation analysis, in line with the structural equations model proposed by Rietveld et al. (2022) and based on estimates from a saturated bivariate model; the first phenotype in the phenotype file is assumed to act as mediator for the genetic component of the second phenotype in the phenotype file; all further phenotypes are ignored; this flag cannot be combined with --(restricted-)genetic-model, --(restricted-)rho-genetic, --(restricted-)no-var-genetic, --(restricted-)environment-model, --(restricted-)rho-environment, --(restricted-)reinitialise, and --store-iter')
         self.parser.add_argument('--drop-missings', action = 'store_true',
                             help = 'option to drop all observations from data with at least one missing phenotype or at least one missing covariate')
         self.parser.add_argument('--no-intercept', action = 'store_true',
@@ -588,7 +646,9 @@ class MgremlReader:
     
     def IsMediation(self):
         if self.args.mediation:
-            if self.bNested:
+            if self.bStoreIter:
+                raise SyntaxError('--mediation cannot be combined with --store-iter')
+            elif self.bNested:
                 raise SyntaxError('--mediation cannot be combined with any flag of the type --restricted-...')
             elif self.bReinitialise:
                 raise SyntaxError('--mediation cannot be combined with --reinitialise')
@@ -688,12 +748,6 @@ class MgremlReader:
                 raise SyntaxError('--restricted-no-var-genetic cannot be combined with --pairwise')
             self.logger.info('Genetic variance in the null model set to zero.')
             self.bNoVarG0 = True
-        # assess if --rho-genetic 1 and --restricted-rho-genetic 0: non-nested
-        if self.bPerfectRhoG and self.bNoRhoG0:
-            raise ValueError('--rho-genetic 1 and --restricted-rho-genetic 0 are not nested')
-        # assess if --rho-genetic 0 and --restricted-rho-genetic 1: non-nested
-        if self.bNoRhoG and self.bPerfectRhoG0:
-            raise ValueError('--rho-genetic 0 and --restricted-rho-genetic 1 are not nested')
     
     def ReadModel(self, sType, bNull = False):
         # set no label string for phenotypes (in rows of all models)
