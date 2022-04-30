@@ -289,7 +289,7 @@ class MgremlReader:
         if self.args.genetic_model is not None:
             if self.bPairwise:
                 raise SyntaxError('--pairwise cannot be combined with --genetic-model')
-            elif self.bMediation:
+            if self.bMediation:
                 raise SyntaxError('--mediation cannot be combined with --genetic-model')
             self.ReadModel(MgremlReader.sGen)
         else:
@@ -298,7 +298,7 @@ class MgremlReader:
         if self.args.environment_model is not None:
             if self.bPairwise:
                 raise SyntaxError('--pairwise cannot be combined with --environment-model')
-            elif self.bMediation:
+            if self.bMediation:
                 raise SyntaxError('--mediation cannot be combined with --environment-model')
             self.ReadModel(MgremlReader.sEnv)
         else:
@@ -319,6 +319,7 @@ class MgremlReader:
             self.dfEnvBinFY0 = None
     
     def FindWrongInputCombos(self):
+        # if a main and restricted model are considered in the first place
         if self.bNested:
             # determine if main and restricted genetic model are the same
             bSameG = False
@@ -334,41 +335,81 @@ class MgremlReader:
             if (self.args.environment_model is not None) and (self.args.restricted_environment_model is not None):
                 if self.args.environment_model[0] == self.args.restricted_environment_model[0]:
                     bSameE = True
-            # if main and restricted models are completely indetical: throw error
+            # if main and restricted models are completely identical: throw error
             if bSameG and bSameE:
                 raise SyntaxError('main model and restricted model are completely identical (both on environment and genetic side)')
-            # if there is main user-specified genetic factor model: print warning except when self.bNoVarG0
+            # now check every baseline main genetic model against every baseline restricted genetic model
             if self.args.genetic_model is not None:
                 if self.args.restricted_genetic_model is not None:
-                    logger.warning('you combined --genetic-model and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                    logger.warning('WARNING! You combined --genetic-model and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
                 elif self.bPerfectRhoG0 or self.bNoRhoG0:
-                    logger.warning('you combined --genetic-model and --restricted-rho-genetic: MGREML does NOT check if your genetic models are nested; please check yourself!')
-                elif not(self.bNoVarG0):
-                    logger.warning('a saturated genetic model is assumed as restricted model, while you also specified a main genetic model using --genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
-            # if the main genetic model assumes perfect rhoG
-            if self.bPerfectRhoG:
+                    logger.warning('WARNING! You combined --genetic-model and --restricted-rho-genetic: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                elif self.bNoVarG0:
+                    logger.info('You combined --genetic-model and --restricted-no-var-genetic: the genetic models are properly nested')
+                else:
+                    logger.warning('WARNING! You combined --genetic-model with a saturated restricted genetic model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+            elif self.bPerfectRhoG:
                 if self.args.restricted_genetic_model is not None:
-                    logger.warning('you combined --rho-genetic 1 and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                    logger.warning('WARNING! You combined --rho-genetic 1 and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                elif self.bPerfectRhoG0:
+                    logger.info('You combined --rho-genetic 1 and --restricted-rho-genetic 1: the genetic models are properly nested')
                 elif self.bNoRhoG0:
                     raise SyntaxError('you combined --rho-genetic 1 and --restricted-rho-genetic 0: that is not nested!')
-                elif not(self.bNoVarG0) and not(self.bPerfectRhoG0):
-                    raise SyntaxError('a saturated genetic model is assumed as restricted model, while you also --rho-genetic 1: that is not nested!')
-            # if the main genetic model assumes no rhoG
-            if self.bNoRhoG:
+                elif self.bNoVarG0:
+                    logger.info('You combined --rho-genetic 1 and --restricted-no-var-genetic: the genetic models are properly nested')
+                else:
+                    raise SyntaxError('you combined --rho-genetic 1 with a saturated restricted genetic model: that is not nested!')
+            elif self.bNoRhoG:
                 if self.args.restricted_genetic_model is not None:
-                    logger.warning('you combined --rho-genetic 0 and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                    logger.warning('WARNING! You combined --rho-genetic 0 and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
                 elif self.bPerfectRhoG0:
                     raise SyntaxError('you combined --rho-genetic 0 and --restricted-rho-genetic 1: that is not nested!')
-                elif not(self.bNoVarG0) and not(self.bNoRhoG0):
-                    raise SyntaxError('a saturated genetic model is assumed as restricted model, while you also --rho-genetic 0: that is not nested!')
-            # if the main genetic model assumes no genetic variance
-            if self.bNoVarG:
+                elif self.bNoRhoG0:
+                    logger.info('You combined --rho-genetic 0 and --restricted-rho-genetic 0: the genetic models are properly nested')
+                elif self.bNoVarG0:
+                    logger.info('You combined --rho-genetic 0 and --restricted-no-var-genetic: the genetic models are properly nested')
+                else:
+                    raise SyntaxError('you combined --rho-genetic 0 with a saturated restricted genetic model: that is not nested!')
+            elif self.bNoVarG:
                 if self.args.restricted_genetic_model is not None:
-                    logger.warning('you combined --no-var-genetic and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                    logger.warning('WARNING! You combined --no-var-genetic and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
                 elif self.bPerfectRhoG0 or self.bNoRhoG0:
                     raise SyntaxError('you combined --no-var-genetic and --restricted-rho-genetic: that is not nested!')
-                elif not(self.bNoVarG0):
-                    raise SyntaxError('a saturated genetic model is assumed as restricted model, while you also --no-var-genetic: that is not nested!')    
+                elif self.bNoVarG0:
+                    logger.info('You combined --no-var-genetic and --restricted-no-var-genetic: the genetic models are properly nested')
+                else:
+                    raise SyntaxError('you combined --no-var-genetic with a saturated restricted genetic model: that is not nested!')
+            else:
+                if self.args.restricted_genetic_model is not None:
+                    logger.info('You combined a saturated main genetic model with --restricted-genetic-model: the genetic models are properly nested')
+                elif self.bPerfectRhoG0 or self.bNoRhoG0:
+                    logger.info('You combined a saturated main genetic model with --restricted-rho-genetic: the genetic models are properly nested')
+                elif self.bNoVarG0:
+                    logger.info('You combined a saturated main genetic model with --restricted-no-var-genetic: the genetic models are properly nested')
+                else:
+                    logger.info('You combined a saturated main genetic model with a saturated restricted genetic model: the genetic models are properly nested')
+            # now check every baseline main environment model against every baseline restricted environment model
+            if self.args.environment_model is not None:
+                if self.args.restricted_environment_model is not None:
+                    logger.warning('WARNING! You combined --environment-model and --restricted-environment-model: MGREML does NOT check if your environment models are nested; please check yourself!')
+                elif self.bNoRhoE0:
+                    logger.warning('WARNING! You combined --environment-model and --restricted-rho-environment 0: MGREML does NOT check if your environment models are nested; please check yourself!')
+                else:
+                    logger.warning('WARNING! You combined --environment-model with a saturated restricted environment model: MGREML does NOT check if your environment models are nested; please check yourself!')
+            elif self.bNoRhoE:
+                if self.args.restricted_environment_model is not None:
+                    logger.warning('WARNING! You combined --rho-environment 0 and --restricted-environment-model: MGREML does NOT check if your environment models are nested; please check yourself!')
+                elif self.bNoRhoE0:
+                    logger.info('You combined --rho-environment 0 and --restricted-rho-environment 0: the environment models are properly nested')
+                else:
+                    raise SyntaxError('you combined --rho-environment 0 with a saturated restricted environment model: that is not nested!')
+            else:
+                if self.args.restricted_environment_model is not None:
+                    logger.info('You combined a saturated main environment model with --restricted-environment-model: the environment models are properly nested')
+                elif self.bNoRhoE0:
+                    logger.info('You combined a saturated main environment model with --restricted-rho-environment 0: the environment models are properly nested')
+                else:
+                    logger.info('You combined a saturated main environment model with a saturated restricted environment model: the environment models are properly nested')
     
     def InitialiseArgumentsAndLogger(self):
         #create mutually exclusive groups
@@ -648,9 +689,9 @@ class MgremlReader:
         if self.args.mediation:
             if self.bStoreIter:
                 raise SyntaxError('--mediation cannot be combined with --store-iter')
-            elif self.bNested:
+            if self.bNested:
                 raise SyntaxError('--mediation cannot be combined with any flag of the type --restricted-...')
-            elif self.bReinitialise:
+            if self.bReinitialise:
                 raise SyntaxError('--mediation cannot be combined with --reinitialise')
             self.bMediation = True
             self.logger.info('MGREML will perform a mediation analysis based on results from a bivariate model for the first two phenotypes in your phenotype file.')
@@ -661,15 +702,15 @@ class MgremlReader:
         if self.args.pairwise:
             if self.bAllCoeffs:
                 raise SyntaxError('--pairwise cannot be combined with --factor-coefficients')
-            elif self.bVarComp:
+            if self.bVarComp:
                 raise SyntaxError('--pairwise cannot be combined with --variance-components')
-            elif self.bStoreIter:
+            if self.bStoreIter:
                 raise SyntaxError('--pairwise cannot be combined with --store-iter')
-            elif self.bReinitialise:
+            if self.bReinitialise:
                 raise SyntaxError('--pairwise cannot be combined with --reinitialise')
-            elif self.bReinitialise0:
+            if self.bReinitialise0:
                 raise SyntaxError('--pairwise cannot be combined with --restricted-reinitialise')
-            elif self.bMediation:
+            if self.bMediation:
                 raise SyntaxError('--pairwise cannot be combined with --mediation')
             self.bPairwise = True
             self.logger.info('MGREML will perform pairwise bivariate estimation instead of multivariate estimation.')
@@ -698,7 +739,7 @@ class MgremlReader:
         if self.args.rho_genetic is not None:
             if self.bReinitialise:
                 raise SyntaxError('--rho-genetic cannot be combined with --reinitialise, as the .pkl file is used to set the model')
-            elif self.bMediation:
+            if self.bMediation:
                 raise SyntaxError('--mediation cannot be combined with --rho-genetic')
             if self.args.rho_genetic==1:
                 self.logger.info('Genetic correlations in the main model all set to one.')
@@ -720,7 +761,7 @@ class MgremlReader:
         if self.args.rho_environment is not None:
             if self.bReinitialise:
                 raise SyntaxError('--rho-environment cannot be combined with --reinitialise, as the .pkl file is used to set the model')
-            elif self.bMediation:
+            if self.bMediation:
                 raise SyntaxError('--mediation cannot be combined with --rho-environment')
             self.logger.info('Environment correlations in the main model all set to zero.')
             self.bNoRhoE = True
@@ -734,9 +775,9 @@ class MgremlReader:
         if self.args.no_var_genetic:
             if self.bReinitialise:
                 raise SyntaxError('--no-var-genetic cannot be combined with --reinitialise, as the .pkl file is used to set the model')
-            elif self.bPairwise:
-                raise SyntaxError('--no-var-genetic cannot be combined with --pairwise')
-            elif self.bMediation:
+            if self.bPairwise:
+                raise SyntaxError('--pairwise cannot be combined with --no-var-genetic')
+            if self.bMediation:
                 raise SyntaxError('--mediation cannot be combined with --no-var-genetic')
             self.logger.info('Genetic variance in the main model set to zero.')
             self.bNoVarG = True
@@ -744,8 +785,8 @@ class MgremlReader:
         if self.args.restricted_no_var_genetic:
             if self.bReinitialise0:
                 raise SyntaxError('--restricted-no-var-genetic cannot be combined with --restricted-reinitialise, as the .pkl file is used to set the restricted model')
-            elif self.bPairwise:
-                raise SyntaxError('--restricted-no-var-genetic cannot be combined with --pairwise')
+            if self.bPairwise:
+                raise SyntaxError('--pairwise cannot be combined with --restricted-no-var-genetic')
             self.logger.info('Genetic variance in the null model set to zero.')
             self.bNoVarG0 = True
     
