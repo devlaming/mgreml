@@ -19,7 +19,7 @@ class StructuralModel:
     # define seed for random-number generator used to initialise factor weights
     iSeed = 249341427
     
-    def __init__(self, mdData, dfBinFY = None, sType='', bNoVar1 = False, bNoCov12 = False):
+    def __init__(self, mdData, dfBinFY = None, sType='', bNoVar2 = False, bNoCov12 = False):
         # store logger
         self.logger = mdData.logger
         # check if model has been specified
@@ -39,7 +39,7 @@ class StructuralModel:
             self.iF = self.iT
             self.logger.info('Assuming saturated ' + sType + 'model')
             # initialise saturated model
-            self.InitialiseSaturatedModel(mdData, bNoVar1, bNoCov12)
+            self.InitialiseSaturatedModel(mdData, bNoVar2, bNoCov12)
         
     def CheckModelSpecification(self, mdData, dfBinFY):
         # raise error if number of traits does not match no. of trais in data
@@ -98,26 +98,25 @@ class StructuralModel:
                 vVAF=rng.dirichlet(iThisF*np.ones(iThisF))*mV[t,t]
                 self.vParam[vParamIndThisTrait] = (vVAF**(0.5))*vSign
     
-    def InitialiseSaturatedModel(self, mdData, bNoVar1 = False, bNoCov12 = False):
+    def InitialiseSaturatedModel(self, mdData, bNoVar2 = False, bNoCov12 = False):
         # get regularised phenotypic covariance matrix
         mV = self.InitialiseV(mdData)
-        if bNoVar1:
+        if bNoVar2:
             mC = np.zeros((2,1))
-            mC[1,0] = (mV[1,1])**0.5
+            mC[0,0] = (mV[0,0])**0.5
         elif bNoCov12:
             mC = np.zeros((2,2))
             mC[0,0] = (mV[0,0])**0.5
             mC[1,1] = (mV[1,1])**0.5
-            mC = np.linalg.cholesky(mV)
         else:
             # get cholesky decomposition (lower triangular)
             mC = np.linalg.cholesky(mV)
         # set trait and factor indices of saturated model
-        self.InitialiseIndicesSaturated(bNoVar1, bNoCov12)
+        self.InitialiseIndicesSaturated(bNoVar2, bNoCov12)
         # set parameters
         self.vParam = mC[self.vIndT,self.vIndF]
         # set labels for the factors
-        if bNoVar1:
+        if bNoVar2:
             self.lFactors = ['factor 0']
         elif bNoCov12:
             self.lFactors = ['factor 0', 'factor 1']
@@ -128,8 +127,8 @@ class StructuralModel:
         mV = (1-StructuralModel.dLambdaInit)*mdData.mCovY + StructuralModel.dLambdaInit*np.diag(np.diag(mdData.mCovY))
         return mV
     
-    def InitialiseIndicesSaturated(self, bNoVar1 = False, bNoCov12 = False):
-        if bNoVar1:
+    def InitialiseIndicesSaturated(self, bNoVar2 = False, bNoCov12 = False):
+        if bNoVar2:
             # set no. of parameters to 1
             iParam = 1
         elif bNoCov12:
@@ -141,8 +140,8 @@ class StructuralModel:
         # set conformable vectors for trait and factor indices
         self.vIndT = np.zeros(iParam)
         self.vIndF = np.zeros(iParam)        
-        if bNoVar1:
-            self.vIndT[0] = 1
+        if bNoVar2:
+            self.vIndT[0] = 0
             self.vIndF[0] = 0
         elif bNoCov12:
             self.vIndT[0] = 0
@@ -241,7 +240,7 @@ class GeneticModel(StructuralModel):
     sType = 'genetic '
     
     def __init__(self, mdData, dfBinFY = None, bMedVarGM0 = False):
-        super().__init__(mdData, dfBinFY, GeneticModel.sType, bNoVar1 = bMedVarGM0)
+        super().__init__(mdData, dfBinFY, GeneticModel.sType, bNoVar2 = bMedVarGM0)
         self.vParam = GeneticModel.dWeight*self.vParam
         self.lFactors = [GeneticModel.sType + str(x) for x in self.lFactors]
 

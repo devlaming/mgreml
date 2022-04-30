@@ -31,8 +31,8 @@ class MgremlEstimator:
     # need to compute gradient and AI matrix after three strikes of failed BFGS
     bAllAtStrike3 = True
     # set mediator and phenotype indices
-    iMedM = 0
-    iMedY = 1
+    iMedY = 0
+    iMedM = 1
     
     def __init__(self, mdData, bNested = False, bMedVarGM0 = False, bMedBeta0 = False):
         # if null model, read out appropriate attributes
@@ -686,8 +686,8 @@ class MgremlEstimator:
                                     self.mVCs[iRowE,3] = np.sqrt(self.mSamplingVarVCs[iRowE,iColE])
                                 # if mediation results are needed:
                                 if self.bMediation:
-                                    # indexing:[0]=VarGM,[1]=CovGMY,[2]=VarGY,[3]=VarEM,[4]=CovEMY,[5]=VarEY
-                                    if i == MgremlEstimator.iMedM:
+                                    # indexing:[0]=VarGY,[1]=CovGMY,[2]=VarGM,[3]=VarEY,[4]=CovEMY,[5]=VarEM
+                                    if i == MgremlEstimator.iMedY:
                                         if j == i:
                                             if k == i:
                                                 if l == i:
@@ -695,7 +695,7 @@ class MgremlEstimator:
                                                     mMediationV[3,0]=self.mSamplingVarVCs[iRowE,iColG]
                                                     mMediationV[3,3]=self.mSamplingVarVCs[iRowE,iColE]
                                                     mMediationV[0,3]=mMediationV[3,0]
-                                                elif l == MgremlEstimator.iMedY:
+                                                elif l == MgremlEstimator.iMedM:
                                                     mMediationV[0,1]=self.mSamplingVarVCs[iRowG,iColG]
                                                     mMediationV[3,1]=self.mSamplingVarVCs[iRowE,iColG]
                                                     mMediationV[0,4]=self.mSamplingVarVCs[iRowG,iColE]
@@ -704,7 +704,7 @@ class MgremlEstimator:
                                                     mMediationV[1,3]=mMediationV[3,1]
                                                     mMediationV[4,0]=mMediationV[0,4]
                                                     mMediationV[4,3]=mMediationV[3,4]
-                                            elif k == MgremlEstimator.iMedY:
+                                            elif k == MgremlEstimator.iMedM:
                                                 if l == k:
                                                     mMediationV[0,2]=self.mSamplingVarVCs[iRowG,iColG]
                                                     mMediationV[3,2]=self.mSamplingVarVCs[iRowE,iColG]
@@ -714,7 +714,7 @@ class MgremlEstimator:
                                                     mMediationV[2,3]=mMediationV[3,2]
                                                     mMediationV[5,0]=mMediationV[0,5]
                                                     mMediationV[5,3]=mMediationV[3,5]
-                                        elif j == MgremlEstimator.iMedY:
+                                        elif j == MgremlEstimator.iMedM:
                                             if k == i:
                                                 if l == j:
                                                     mMediationV[1,1]=self.mSamplingVarVCs[iRowG,iColG]
@@ -731,7 +731,7 @@ class MgremlEstimator:
                                                     mMediationV[2,4]=mMediationV[4,2]
                                                     mMediationV[5,1]=mMediationV[1,5]
                                                     mMediationV[5,4]=mMediationV[4,5]
-                                    elif i == MgremlEstimator.iMedY:
+                                    elif i == MgremlEstimator.iMedM:
                                         if j == i:
                                             if k == i:
                                                 if l == i:
@@ -747,32 +747,32 @@ class MgremlEstimator:
                         iRowE += 1
                 # if mediation:
                 if self.bMediation:
-                    # indexing:[0]=VarGM,[1]=CovGMY,[2]=VarGY,[3]=VarEM,[4]=CovEMY,[5]=VarEY
+                    # indexing:[0]=VarGY,[1]=CovGMY,[2]=VarGM,[3]=VarEY,[4]=CovEMY,[5]=VarEM
                     # compute gradient effect M on Y w.r.t. parameters
                     vGradBetaMY = np.zeros((iSize,1))
-                    vGradBetaMY[3]= -self.dBetaMY/dVarEM
+                    vGradBetaMY[5]= -self.dBetaMY/dVarEM
                     vGradBetaMY[4]= 1/dVarEM
                     # compute gradient genetic variance of Y mediated by M w.r.t. parameters
                     vGradMediatedVGY = np.zeros((iSize,1))
-                    vGradMediatedVGY[0] = self.dBetaMY**2
-                    vGradMediatedVGY[3] = -2*self.dMediatedVGY/dVarEM
+                    vGradMediatedVGY[2] = self.dBetaMY**2
+                    vGradMediatedVGY[5] = -2*self.dMediatedVGY/dVarEM
                     vGradMediatedVGY[4] = 2*self.dMediatedVGY/dCovEMY
                     # compute gradient genetic variance of Y not mediated by M w.r.t. parameters
                     vGradNonMediatedVGY = np.zeros((iSize,1))
-                    vGradNonMediatedVGY[0] = self.dBetaMY**2
+                    vGradNonMediatedVGY[2] = self.dBetaMY**2
                     vGradNonMediatedVGY[1] = -2*self.dBetaMY
-                    vGradNonMediatedVGY[2] = 1
-                    vGradNonMediatedVGY[3] = 2*(((dCovGMY*self.dBetaMY)-self.dMediatedVGY)/dVarEM)
+                    vGradNonMediatedVGY[0] = 1
+                    vGradNonMediatedVGY[5] = 2*(((dCovGMY*self.dBetaMY)-self.dMediatedVGY)/dVarEM)
                     vGradNonMediatedVGY[4] = 2*((self.dMediatedVGY - dCovGMY*self.dBetaMY)/dCovEMY)
                     # compute gradient of proportion of genetic variance of Y that is not mediated
                     vGradPropNonMediatedVGY = (vGradNonMediatedVGY.copy())/self.dVGY
-                    vGradPropNonMediatedVGY[2] = ((2*dCovGMY*self.dBetaMY)-self.dMediatedVGY)/(self.dVGY**2)
+                    vGradPropNonMediatedVGY[0] = ((2*dCovGMY*self.dBetaMY)-self.dMediatedVGY)/(self.dVGY**2)
                     # compute gradient genetic variance of Y w.r.t. parameters
                     vGradVGY = np.zeros((iSize,1))
-                    vGradVGY[2] = 1
+                    vGradVGY[0] = 1
                     # compute gradient genetic variance of M w.r.t. parameters
                     vGradVGM = np.zeros((iSize,1))
-                    vGradVGM[0] = 1
+                    vGradVGM[2] = 1
                     # compute standard error of relevant parameters
                     self.dBetaMY_SE=((vGradBetaMY.T@mMediationV@vGradBetaMY)[0,0])**0.5
                     self.dMediatedVGY_SE=((vGradMediatedVGY.T@mMediationV@vGradMediatedVGY)[0,0])**0.5

@@ -27,8 +27,8 @@ class DataWriter:
     lEstimateSE = ['estimate', 'standard error']
     lEstimateCoeffSE = ['estimate', 'standard error', 'large (1=yes)']
     lEstimate = ['estimate']
-    iMedM = 0
-    iMedY = 1
+    iMedY = 0
+    iMedM = 1
     
     def __init__(self, estimates, data):
         self.logger = data.logger

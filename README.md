@@ -543,25 +543,25 @@ reinitialises estimation for the null and alternative model from appropriate `.p
 
 Rietveld et al. (2022; see [Citation](#citation)) propose a structural equations model (SEM), which can be used to answer the question to which degree the genetic variance of outcome *Y* is mediated by supposed mediator *M*.
 
-`mgreml` has a `--mediation` option, which estimates the relevant parameters from this SEM by, first, fitting a bivariate saturated model for *M* and *Y* and, second, by transforming the estimated variance components and their sampling variance matrix to estimates and standard errors of the parameters in the SEM.
+`mgreml` has a `--mediation` option which estimates the relevant parameters from this SEM by, first, fitting a bivariate saturated model for *Y* and *M* and, second, by transforming the estimated variance components and their sampling variance matrix to estimates and standard errors of the parameters in the SEM.
 
-The `--mediation` option forces `mgreml` to only consider the first two phenotypes in your phenotype file, where the first phenotype is treated as mediator *M* and the second phenotype as outcome *Y*. Any subsequent phenotypes will be ignored.
+The `--mediation` option forces `mgreml` to only consider the first two phenotypes in your phenotype file, where the first phenotype is treated as outcome *Y* and the second phenotype as mediator *M*. Any subsequent phenotypes will be ignored.
 
-In case you do not wish standard errors to be reported, you can combine `--mediation` with the `--no-se` option. Please note that `--mediation` cannot be combined with any of the following options: `--(restricted-)genetic-model`, `--(restricted-)rho-genetic`, `--(restricted-)no-var-genetic`, `--(restricted-)environment-model`, `--(restricted-)rho-environment`, and `--(restricted-)reinitialise`.
+In case you do not wish standard errors to be reported, you can combine `--mediation` with the `--no-se` option. Please note that `--mediation` cannot be combined with any of the following options: `--(restricted-)genetic-model`, `--(restricted-)rho-genetic`, `--(restricted-)no-var-genetic`, `--(restricted-)environment-model`, `--(restricted-)rho-environment`, `--(restricted-)reinitialise`, and `--store-iter`.
 
 The resulting SEM estimates will be stored in an output file ending in `.mediation.out`.
 
-As an example, consider `mediation.txt` in the subdirectory `tutorial`. This file comprises two phenotypes, labelled Mediator and Outcome. A few lines from this file are shown below:
+As an example, consider `mediation.txt` in the subdirectory `tutorial`. This file comprises two phenotypes, labelled `Outcome` and `Mediator`. A few lines from this file are shown below:
 
-| FID | IID | Mediator | Outcome |
+| FID | IID | Outcome | Mediator |
 | --- | --- | --- | --- |
-| FID 1 | IID 5001 | -10.670 | -11.437 |
-| FID 2 | IID 5002 | 1.947 | 2.618 |
-| FID 3 | IID 5003 | 5.800 | 10.586 |
+| FID 1 | IID 5001 | -11.437 | -10.670 |
+| FID 2 | IID 5002 | 2.618 | 1.947 |
+| FID 3 | IID 5003 | 10.586 | 5.800 |
 | ... | ... | ... | ... |
-| FID 4998 | IID 9998 | -12.892 | -11.536 |
-| FID 4999 | IID 9999 | -2.089 | -3.536 |
-| FID 5000 | IID 10000 | -13.177 | -9.323 |
+| FID 4998 | IID 9998 | -11.536 | -12.892 |
+| FID 4999 | IID 9999 | -3.536 | -2.089 |
+| FID 5000 | IID 10000 | -9.323 | -13.177 |
 
 An overview of the SEM that underlies this data is shown in the figure below:
 
@@ -590,22 +590,22 @@ Now, let's have a look at the output file `try_mediation.mediation.out`:
 ```
 Mediation analysis in line with Rietveld et al. (2022):
 Mediator M = Mediator; Outcome Y = Outcome
-Effect M on Y (S.E.; Wald test statistic; asymptotic P value)* = 0.9852870634198768 (0.015112109436740342; 4250.8460961267; 0.0)
-Total genetic variance of M (S.E.) = 24.84236880237618 (1.1967344214880011)
-Total genetic variance of Y (S.E.) = 42.45446095524771 (2.005691645227429)
-Indirect genetic effect = Genetic variance Y mediated by M (S.E.; Wald test statistic; asymptotic P value)* = 24.116738049063056 (1.3575913481004387; 315.57239745323005; 0.0)
-Direct genetic effect = Genetic variance Y not mediated by M (S.E.; Wald test statistic; asymptotic P value)* = 4.46526039455577 (0.4541257330245469; 96.68104957436566; 0.0)
-Proportion of genetic variance Y not mediated by M (S.E.) = 0.10517764904052629 (0.00920912144463799)
+Effect M on Y (S.E.; Wald test statistic; asymptotic P value)* = 0.9852851661820797 (0.015112075740820264; 4250.848682017674; 0.0)
+Total genetic variance of M (S.E.) = 24.842148570667977 (1.196723311443547)
+Total genetic variance of Y (S.E.) = 42.45409805220828 (2.0056705514777766)
+Indirect genetic effect = Genetic variance Y mediated by M (S.E.; Wald test statistic; asymptotic P value)* = 24.116431374238918 (1.3575738009054434; 315.57252934910156; 0.0)
+Direct genetic effect = Genetic variance Y not mediated by M (S.E.; Wald test statistic; asymptotic P value)* = 4.465297347901618 (0.4541251486913681; 96.68289860365418; 0.0)
+Proportion of genetic variance Y not mediated by M (S.E.) = 0.10517941854306695 (0.009209180342654846)
 * Wald test statistic and P value under null hypothesis that parameter of interest = 0
-Log-likelihood restricted model with no genetic variance of mediator = -31083.968230838338
-Log-likelihood restricted model with no effect mediator on outcome = -32233.66196561707
+Log-likelihood restricted model with no genetic variance of mediator = -31083.96823086367
+Log-likelihood restricted model with no effect mediator on outcome = -32233.66196536825
 Supremum restricted models is achieved under model with no genetic variance of mediator: test has 2 degrees of freedom 
-Log-likelihood unrestricted model with genetic mediation = -30531.931576735766
-Chi-square test statistic for presence of genetic mediation = 1104.0733082051447
+Log-likelihood unrestricted model with genetic mediation = -30531.931576827894
+Chi-square test statistic for presence of genetic mediation = 1104.0733080715509
 with P-value = 0.0
 ```
 
-Estimates are all less than two standard errors away from the true parameters of the structural model. Moreover, estimates in `try_mediation.HSq.out` also show that the estimated heritabilities are less than two standard errors removed from the true value (50% for both). In addition, based on Wald tests, observe that the estimated effect of *M* on *Y* is significant, the indirect effect of genes on *Y* via *M* is significant, and the direct effect of genes on *Y* is also significant. Finally, observe that the more reliable likelihood-ratio test also finds the estimated indirect genetic effect on *Y* (i.e., mediated by *M*) to be highly significant.
+Estimates are all less than two standard errors away from the true parameters of the structural model. Moreover, estimates in `try_mediation.HSq.out` also show that the estimated heritabilities are less than two standard errors removed from the true value (50% for both). In addition, based on Wald tests, observe that the estimated effect of *M* on *Y* is significant, the indirect effect of genes on *Y* via *M* is significant, and the direct effect of genes on *Y* is also significant. Finally, observe that the likelihood-ratio test (more reliable than the Wald test) also finds the estimated indirect genetic effect on *Y* (i.e., mediated by *M*) to be highly significant.
 
 ### Data formats and management
 
@@ -680,7 +680,7 @@ An overview of all `mgreml` commands is listed below:
 | `--grm-cutoff THRESHOLD` | option to drop individuals using a greedy algorithm, such that there is no relatedness in GRM in excess of threshold for remaining individuals |
 | `--adjust-pcs INTEGER [INTEGER]` | option to specify for how many leading principal components (PCs) from genetic data to adjust (to control for population stratification) and for how many trailing PCs to adjust (for computational efficiency); if just one non-negative integer is specified this is taken as the number of leading PCs to adjust for |
 | `--pheno FILENAME [nolabelpheno]` | phenotype file: should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per phenotype; can be followed by optional flag `nolabelpheno`, e.g. `--pheno` `mypheno.txt nolabelpheno`, but we recommend to label phenotypes |
-| `--mediation` | option to perform a genetic mediation analysis, in line with the structural equations model proposed by Rietveld et al. (2022) and based on estimates from a saturated bivariate model; the first phenotype in the phenotype file is assumed to act as mediator for the genetic component of the second phenotype in the phenotype file; all further phenotypes are ignored; cannot be combined with `--(restricted-)genetic-model`, `--(restricted-)rho-genetic`, `--(restricted-)no-var-genetic`, `--(restricted-)environment-model`, `--(restricted-)rho-environment`, and `--(restricted-)reinitialise` |
+| `--mediation` | option to perform a genetic mediation analysis, in line with the structural equations model proposed by Rietveld et al. (2022) and based on estimates from a saturated bivariate model; the second phenotype in the phenotype file is assumed to act as mediator for the genetic component of the first phenotype in the phenotype file; all further phenotypes are ignored; cannot be combined with `--(restricted-)genetic-model`, `--(restricted-)rho-genetic`, `--(restricted-)no-var-genetic`, `--(restricted-)environment-model`, `--(restricted-)rho-environment`, `--(restricted-)reinitialise`, and `--store-iter` |
 | `--drop-missings` | option to drop all observations from data with at least one missing phenotype or at least one missing covariate |
 | `--no-intercept` | option to indicate an intercept should not be included automatically as covariate |
 | `--covar FILENAME [nolabelcovar]` | optional covariate file: should be comma-, space-, or tab- separated, with one row per individual, with FID and IID as first two fields, followed by a field per covariate; can be followed by optional flag `nolabelcovar`, e.g. `--covar mycovar.txt nolabelcovar`, but we recommend to label covariates; :warning: do not include principal components from genetic data as covariates, use `--adjust-pcs` instead |
