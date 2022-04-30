@@ -341,75 +341,75 @@ class MgremlReader:
             # now check every baseline main genetic model against every baseline restricted genetic model
             if self.args.genetic_model is not None:
                 if self.args.restricted_genetic_model is not None:
-                    logger.warning('WARNING! You combined --genetic-model and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                    self.logger.warning('WARNING! You combined --genetic-model and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
                 elif self.bPerfectRhoG0 or self.bNoRhoG0:
-                    logger.warning('WARNING! You combined --genetic-model and --restricted-rho-genetic: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                    self.logger.warning('WARNING! You combined --genetic-model and --restricted-rho-genetic: MGREML does NOT check if your genetic models are nested; please check yourself!')
                 elif self.bNoVarG0:
-                    logger.info('You combined --genetic-model and --restricted-no-var-genetic: the genetic models are properly nested')
+                    self.logger.info('You combined --genetic-model and --restricted-no-var-genetic: the genetic models are properly nested')
                 else:
-                    logger.warning('WARNING! You combined --genetic-model with a saturated restricted genetic model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                    self.logger.warning('WARNING! You combined --genetic-model with a saturated restricted genetic model: MGREML does NOT check if your genetic models are nested; please check yourself!')
             elif self.bPerfectRhoG:
                 if self.args.restricted_genetic_model is not None:
-                    logger.warning('WARNING! You combined --rho-genetic 1 and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                    self.logger.warning('WARNING! You combined --rho-genetic 1 and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
                 elif self.bPerfectRhoG0:
-                    logger.info('You combined --rho-genetic 1 and --restricted-rho-genetic 1: the genetic models are properly nested')
+                    self.logger.info('You combined --rho-genetic 1 and --restricted-rho-genetic 1: the genetic models are properly nested')
                 elif self.bNoRhoG0:
                     raise SyntaxError('you combined --rho-genetic 1 and --restricted-rho-genetic 0: that is not nested!')
                 elif self.bNoVarG0:
-                    logger.info('You combined --rho-genetic 1 and --restricted-no-var-genetic: the genetic models are properly nested')
+                    self.logger.info('You combined --rho-genetic 1 and --restricted-no-var-genetic: the genetic models are properly nested')
                 else:
                     raise SyntaxError('you combined --rho-genetic 1 with a saturated restricted genetic model: that is not nested!')
             elif self.bNoRhoG:
                 if self.args.restricted_genetic_model is not None:
-                    logger.warning('WARNING! You combined --rho-genetic 0 and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                    self.logger.warning('WARNING! You combined --rho-genetic 0 and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
                 elif self.bPerfectRhoG0:
                     raise SyntaxError('you combined --rho-genetic 0 and --restricted-rho-genetic 1: that is not nested!')
                 elif self.bNoRhoG0:
-                    logger.info('You combined --rho-genetic 0 and --restricted-rho-genetic 0: the genetic models are properly nested')
+                    self.logger.info('You combined --rho-genetic 0 and --restricted-rho-genetic 0: the genetic models are properly nested')
                 elif self.bNoVarG0:
-                    logger.info('You combined --rho-genetic 0 and --restricted-no-var-genetic: the genetic models are properly nested')
+                    self.logger.info('You combined --rho-genetic 0 and --restricted-no-var-genetic: the genetic models are properly nested')
                 else:
                     raise SyntaxError('you combined --rho-genetic 0 with a saturated restricted genetic model: that is not nested!')
             elif self.bNoVarG:
                 if self.args.restricted_genetic_model is not None:
-                    logger.warning('WARNING! You combined --no-var-genetic and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
+                    self.logger.warning('WARNING! You combined --no-var-genetic and --restricted-genetic-model: MGREML does NOT check if your genetic models are nested; please check yourself!')
                 elif self.bPerfectRhoG0 or self.bNoRhoG0:
                     raise SyntaxError('you combined --no-var-genetic and --restricted-rho-genetic: that is not nested!')
                 elif self.bNoVarG0:
-                    logger.info('You combined --no-var-genetic and --restricted-no-var-genetic: the genetic models are properly nested')
+                    self.logger.info('You combined --no-var-genetic and --restricted-no-var-genetic: the genetic models are properly nested')
                 else:
                     raise SyntaxError('you combined --no-var-genetic with a saturated restricted genetic model: that is not nested!')
             else:
                 if self.args.restricted_genetic_model is not None:
-                    logger.info('You combined a saturated main genetic model with --restricted-genetic-model: the genetic models are properly nested')
+                    self.logger.info('You combined a saturated main genetic model with --restricted-genetic-model: the genetic models are properly nested')
                 elif self.bPerfectRhoG0 or self.bNoRhoG0:
-                    logger.info('You combined a saturated main genetic model with --restricted-rho-genetic: the genetic models are properly nested')
+                    self.logger.info('You combined a saturated main genetic model with --restricted-rho-genetic: the genetic models are properly nested')
                 elif self.bNoVarG0:
-                    logger.info('You combined a saturated main genetic model with --restricted-no-var-genetic: the genetic models are properly nested')
+                    self.logger.info('You combined a saturated main genetic model with --restricted-no-var-genetic: the genetic models are properly nested')
                 else:
-                    logger.info('You combined a saturated main genetic model with a saturated restricted genetic model: the genetic models are properly nested')
+                    self.logger.info('You combined a saturated main genetic model with a saturated restricted genetic model: the genetic models are properly nested')
             # now check every baseline main environment model against every baseline restricted environment model
             if self.args.environment_model is not None:
                 if self.args.restricted_environment_model is not None:
-                    logger.warning('WARNING! You combined --environment-model and --restricted-environment-model: MGREML does NOT check if your environment models are nested; please check yourself!')
+                    self.logger.warning('WARNING! You combined --environment-model and --restricted-environment-model: MGREML does NOT check if your environment models are nested; please check yourself!')
                 elif self.bNoRhoE0:
-                    logger.warning('WARNING! You combined --environment-model and --restricted-rho-environment 0: MGREML does NOT check if your environment models are nested; please check yourself!')
+                    self.logger.warning('WARNING! You combined --environment-model and --restricted-rho-environment 0: MGREML does NOT check if your environment models are nested; please check yourself!')
                 else:
-                    logger.warning('WARNING! You combined --environment-model with a saturated restricted environment model: MGREML does NOT check if your environment models are nested; please check yourself!')
+                    self.logger.warning('WARNING! You combined --environment-model with a saturated restricted environment model: MGREML does NOT check if your environment models are nested; please check yourself!')
             elif self.bNoRhoE:
                 if self.args.restricted_environment_model is not None:
-                    logger.warning('WARNING! You combined --rho-environment 0 and --restricted-environment-model: MGREML does NOT check if your environment models are nested; please check yourself!')
+                    self.logger.warning('WARNING! You combined --rho-environment 0 and --restricted-environment-model: MGREML does NOT check if your environment models are nested; please check yourself!')
                 elif self.bNoRhoE0:
-                    logger.info('You combined --rho-environment 0 and --restricted-rho-environment 0: the environment models are properly nested')
+                    self.logger.info('You combined --rho-environment 0 and --restricted-rho-environment 0: the environment models are properly nested')
                 else:
                     raise SyntaxError('you combined --rho-environment 0 with a saturated restricted environment model: that is not nested!')
             else:
                 if self.args.restricted_environment_model is not None:
-                    logger.info('You combined a saturated main environment model with --restricted-environment-model: the environment models are properly nested')
+                    self.logger.info('You combined a saturated main environment model with --restricted-environment-model: the environment models are properly nested')
                 elif self.bNoRhoE0:
-                    logger.info('You combined a saturated main environment model with --restricted-rho-environment 0: the environment models are properly nested')
+                    self.logger.info('You combined a saturated main environment model with --restricted-rho-environment 0: the environment models are properly nested')
                 else:
-                    logger.info('You combined a saturated main environment model with a saturated restricted environment model: the environment models are properly nested')
+                    self.logger.info('You combined a saturated main environment model with a saturated restricted environment model: the environment models are properly nested')
     
     def InitialiseArgumentsAndLogger(self):
         #create mutually exclusive groups
