@@ -125,7 +125,7 @@ class MgremlEstimator:
             # update iteration counter
             self.iIter += 1
             if self.iIter > MgremlEstimator.iMaxIter:
-                raise RuntimeError('Aborting BFGS algorithm after ' + str(MgremlEstimator.iMaxIter) + ' iterations. Have you set a too stringent convergence threshold using --grad-tol? We recommend using the default value of 1E-5.')
+                raise RuntimeError('Aborting BFGS algorithm after ' + str(MgremlEstimator.iMaxIter) + ' iterations. Have you set a too stringent convergence threshold using --grad-tol? We recommend using the default value of 1E-5')
             self.logger.info('BFGS iteration ' + str(self.iIter) + ': log-likelihood per observation = ' + str(self.dLogL) + ', length of gradient per parameter = ' + str(self.dGradLengthPerParam))
             # if results are stored in each iteration
             if self.bStoreIter:
@@ -223,7 +223,7 @@ class MgremlEstimator:
             # update iteration counter
             self.iIter += 1
             if self.iIter > MgremlEstimator.iMaxIter:
-                raise RuntimeError('Aborting Newton algorithm after ' + str(MgremlEstimator.iMaxIter) + ' iterations. Have you set a too stringent convergence threshold using --grad-tol? We recommend using the default value of 1E-5.')
+                raise RuntimeError('Aborting Newton algorithm after ' + str(MgremlEstimator.iMaxIter) + ' iterations. Have you set a too stringent convergence threshold using --grad-tol? We recommend using the default value of 1E-5')
             if self.bEstimatesChanged: # if the estimates have changed
                 # compute the log likelihoodper observation etc.
                 (self.dLogL, self.vGrad, self.mInfo) = self.mgreml_model.ComputeLogLik(MgremlEstimator.bGradNewton,MgremlEstimator.bInfoNewton,bSilent = MgremlEstimator.bSilentNewton)
@@ -402,7 +402,7 @@ class MgremlEstimator:
     def ComputeStatistics(self):
         # if not converged: raise error
         if self.bNotConverged:
-            raise RuntimeError('Trying to calculate final statistics, while estimatese have not converged.')
+            raise RuntimeError('Trying to calculate final statistics, while estimatese have not converged')
         # get variance matrices and coefficient matrices
         (mVG, mCG, mVE, mCE) = self.mgreml_model.model.GetVandC()
         # get genetic variances, environment and total variances

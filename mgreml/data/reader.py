@@ -112,13 +112,13 @@ class MgremlReader:
             self.bAnalyse = True
             # if GRM, pheno or output has not been specified: stop analysing
             if self.args.grm is None:
-                self.logger.error('Error: no GRM was specified.')
+                self.logger.error('Error: no GRM was specified')
                 self.bAnalyse = False
             if self.args.pheno is None:
-                self.logger.error('Error: no phenotype file was specified.')
+                self.logger.error('Error: no phenotype file was specified')
                 self.bAnalyse = False            
             if self.args.out is None:
-                self.logger.error('Error: no prefix for the output files was specified.')
+                self.logger.error('Error: no prefix for the output files was specified')
                 self.bAnalyse = False
             # if we can analyse, read in data
             if self.bAnalyse:
@@ -484,7 +484,7 @@ class MgremlReader:
             self.args = self.parser.parse_args()
         except Exception:
             # if doesn't work: print error
-            raise SyntaxError('you specified incorrect input options.')
+            raise SyntaxError('you specified incorrect input options')
         # customise the logger using the prefix for output-files
         c_handler = logging.StreamHandler()
         # if no --out option has not been specified
@@ -495,7 +495,7 @@ class MgremlReader:
             # check if output holds directory name at all, and if so whether it doesn't exist
             if not(sDir == '') and not(os.path.isdir(sDir)):
                 # if so, raise an error
-                raise ValueError('prefix specified using --out may start with a directory name; this directory must exist however. ' + sDir + ' is not a directory.')
+                raise ValueError('prefix specified using --out may start with a directory name; this directory must exist however. ' + sDir + ' is not a directory')
             self.sPrefix = self.args.out + '.'
             sFileOut = self.sPrefix + 'log'
         else:
@@ -530,7 +530,7 @@ class MgremlReader:
             header = header[0:-1]+'\n'
             self.logger.info(header)
         except Exception:
-            raise SyntaxError('you specified incorrect input options.')
+            raise SyntaxError('you specified incorrect input options')
     
     def DetermineIfDropMissings(self):
         # if --drop-missings option used
@@ -546,15 +546,15 @@ class MgremlReader:
         # if --grm-cutoff used
         if self.args.grm_cutoff is not None:
             if (self.args.grm_cutoff < 0):
-                raise ValueError('--grm-cutoff should be followed by non-negative value.')
+                raise ValueError('--grm-cutoff should be followed by non-negative value')
             else:
                 self.bRelCutoff = True
                 self.dRelCutoff = self.args.grm_cutoff
-                self.logger.info('A relatedness cutoff of ' + str(self.dRelCutoff) + ' will be applied to your GRM.')
+                self.logger.info('A relatedness cutoff of ' + str(self.dRelCutoff) + ' will be applied to your GRM')
         else:
             self.bRelCutoff = False
             self.dRelCutoff = None
-            self.logger.info('No relatedness cutoff will be applied to your GRM.')
+            self.logger.info('No relatedness cutoff will be applied to your GRM')
     
     def SetNumberOfPCs(self):
         # if no. of PCs specified
@@ -582,10 +582,10 @@ class MgremlReader:
         if self.args.no_se:
             # report no SEs
             self.bSEs = False
-            self.logger.info('Your results will not include standard errors.')
+            self.logger.info('Your results will not include standard errors')
         else:
             self.bSEs = True
-            self.logger.info('Your results will include standard errors.')
+            self.logger.info('Your results will include standard errors')
             
     def NeedIntercept(self):
         # if --no-intercept option used
@@ -594,8 +594,8 @@ class MgremlReader:
             self.bIntercept = False
         else:
             self.bIntercept = True
-            self.logger.info('An intercept will be added automatically to your set of covariates.')
-            self.logger.info('This intercept will apply to all phenotypes in your data.')
+            self.logger.info('An intercept will be added automatically to your set of covariates')
+            self.logger.info('This intercept will apply to all phenotypes in your data')
             
     def NeedAllCoeffs(self):
         # if --factor-coefficients option used
@@ -655,9 +655,9 @@ class MgremlReader:
                     or (self.args.restricted_no_var_genetic) \
                     or (self.args.restricted_reinitialise is not None)
         if self.bNested:
-            self.logger.info('You specified two models for comparison. Results will include a likelihood-ratio test comparing the restricted model (null hypothesis) to the main model (alternative hypothesis).')
+            self.logger.info('You specified two models for comparison. Results will include a likelihood-ratio test comparing the restricted model (null hypothesis) to the main model (alternative hypothesis)')
         else:
-            self.logger.info('You specified only the main model. No likelihood-ratio test will be performed.')
+            self.logger.info('You specified only the main model. No likelihood-ratio test will be performed')
     
     def NeedToReinitialise(self, bNull = False):
         if bNull:
@@ -694,7 +694,7 @@ class MgremlReader:
             if self.bReinitialise:
                 raise SyntaxError('--mediation cannot be combined with --reinitialise')
             self.bMediation = True
-            self.logger.info('MGREML will perform a mediation analysis based on results from a bivariate model for the first two phenotypes in your phenotype file.')
+            self.logger.info('MGREML will perform a mediation analysis based on results from a bivariate model for the first two phenotypes in your phenotype file')
         else:
             self.bMediation = False
     
@@ -713,14 +713,14 @@ class MgremlReader:
             if self.bMediation:
                 raise SyntaxError('--pairwise cannot be combined with --mediation')
             self.bPairwise = True
-            self.logger.info('MGREML will perform pairwise bivariate estimation instead of multivariate estimation.')
+            self.logger.info('MGREML will perform pairwise bivariate estimation instead of multivariate estimation')
         else:
             self.bPairwise = False
     
     def IgnoreCollinearity(self):
         if self.args.ignore_collinearity:
             self.bIgnoreCollinearity = True
-            self.logger.info('MGREML will ignore multicollinearity between phenotypes.')
+            self.logger.info('MGREML will ignore multicollinearity between phenotypes')
         else:
             self.bIgnoreCollinearity = False
     
@@ -742,20 +742,20 @@ class MgremlReader:
             if self.bMediation:
                 raise SyntaxError('--mediation cannot be combined with --rho-genetic')
             if self.args.rho_genetic==1:
-                self.logger.info('Genetic correlations in the main model all set to one.')
+                self.logger.info('Genetic correlations in the main model all set to one')
                 self.bPerfectRhoG = True
             else:
-                self.logger.info('Genetic correlations in the main model all set to zero.')
+                self.logger.info('Genetic correlations in the main model all set to zero')
                 self.bNoRhoG = True
         # assess whether rhoG is perfect or zero in the restricted model
         if self.args.restricted_rho_genetic is not None:
             if self.bReinitialise0:
                 raise SyntaxError('--restricted-rho-genetic cannot be combined with --restricted-reinitialise, as the .pkl file is used to set the restricted model')
             if self.args.restricted_rho_genetic==1:
-                self.logger.info('Genetic correlations in the null model all set to one.')
+                self.logger.info('Genetic correlations in the null model all set to one')
                 self.bPerfectRhoG0 = True
             else:
-                self.logger.info('Genetic correlations in the null model all set to zero.')
+                self.logger.info('Genetic correlations in the null model all set to zero')
                 self.bNoRhoG0 = True
         # assess whether rhoE is zero
         if self.args.rho_environment is not None:
@@ -763,13 +763,13 @@ class MgremlReader:
                 raise SyntaxError('--rho-environment cannot be combined with --reinitialise, as the .pkl file is used to set the model')
             if self.bMediation:
                 raise SyntaxError('--mediation cannot be combined with --rho-environment')
-            self.logger.info('Environment correlations in the main model all set to zero.')
+            self.logger.info('Environment correlations in the main model all set to zero')
             self.bNoRhoE = True
         # assess whether rhoE is zero in the restricted model  
         if self.args.restricted_rho_environment is not None:
             if self.bReinitialise0:
                 raise SyntaxError('--restricted-rho-environment cannot be combined with --restricted-reinitialise, as the .pkl file is used to set the restricted model')
-            self.logger.info('Environment correlations in the null model all set to zero.')
+            self.logger.info('Environment correlations in the null model all set to zero')
             self.bNoRhoE0 = True
         # assess whether genetic variance is zero
         if self.args.no_var_genetic:
@@ -779,7 +779,7 @@ class MgremlReader:
                 raise SyntaxError('--pairwise cannot be combined with --no-var-genetic')
             if self.bMediation:
                 raise SyntaxError('--mediation cannot be combined with --no-var-genetic')
-            self.logger.info('Genetic variance in the main model set to zero.')
+            self.logger.info('Genetic variance in the main model set to zero')
             self.bNoVarG = True
         # assess whether genetic variance is zero in the restricted model
         if self.args.restricted_no_var_genetic:
@@ -787,7 +787,7 @@ class MgremlReader:
                 raise SyntaxError('--restricted-no-var-genetic cannot be combined with --restricted-reinitialise, as the .pkl file is used to set the restricted model')
             if self.bPairwise:
                 raise SyntaxError('--pairwise cannot be combined with --restricted-no-var-genetic')
-            self.logger.info('Genetic variance in the null model set to zero.')
+            self.logger.info('Genetic variance in the null model set to zero')
             self.bNoVarG0 = True
     
     def ReadModel(self, sType, bNull = False):
@@ -827,7 +827,7 @@ class MgremlReader:
                 sOption = '--environment-model'
                 lArgs = self.args.environment_model
         else:
-            raise TypeError('MgremlReader.ReadModel() can only be used to read a model specification for factors or covariates.')
+            raise TypeError('MgremlReader.ReadModel() can only be used to read a model specification for factors or covariates')
         if sType != MgremlReader.sCov:
             if bNull:
                 if self.bReinitialise0:
@@ -862,7 +862,7 @@ class MgremlReader:
                 raise ValueError('the second or third argument of ' + sOption + ' is incorrect. Did you mean ' + sNoLabelIndex + ' ' + sNoLabelHeader + '?')
         else:
             # if we have neither 1, 2, nor 3 input args: raise an errror
-            raise SyntaxError(sOption + ' requires a filename and can have the optional arguments ' + sNoLabelIndex + ' and/or ' + sNoLabelHeader + '.')
+            raise SyntaxError(sOption + ' requires a filename and can have the optional arguments ' + sNoLabelIndex + ' and/or ' + sNoLabelHeader)
         # assign False/None as column/row where indices/headers are found
         iIndCol = False
         iHeadRow = None
@@ -882,7 +882,7 @@ class MgremlReader:
         dfBin = dfBin.apply(pd.to_numeric, errors='coerce')
         # get the number of traits and factors/covariates involved and report
         (iT,iK) = dfBin.shape
-        self.logger.info('Found a ' + sData + ' on ' + str(iT) + ' phenotypes and ' + str(iK) + ' ' + sDescr + '.')
+        self.logger.info('Found a ' + sData + ' on ' + str(iT) + ' phenotypes and ' + str(iK) + ' ' + sDescr)
         # if no index provided
         if not(bIndex):
             dfBin.index = ['phenotype ' + str(x) for x in range(0,iT)]
@@ -926,7 +926,7 @@ class MgremlReader:
             lArgs = self.args.covar
             bTwoOnly = False
         else:
-            raise TypeError('MgremlReader.ReadData() can only be used to read a phenotype file or covariate file.')
+            raise TypeError('MgremlReader.ReadData() can only be used to read a phenotype file or covariate file')
         # if no. of input args. is one
         if len(lArgs) == 1:
             # we have a header
@@ -940,7 +940,7 @@ class MgremlReader:
             bHeader=False
         else:
             # if we have neither 1 nor 2 input args: raise an errror
-            raise SyntaxError(sOption + ' requires a filename and can have the optional argument ' + sNoLabel + '.')
+            raise SyntaxError(sOption + ' requires a filename and can have the optional argument ' + sNoLabel)
         # prepare string to let user know whether header has been set, yes or no
         if bHeader:
             sInfoString1 = 'Headers specified in ' + sData + ' file'
@@ -1016,7 +1016,7 @@ class MgremlReader:
         IDFileName = self.args.grm + ".grm.id"
         # check if one or more files are missing:
         if not(os.path.isfile(BinFileName)) or not(os.path.isfile(IDFileName)):
-            raise TypeError('specified set of GRM files either incomplete or non-existent.')
+            raise TypeError('specified set of GRM files either incomplete or non-existent')
         # read IDs and sample size
         ids = pd.read_csv(IDFileName, sep = None, engine='python', header = None)
         ids.columns= MgremlReader.lLabelsFID_IID
@@ -1096,7 +1096,7 @@ class MgremlReader:
             # if dfBinXY is all ones: print warning and drop
             if ((self.dfBinXY==1).sum().sum()) == (self.dfBinXY.shape[0]*self.dfBinXY.shape[1]):
                 self.logger.warning('Warning: your model indicating which covariate affects which phenotype now comprises only ones')
-                self.logger.warning('Assuming all covariates apply to all traits.')
+                self.logger.warning('Assuming all covariates apply to all traits')
                 self.dfBinXY = None
                 self.bSameCovs = True
     
@@ -1543,7 +1543,7 @@ class MgremlReader:
                 # if any eigenvalue is too close to zero or negative
                 if any(vDXTX < abs(np.finfo(float).eps)):
                     # raise an error with a proper explanation of the likely cause
-                    raise ValueError('your covariates are rank deficient after the canonical transformation (i.e. perfectly multicollinear). Likely reason: you specified principal components (PCs) from your genetic data as fixed-effect covariates. MGREML already controls for population stratification in the canonical transformation. Please do not control for PCs manually as well. Rather, use --adjust-pcs INTEGER, to indicate for how many PCs you want to control via the canonical transformation.')
+                    raise ValueError('your covariates are rank deficient after the canonical transformation (i.e. perfectly multicollinear). Likely reason: you specified principal components (PCs) from your genetic data as fixed-effect covariates. MGREML already controls for population stratification in the canonical transformation. Please do not control for PCs manually as well. Rather, use --adjust-pcs INTEGER, to indicate for how many PCs you want to control via the canonical transformation')
                 # compute log|X'X| and store
                 self.dLogDetXTX = (self.iT)*np.log(vDXTX).sum()
                 # compute OLS residual of Y w.r.t. X
@@ -1572,7 +1572,7 @@ class MgremlReader:
                     # if any eigenvalue is too close to zero or negative
                     if any(vDXTX < abs(np.finfo(float).eps)):
                         # raise an error with a proper explanation of the likely cause
-                        raise ValueError('Your covariates are rank deficient after the canonical transformation (i.e. perfectly multicollinear). Likely reason: you specified principal components (PCs) from your genetic data as fixed-effect covariates. MGREML already controls for population stratification in the canonical transformation. Please do not control for PCs manually as well. Rather, use --adjust-pcs INTEGER, to indicate for how many PCs you want to control via the canonical transformation.')
+                        raise ValueError('Your covariates are rank deficient after the canonical transformation (i.e. perfectly multicollinear). Likely reason: you specified principal components (PCs) from your genetic data as fixed-effect covariates. MGREML already controls for population stratification in the canonical transformation. Please do not control for PCs manually as well. Rather, use --adjust-pcs INTEGER, to indicate for how many PCs you want to control via the canonical transformation')
                     # compute log|X'X| and insert in vector
                     self.vLogDetXTX[it] = np.log(vDXTX).sum()
                 # compute log|X'X| and store
@@ -1595,11 +1595,10 @@ class MgremlReader:
             # if collinearity ignored
             if self.bIgnoreCollinearity:
                 # only print warning
-                self.logger.warning('Warning: your phenotype data is highly collinear after initial residualisation with respect to fixed-effect covariates (if any) and the canonical transformation.')
-                self.logger.warning('This may lead to poorly identified models.')
+                self.logger.warning('Warning: your phenotype data is highly collinear after initial residualisation with respect to fixed-effect covariates (if any) and the canonical transformation. This may lead to poorly identified models. Consider regularising your phenotypes (i.e. adding a little bit of noise to them) or using a different set of phenotypes')
             else:
                 # else raise error
-                raise ValueError('your phenotype data is too collinear after initial residualisation with respect to fixed-effect covariates (if any) and the canonical transformation')
+                raise ValueError('your phenotype data is too collinear after initial residualisation with respect to fixed-effect covariates (if any) and the canonical transformation. Use --ignore-collinearity to override this error')
         # if there is at least one trait with no variance
         if (vVarY == 0).sum() > 0:
             raise ValueError('you have specified one or more phenotypes without any variance at all')

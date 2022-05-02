@@ -44,25 +44,25 @@ class StructuralModel:
     def CheckModelSpecification(self, mdData, dfBinFY):
         # raise error if number of traits does not match no. of trais in data
         if self.iT != mdData.mY.shape[1]:
-            raise ValueError('The number of traits in your structural model does not match the number of traits in your data.')
+            raise ValueError('The number of traits in your structural model does not match the number of traits in your data')
         # if duplicates in index of dfBinFY
         if dfBinFY.index.duplicated().sum() > 0:
-            raise ValueError('You have phenotypes with duplicate labels in your structural model.')
+            raise ValueError('You have phenotypes with duplicate labels in your structural model')
         # if duplicates in columns of dfBinFY
         if dfBinFY.columns.duplicated().sum() > 0:
-            raise ValueError('You have factors with duplicate labels in your structural model.')
+            raise ValueError('You have factors with duplicate labels in your structural model')
         # get indices for phentoypes
         indY_Y  = pd.Index(mdData.lPhenos)
         indFY_Y = dfBinFY.index
         # all phenotypes in data should refer to phenotypes in dfBinFY; abort if problematic
         if not(indY_Y.isin(indFY_Y).all()):
-            raise ValueError('There is at least one phenotype which has not been specified in your structural model.') 
+            raise ValueError('There is at least one phenotype which has not been specified in your structural model') 
         # all phenotypes in dfBinFY should refer to phenotypes in data; abort if problematic
         if not(indFY_Y.isin(indY_Y).all()):
-            raise ValueError('There is at least one phenotype in your structural model for which you have not provided data.') 
+            raise ValueError('There is at least one phenotype in your structural model for which you have not provided data') 
         # if dfBinFY is not binary: abort
         if ((dfBinFY==0).sum().sum() + (dfBinFY==1).sum().sum()) != (dfBinFY.shape[0]*dfBinFY.shape[1]):
-            raise ValueError('The specification of your structural model does not only comprise zeros and ones, signifying whether a given factor is permitted to affect a given phenotype.')
+            raise ValueError('The specification of your structural model does not only comprise zeros and ones, signifying whether a given factor is permitted to affect a given phenotype')
             
     def InitialiseStructuralModel(self, mdData, dfBinFY):
         # get indices for phentoypes from data
@@ -71,7 +71,7 @@ class StructuralModel:
         dfBinFY = dfBinFY.loc[indY]
         # double-check if everything is now lined up
         if not(all(dfBinFY.index == indY)):
-            raise ValueError('The phenotype labels in your data and structural model cannot be lined up properly.')
+            raise ValueError('The phenotype labels in your data and structural model cannot be lined up properly')
         # read out factor labels
         self.lFactors = dfBinFY.columns.tolist()
         # read out structural model as numpy as array
@@ -223,7 +223,7 @@ class StructuralModel:
         if isinstance(vNew, np.ndarray):
             self.vParam = vNew
         else:
-            raise TypeError('The new parameter estimates of the model are invaled.')
+            raise TypeError('The new parameter estimates of the model are invalid')
             
     def GetParamsAndIndices(self):
         return self.vIndT, self.vIndF, self.vParam
@@ -256,16 +256,6 @@ class EnvironmentModel(StructuralModel):
         super().__init__(mdData, dfBinFY, EnvironmentModel.sType, bNoCov12 = bMedBeta0)
         self.vParam = EnvironmentModel.dWeight*self.vParam
         self.lFactors = [EnvironmentModel.sType + str(x) for x in self.lFactors]
-        # if less environment factors than traits: crash, as this is incompatible with MGREML
-        if self.iF < self.iT:
-            raise ValueError('You have specified less environmental factors than traits. This is not permitted in MGREML.')
-        # if one trait
-        if (self.iT == 1):
-            # if binary matrix specified
-            if dfBinFY is not None:
-                # if only element that can be free is not free
-                if (dfBinFY.iloc[0,0]==0):
-                    raise ValueError('You have specified a model for 1 trait with 1 environmental factor, with a coefficient that is restricted to zero. This is not permitted in MGREML.')
 
 class CombinedModel:
     
@@ -284,7 +274,7 @@ class CombinedModel:
             vNewE = vNew[self.iParamsG:]
             return vNewG, vNewE
         else:
-            raise TypeError('The new parameter estimates of the model are invaled.')
+            raise TypeError('The new parameter estimates of the model are invalid')
     
     def GetVandC(self, vNew = None):
         if isinstance(vNew, np.ndarray):
@@ -319,7 +309,7 @@ class CombinedModel:
             self.genmod.UpdateParams(vNewG)
             self.envmod.UpdateParams(vNewE)
         else:
-            raise TypeError('The new parameter estimates of the model are invaled.')
+            raise TypeError('The new parameter estimates of the model are invalid')
             
     def GetFreeCoeffs(self):
         mBG = self.genmod.GetFreeCoeffs()
