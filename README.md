@@ -6,7 +6,7 @@
 
 `mgreml` can easily handle estimation of the full genetic correlation matrix for up to 100 traits observed in 20,000 individuals. `mgreml` allows users to specify structural models and test hypotheses regarding nested models (e.g. no genetic correlations). In addition, the tool can handle a considerable amount of fixed-effect covariates and a very minor degree of phenotypic missingness.
 
-Finally, `mgreml` has built-in options to (i) return the full set of factor coefficients and (ii) variance components, as well as (iii) the complete covariance matrix of those estimates, and (iv) estimates of a genetic mediation model for two traits as discussed by Rietveld et al. (2022).
+Finally, `mgreml` has built-in options to return (*i*) the full set of factor coefficients and (*ii*) variance components, as well as (*iii*) the complete covariance matrix of those estimates, and (*iv*) estimates of a genetic mediation model for two traits as discussed by Rietveld et al. (2022; see [Citation](#citation)).
 
 ## Installation
 
@@ -86,7 +86,7 @@ Let us first inspect the `pheno.txt` file. This file contains data in tab-separa
 
 Although `mgreml` in principle can handle phenotype data without header (using a modifier that we discuss later on), we recommend always including headers in your data, so e.g. your phenotypes are labelled, allowing `mgreml` output to refer to specific phenotype names rather than ambiguous indices such as `1`, `2`, `3` etc.
 
-For the same set of individuals, you have a binary genomic-relatedness matrix (a.k.a. GRM) e.g. computed using [LDAK](https://dougspeed.com/ldak/), [PLINK](https://www.cog-genomics.org/plink/), or [GCTA](https://cnsgenomics.com/software/gcta/). In this case, the set of binary GRM files comprises `data.grm.bin`, `data.grm.N.bin`, and `data.grm.id` (MGREML ignores whether or not the `.grm.N.bin` file is present). We refer to this set of binary GRM files by its prefix, i.e. `data`.
+For the same set of individuals, you have a binary genomic-relatedness matrix (a.k.a. GRM) e.g. computed using [LDAK](https://dougspeed.com/ldak/), [PLINK](https://www.cog-genomics.org/plink/), or [GCTA](https://cnsgenomics.com/software/gcta/). In this case, the set of binary GRM files comprises `data.grm.bin`, `data.grm.N.bin`, and `data.grm.id` (`mgreml` ignores whether or not the `.grm.N.bin` file is present). We refer to this set of binary GRM files by its prefix, i.e. `data`.
 
 ### Basic estimation
 
@@ -97,7 +97,9 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                    --no-intercept --out ./tutorial/nocovs
 ```
 
-:warning: The phenotypic data itself may only be numerical. E.g., values such as `yes` and `no` are not permitted as phenotypic values. Instead, please use values such as `1` and `0`. Please notice that the labels of the phenotypes (i.e., in the header row) do **not** need to be numerical, of course.
+:warning: The phenotypic data itself may only be numerical. E.g. values such as `yes` and `no` are not permitted as phenotypic values. Instead, please use values such as `1` and `0`.
+
+Please notice that the labels of the phenotypes (i.e, in the header row) do **not** need to be numerical, of course. Also, missing values can be encoded non-numerically (e.g. as `NA` or `NaN`), see [Missing data and unbalancedness](#missing-data-and-unbalancedness) for more details.
 
 When carrying out this command, `mgreml` will first show the welcome screen and directly after that summarise the input options that you specified:
 
@@ -153,7 +155,7 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                    --out ./tutorial/intercept
 ```
 
-Resulting SNP heritability estimates in `./tutorial/intercept.HSq.out`, however, show our estimates are still strongly biased:
+Resulting SNP heritability estimates in `./tutorial/intercept.HSq.out`, however, show our estimates still seem to be biased:
 
 | trait | heritability | standard error |
 | --- | --- | --- |
@@ -168,14 +170,16 @@ Resulting SNP heritability estimates in `./tutorial/intercept.HSq.out`, however,
 | Some pheno 109 | 0.055 | 0.016 |
 | Some pheno 110 | 0.159 | 0.017 |
 
-The reasons this bias persists is that more fixed-effect covariates are at play than just the intercept. The file `./tutorial/covar.txt` contains the other covariates that affect the traits of interest. So we need to use the `--covar` option to specify these additional fixed-effect covariates. This boils down to the following `mgreml` command:
+The reason that this bias persists is that more fixed-effect covariates are at play than just the intercept. The file `./tutorial/covar.txt` contains the other covariates that affect the traits of interest. So we need to use the `--covar` option to specify these additional fixed-effect covariates. This boils down to the following `mgreml` command:
 
 ```
 python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                    --covar ./tutorial/covar.txt --out ./tutorial/covs
 ```
 
-:warning: As with the phenotypic data, the actual data on the covariates may also only be numerical. E.g., values such as `female` and `male` are not permitted as values of covariates. Instead, please use values such as `1` and `0`. Please notice that the labels of the covariates (i.e., in the header row) do **not** need to be numerical, of course.
+:warning: As with the phenotypic data, the actual data on the covariates may also only be numerical. E.g. values such as `female` and `male` are not permitted as values of covariates. Instead, please use values such as `1` and `0`.
+
+Please notice that the labels of the covariates (i.e. in the header row) do **not** need to be numerical, of course. Also, missing values can be encoded non-numerically (e.g. as `NA` or `NaN`), see [Missing data and unbalancedness](#missing-data-and-unbalancedness) for more details.
 
 Notice that analyses including covariates are computationally slightly more demanding. E.g. in this case we have 10 covariates (i.e. the intercept + 9 additional covariates in `./tutorial/covar.txt`), each of which is allowed to have a different effect on each trait. As we have 10 traits, this means we have 100 fixed effects in total, which our model needs to take into account.
 
@@ -200,7 +204,9 @@ Moreover, when looking at the heatmaps of the genetic correlations as estimated 
 
 ### Population stratification
 
-In the previous part, you may have noticed that `covar.txt` does not include any principal components (PCs) from the genetic data as fixed-effect covariates. Perhaps surprisingly, this is perfectly normal for an `mgreml` analysis. In fact, in `mgreml`, the file with your covariates should **NEVER** contain PCs from your genetic data, as `mgreml` already removes the effects of population stratification during the so-called canonical transformation. By default, `mgreml` removes the effects of 20 leading PCs from your genetic data. The effective sample size is reduced by 20 as a result of this correction for PCs.
+In the previous part, you may have noticed that `covar.txt` does not include any principal components (PCs) from the genetic data as fixed-effect covariates. Perhaps surprisingly, this is perfectly normal for an `mgreml` analysis.
+
+In fact, in `mgreml`, the file with your covariates should **NEVER** contain PCs from your genetic data, as `mgreml` already removes the effects of population stratification in the so-called canonical transformation. By default, `mgreml` removes the effects of 20 leading PCs from your genetic data. The effective sample size is reduced by 20 as a result of this correction for PCs.
 
 In case you want to change the number of PCs you control for, do **NOT** add these PCs to your file with covariate data. Instead, use the `--adjust-pcs` option, followed by the total number of leading PCs you want to control for. E.g. `--adjust-pcs 20` is equivalent to the default setting, `--adjust-pcs 40` controls for the 40 leadings PCs, and `--adjust-pcs 0` controls for no PCs at all (not recommended). In these three cases, the sample size is reduced by 20, 40, and zero respectively.
 
@@ -231,13 +237,15 @@ As there is no population stratification in our data (by virtue of our simulatio
 
 For advanced users, the `--adjust-pcs` option can also be followed by a second number, indicating the number of trailing eigenvectors from your GRM to adjust for. E.g. `--adjust-pcs 100 1000` controls for 100 leading eigenvectors from your GRM and 1000 trailing eigenvectors. Doing this decreases the overall sample size by 100 + 1000 = 1100.
 
-By default no trailing eigenvectors are adjusted for. However, if the trailing eigenvalues are sufficiently small, we may adjust for a considerable number of them, boosting CPU time (as the overall sample size becomes smaller), without diminishing statistical efficiency of the analysis too much (as effectively only less informative bits of data are ignored). Note that adjusting for trailing eigenvectors may require you to use `--no-intercept`, as the last eigenvector from the GRM tends to be highly multicollinear with the intercept for technical reasons.
+By default no trailing eigenvectors are adjusted for. However, if the trailing eigenvalues are sufficiently small, we may adjust for a considerable number of them, reducing CPU time (as the overall sample size becomes smaller), without diminishing statistical efficiency of the analysis too much (as effectively only less informative bits of data are ignored).
+
+Please notice that adjusting for trailing eigenvectors may require you to use `--no-intercept`, as the last eigenvector from the GRM tends to be highly multicollinear with the intercept for technical reasons.
 
 ### Standard errors
 
 In addition to reporting the heritabilities, and genetic and environment correlations, `mgreml` also automatically reports the standard errors of all estimates.
 
-In case you do not wish `mgreml` to compute standard errors, you can use the `--no-se` option. Especially for a large number of traits, computing the standard errors is computationally demanding, as this requires calculating the average information matrix, which has a computational complexity of the order *NT*<sup> 4</sup>, where *T* denotes the number of traits and *N* the number of observations.
+In case you do not wish `mgreml` to compute standard errors after model estimation, you can use the `--no-se` option. Especially for a large number of traits, computing the standard errors is computationally demanding, as this requires calculating the average information matrix, which has a computational complexity of the order *NT*<sup> 4</sup>, where *T* denotes the number of traits and *N* the number of observations.
 
 `mgreml` also automatically reports the fixed-effect estimates (a.k.a. GLS estimates), including the covariance matrix of those estimates, and their standard errors. If the `--no-se` option is used, the estimated covariance matrix and standard errors of the GLS estimates will not be included either.
 
@@ -288,11 +296,17 @@ E.g. `my covar 301` does not affect `Some pheno 101` in this case.
 
 ### Specifying structural models
 
-Analogous to `--covar-model`, users can also specify which genetic factor affects which trait and which environment factor affects which trait. Such specifications can be passed to `mgreml` using the `--genetic-model` and `--environment-model` options. Note that any such user-specified structural model must be identified. Moreover, for the factor specification of the environment, `mgreml` requires as many factors as there are traits.
+Analogous to `--covar-model`, users can also specify which genetic factor affects which trait and which environment factor affects which trait. Such specifications can be passed to `mgreml` using the `--genetic-model` and `--environment-model` options.
 
-For example, we could impose a factor structure, where there is only one genetic factor, and where there are *T*=10 environment factors, each affecting only a single trait, and no trait being affected by two distinct environment factors.
+These specifications are effectively binary tables with factor labels in the header row and traits labels in the column header. In case a given factor is permitted to have an effect on a given trait, the corresponding element is set equal to one and otherwise that element is set to zero. An element equal to one is, thus, a free coefficient.
 
-Effectively, this boils down to a model with genetic correlations all equal to one and environment correlations all equal to zero. These factor structures are shown in the files `gen_model.txt` and `env_model.txt` both found in the `tutorial` folder. Both files contain a binary table, with elements equal to one, where a given factor is permitted to affect the given phenotype, and equal to zero otherwise.
+Any such user-specified structural model must be identified. `mgreml` performs only one superficial tests on identification: the tool checks if there are at most *T*(*T*+1)/2 free genetic coefficients and at most *T*(*T*+1)/2 free environment coefficients (this is the so-called *t*-rule). Satisfying the *t*-rule is a minimum but not (!) sufficient condition for model identification.
+
+:warning: The overall responsibility for formulating a proper, identified model lies with you, the user.
+
+To given en example of a user-specified model: we could impose a factor structure, where there is only one genetic factor, and where there are *T*=10 environment factors, each affecting only a single trait, and no trait being affected by two distinct environment factors.
+
+Effectively, this boils down to a model with genetic correlations all equal to plus or minus one and environment correlations all equal to zero. These specifications of the genetic and environmental factor models are stored in the files `gen_model.txt` and `env_model.txt` respectively, both found in the `tutorial` folder. Both files contain a binary table, with elements equal to one, where a given factor is permitted to affect the given phenotype, and equal to zero otherwise.
 
 To estimate this structural model, we can simply carry out the following command:
 
@@ -605,7 +619,7 @@ Chi-square test statistic for presence of genetic mediation = 1104.0733080715509
 with P-value = 0.0
 ```
 
-Estimates are all less than two standard errors away from the true parameters of the structural model. Moreover, estimates in `try_mediation.HSq.out` also show that the estimated heritabilities are less than two standard errors removed from the true value (50% for both). In addition, based on Wald tests, observe that the estimated effect of *M* on *Y* is significant, the indirect effect of genes on *Y* via *M* is significant, and the direct effect of genes on *Y* is also significant. Finally, observe that the likelihood-ratio test (more reliable than the Wald test) also finds the estimated indirect genetic effect on *Y* (i.e., mediated by *M*) to be highly significant.
+Estimates are all less than two standard errors away from the true parameters of the structural model. Moreover, estimates in `try_mediation.HSq.out` also show that the estimated heritabilities are less than two standard errors removed from the true value (50% for both). In addition, based on Wald tests, observe that the estimated effect of *M* on *Y* is significant, the indirect effect of genes on *Y* via *M* is significant, and the direct effect of genes on *Y* is also significant. Finally, observe that the likelihood-ratio test (more reliable than the Wald test) also finds the estimated indirect genetic effect on *Y* (i.e. mediated by *M*) to be highly significant.
 
 ### Data formats and management
 
@@ -649,11 +663,11 @@ Introducing dummies to control for gaps in the data can become computationally h
 
 Therefore, `mgreml` has a `--drop-missings` option, whereby all individuals are dropped that have at least one missing phenotype and/or at least one missing covariate that is relevant (either because `--covar-model` has not been used, or because the file following `--covar-model` indicates the covariate with a missing value for a given individual affects at least one trait).
 
-MGREML can handle missing values in the phenotype and/or covariate file when encoded using one of the following formats (comma-separated list of formats, with each format between single quotation marks):
+`mgreml` can handle missing values in the phenotype and/or covariate file when encoded using one of the following formats (comma-separated list of formats, with each format between single quotation marks):
 
 ‘’, ‘-999’, ‘#N/A’, ‘#N/A N/A’, ‘#NA’, ‘-1.#IND’, ‘-1.#QNAN’, ‘-NaN’, ‘-nan’, ‘1.#IND’, ‘1.#QNAN’, ‘’, ‘N/A’, ‘NA’, ‘NULL’, ‘NaN’, ‘n/a’, ‘nan’, ‘null’.
 
-This list is based on https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html, which is the reference manual of the pandas function that MGREML uses to read in phenotype and covariate data.
+This list is based on https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html, which is the reference manual of the pandas function that `mgreml` uses to read in phenotype and covariate data.
 
 :warning: Your phenotypes and covariates should not contain non-numeric stuff other than missing values!
 
@@ -764,7 +778,7 @@ In addition, if you use the `--mediation` option, please also cite
 
 ## Derivations
 
-For full details on the derivation of the MGREML method, see the [Supplementary Information](https://www.biorxiv.org/content/biorxiv/early/2021/04/19/2021.04.19.440478/DC1/embed/media-1.pdf), available on bioRxiv.
+For full details on the derivation of the `mgreml` method, see the [Supplementary Information](https://static-content.springer.com/esm/art%3A10.1038%2Fs42003-021-02712-y/MediaObjects/42003_2021_2712_MOESM2_ESM.pdf).
 
 For derivations on the structural model used in the mediation analysis, see *tba*.
 
