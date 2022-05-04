@@ -60,13 +60,14 @@ In this tutorial, you will learn how to use `mgreml`. Before you start using `mg
 5. [Standard errors](#standard-errors)
 6. [Different traits with different covariates](#different-traits-with-different-covariates)
 7. [Specifying structural models](#specifying-structural-models)
-8. [Factor coefficients and variance components](#factor-coefficients-and-variance-components)
-9. [Nested models and likelihood-ratio tests](#nested-models-and-likelihood-ratio-tests)
-10. [Estimation reinitialisation](#estimation-reinitialisation)
-11. [Genetic mediation analysis](#genetic-mediation-analysis)
-12. [Data formats and management](#data-formats-and-management)
-13. [Missing data and unbalancedness](#missing-data-and-unbalancedness)
-14. [Advanced options](#advanced-options)
+8. [Factor coefficients](#factor-coefficients)
+9. [Variance components](#variance-components)
+10. [Nested models and likelihood-ratio tests](#nested-models-and-likelihood-ratio-tests)
+11. [Estimation reinitialisation](#estimation-reinitialisation)
+12. [Genetic mediation analysis](#genetic-mediation-analysis)
+13. [Data formats and management](#data-formats-and-management)
+14. [Missing data and unbalancedness](#missing-data-and-unbalancedness)
+15. [Advanced options](#advanced-options)
 
 ### Tutorial data
 
@@ -181,9 +182,9 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 
 Please notice that the labels of the covariates (i.e. in the header row) do **not** need to be numerical, of course. Also, missing values can be encoded non-numerically (e.g. as `NA` or `NaN`), see [Missing data and unbalancedness](#missing-data-and-unbalancedness) for more details.
 
-Notice that analyses including covariates are computationally slightly more demanding. E.g. in this case we have 10 covariates (i.e. the intercept + 9 additional covariates in `./tutorial/covar.txt`), each of which is allowed to have a different effect on each trait. As we have 10 traits, this means we have 100 fixed effects in total, which our model needs to take into account.
+Notice that analyses including covariates are computationally slightly more demanding per BFGS iteration. E.g. in this case we have 10 covariates (i.e. the intercept + 9 additional covariates in `./tutorial/covar.txt`), each of which is allowed to have a different effect on each trait. As we have 10 traits, this means we have 100 fixed effects in total, which our model needs to take into account.
 
-If we compare the new estimates of heritability (see below) to the true values, taking the standard errors of the estimates into account, we see the strong bias is gone.
+If we compare the new SNP-based heritability estimates in file `./tutorial/covs.HSq.out` to the true values, taking the standard errors of the estimates into account, we see the strong bias is gone:
 
 | trait | heritability | standard error |
 | --- | --- | --- |
@@ -220,7 +221,7 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 
 makes `mgreml` adjust for 1000 leading PCs from the genetic data.
 
-As there is no population stratification in our data (by virtue of our simulation design), this means adjusting for so many PCs will just reduce precision of our estimates, without eliminating any bias. If we look at `many_pcs.HSq.out` we see that our estimates indeed have considerably higher standard errors:
+As there is no population stratification in our data (by virtue of our simulation design), this means adjusting for that many PCs will just reduce precision of our estimates, without eliminating any bias. If we look at `many_pcs.HSq.out` we see that our estimates indeed have considerably higher standard errors:
 
 | trait | heritability | standard error |
 | --- | --- | --- |
@@ -300,11 +301,28 @@ Analogous to `--covar-model`, users can also specify which genetic factor affect
 
 These specifications are effectively binary tables with factor labels in the header row and traits labels in the column header. In case a given factor is permitted to have an effect on a given trait, the corresponding element is set equal to one and otherwise that element is set to zero. An element equal to one is, thus, a free coefficient.
 
-Any such user-specified structural model must be identified. `mgreml` performs only one superficial tests on identification: the tool checks if there are at most *T*(*T*+1)/2 free genetic coefficients and at most *T*(*T*+1)/2 free environment coefficients (this is the so-called *t*-rule). Satisfying the *t*-rule is a minimum but not (!) sufficient condition for model identification.
+For instance, `block_model.txt` (found in the `tutorial` folder) is a factor model where factors 0 &ndash; 4 constitute a saturated model for Some pheno 101 &ndash; 105 (Block 1) and factors 5 &ndash; 9 a saturated model Some pheno 106 &ndash; 110 (Block 2), without any overlap (i.e. there are no factors that affect traits from both Block 1 and Block 2):
 
-:warning: The overall responsibility for formulating a proper, identified model lies with you, the user.
+|  | factor 0 | factor 1 | factor 2 | factor 3 | factor 4 | factor 5 | factor 6 | factor 7 | factor 8 | factor 9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Some pheno 101 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Some pheno 102 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Some pheno 103 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Some pheno 104 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Some pheno 105 | 1 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
+| Some pheno 106 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |
+| Some pheno 107 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 0 | 0 | 0 |
+| Some pheno 108 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 0 | 0 |
+| Some pheno 109 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 0 |
+| Some pheno 110 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 1 |
 
-To given en example of a user-specified model: we could impose a factor structure, where there is only one genetic factor, and where there are *T*=10 environment factors, each affecting only a single trait, and no trait being affected by two distinct environment factors.
+This block model actually aligns with the way in which the genetic components of these traits were simulated! We will use this factor model specification later on, in [Nested models and likelihood-ratio tests](#nested-models-and-likelihood-ratio-tests).
+
+Importantly, any such user-specified structural model must be identified. `mgreml` performs only one superficial tests on identification: the tool checks if there are at most *T*(*T*+1)/2 free genetic coefficients and at most *T*(*T*+1)/2 free environment coefficients (this is the so-called *t*-rule). Satisfying the *t*-rule is a minimum but not (!) sufficient condition for model identification.
+
+:warning: Responsibility for formulating a proper, identified model lies with you, the user.
+
+To given another example of a user-specified model: we could impose a factor structure such that there is only one genetic factor, where that genetic factor affects all traits, and such that there are *T*=10 environment factors, each affecting only a single trait, and no trait being affected by two distinct environment factors.
 
 Effectively, this boils down to a model with genetic correlations all equal to plus or minus one and environment correlations all equal to zero. These specifications of the genetic and environmental factor models are stored in the files `gen_model.txt` and `env_model.txt` respectively, both found in the `tutorial` folder. Both files contain a binary table, with elements equal to one, where a given factor is permitted to affect the given phenotype, and equal to zero otherwise.
 
@@ -349,12 +367,12 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 Inspection of the log-likelihoods in `custom_model.loglik.out` and `rhoG1_rhoE0.loglik.out` indeed reveal that these models yield an identical fit to the data:
 
 ```
-Log-likelihood of model = -103463.59460195134,
+Log-likelihood of model = -103463.59457446574,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 1 genetic factors and 10 environment factors,
 comprising 10 free genetic factor coefficients and 10 free environment factor coefficients in turn.
 Controlled for 100 fixed-effect covariates in total in this model.
-Estimates converged after 36 BFGS iterations. 
+Estimates converged after 31 BFGS iterations.
 ```
 
 Notice that the option `--rho-genetic` cannot be combined with `--genetic-model` and, similarly, that `--rho-environment` cannot be combined with `--environment-model`.
@@ -372,9 +390,25 @@ yields heritability estimates all equal to zero, as expected, in `novarG.HSq.out
 
 Notice that the option `--no-var-genetic` cannot be combined with `--rho-genetic` and/or `--genetic-model`.
 
-### Factor coefficients and variance components
+Finally, please note that for models constraining correlations and genetic variances in such fashion, the standard errors can be highly misguiding! E.g. if genetic variance is constrained to be equal to zero so then is the resulting heritability estimate, which then in turn has a standard error of zero. But this zero standard error has little practical meaning. Intuitively: if we force the estimator of heritability to equal zero, the estimator will always yield zero with no sampling variability. More formally: so-called regularity conditions break down, messing up the asymptotic theory.
 
-In case you estimate a model using `mgreml`, either according to some specific structural model (e.g. using `--genetic-model`) or the default fully saturated model we started with, `mgreml` can report the factor coefficients (i.e. the estimated effect of each factor on each trait) by using the `--factor-coefficients` option. Unless `--no-se` is used, the `--factor-coefficients` option not only reports the estimated factor coefficients, but also the complete covariance matrix of those estimates. :warning: This covariance matrix may grow very large for large *T*.
+### Factor coefficients
+
+In case you estimate a model using `mgreml`, either according to some specific structural model (e.g. using `--genetic-model`) or the default saturated model we started with, `mgreml` can report the factor coefficients (i.e. the estimated effect of each factor on each trait) by using the `--factor-coefficients` option.
+
+#### Poor identification diagnostic
+
+In addition to the estimated coefficients, the `--factor-coefficients` also reports the standard error of each estimated coefficients, as well as a diagnostic indicating if the standard error of that coefficient is unreasonably high, which is indicative of poor model identification. Unreasonably high is here defined as a standard error in excess of the standard deviation of the corresponding trait (after correcting for the relevant fixed-effect covariates). 
+
+To put this diagnostic into perspective: in an ordinary least squares context where we are interested in the effect of some regressor *X* on outcome *Y*, the estimated coefficient for that regressor only has such an extreme standard error if *X* (after partialling out the other regressors) is highly unstable (i.e. with a squared sum less than or equal to one), thus constituting a poorly identified coefficient.
+
+Although we here look at latent factors rather than observed regressors, in our experience, such a high standard error of an estimated path coefficient in `mgreml` is typically also indicative of poor model identification, in which case you should consider reformulating your model (e.g. with fewer factors and/or fewer free path coefficients).
+
+:warning: please keep in mind that this diagnostic does not necessarily flag all cases of poor identification. E.g. there may be models that are poorly identified, were the standard error falls only marginally below the threshold that our diagnostic uses. In the end, model identification is the responsibility of you, the user. The diagnostic just provides some small guidance in that process.
+
+In addition to standard errors,  `--factor-coefficients` also returns the complete covariance matrix of those estimates in a separate file. :warning: This covariance matrix may grow very large for large *T*.
+
+Please notice that if `--factor-coefficients` is combined with `--no-se`, the standard errors, diagnostic for large standard erros, and the covariance matrix of estimated coefficients are all NOT reported.
 
 E.g. the command
 
@@ -387,19 +421,23 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 
 generates, amongst others, the file `factors.coeff.out`, which contains 110 estimated factor coefficients in this case, of which a few lines are shown below:
 
-| trait | factor | estimate | standard error |
-| --- | --- | --- | --- |
-| Some pheno 101 | genetic factor 0 | 1.005 | 0.039 |
-| Some pheno 102 | genetic factor 0 | -0.197 | 0.056 |
-| Some pheno 103 | genetic factor 0 | 0.285 | 0.056 |
-| Some pheno 104 | genetic factor 0 | -0.341 | 0.054 |
-| ... | ... | ... | ... |
-| Some pheno 110 | environment factor 7 | 0.034 | 0.005 |
-| Some pheno 109 | environment factor 8 | 0.929 | 0.013 |
-| Some pheno 110 | environment factor 8 | 0.230 | 0.004 |
-| Some pheno 110 | environment factor 9 | 0.106 | 0.001 |
+| trait | factor | estimate | standard error | large (1=yes) |
+| --- | --- | --- | --- | --- |
+| Some pheno 101 | genetic factor 0 | 1.005 | 0.039 | 0 |
+| Some pheno 102 | genetic factor 0 | -0.197 | 0.056 | 0 |
+| Some pheno 103 | genetic factor 0 | 0.285 | 0.056 | 0 |
+| Some pheno 104 | genetic factor 0 | -0.341 | 0.054 | 0 |
+| ... | ... | ... | ... | ... |
+| Some pheno 110 | environment factor 7 | 0.034 | 0.005 | 0 |
+| Some pheno 109 | environment factor 8 | 0.929 | 0.013 | 0 |
+| Some pheno 110 | environment factor 8 | 0.230 | 0.004 | 0 |
+| Some pheno 110 | environment factor 9 | 0.106 | 0.001 | 0 |
+
+For these estimates, the standard errors are all relatively small (largest standard error is 0.205). In line with this observation, the diagnostic in the last column does not flag any of the standard errors as suspiciously high.
 
 The file `factors.coeff.var.out` contains a 110-by-110 matrix representing the covariance matrix of those estimates. 
+
+### Variance components
 
 Similarly, `mgreml` can also return the estimated variance components (again either based on some structural model, or just the saturated model), also including the covariance matrix of those estimated variance components (unless `--no-se` is used). To get these results, use the `--variance-components` option. E.g. the command
 
@@ -426,6 +464,8 @@ generates, amongst others, the file `components.VCs.out`, which contains 110 est
 
 The file `components.VCs.var.out` contains a 110-by-110 matrix representing the covariance matrix of those estimates. 
 
+:warning: please notice that `--variance-components` does NOT have a diagnostic for unreasonably large standard errors: that diagnostic is only reported for factor coefficients (i.e. when using `--factor-coefficients`).
+
 ### Nested models and likelihood-ratio tests
 
 `mgreml` can also be used to specify two models at once, to compare them using a likelihood-ratio test, provided the null model is nested with respect to the alternative. E.g. one can use the following command to compare the saturated model to the previously considered model assuming perfect genetic correlations and no environment correlations at all:
@@ -441,14 +481,14 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 Inspection of `restricted_rhoG1_rhoE0.loglik.out` reveals that the saturated model fits the data significantly better than this restricted model:
 
 ```
-Log-likelihood of nested model (null hypothesis) = -103463.59460195134,
+Log-likelihood of nested model (null hypothesis) = -103463.59457446574,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 1 genetic factors and 10 environment factors,
 comprising 10 free genetic factor coefficients and 10 free environment factor coefficients in turn.
 Controlled for 100 fixed-effect covariates in total in this model.
-Estimates converged after 36 BFGS iterations.
+Estimates converged after 31 BFGS iterations.
 
-Log-likelihood of parent model (alternative hypothesis) = -85227.36770921224,
+Log-likelihood of parent model (alternative hypothesis) = -85227.36758415299,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 10 genetic factors and 10 environment factors,
 comprising 55 free genetic factor coefficients and 55 free environment factor coefficients in turn.
@@ -456,7 +496,7 @@ Controlled for 100 fixed-effect covariates in total in this model.
 Estimates converged after 53 BFGS iterations.
 
 Results of likelihood-ratio test with 90 degrees of freedom:
-Chi-square test statistic is 36472.453785478196
+Chi-square test statistic is 36472.45398062549
 with P-value = 0.0
 ```
 
@@ -484,14 +524,14 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 where output file `restricted_novarG.loglik.out` reveals that allowing for genetic variance significantly improves the fit of the model:
 
 ```
-Log-likelihood of nested model (null hypothesis) = -94524.0137520493,
+Log-likelihood of nested model (null hypothesis) = -94524.01375204933,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 1 genetic factors and 10 environment factors,
 comprising 0 free genetic factor coefficients and 55 free environment factor coefficients in turn.
 Controlled for 100 fixed-effect covariates in total in this model.
 Estimates converged after 20 BFGS iterations.
 
-Log-likelihood of parent model (alternative hypothesis) = -85227.36770921224,
+Log-likelihood of parent model (alternative hypothesis) = -85227.36758415299,
 based on data on 10 traits and 4980 observations,
 with a model consisting of 10 genetic factors and 10 environment factors,
 comprising 55 free genetic factor coefficients and 55 free environment factor coefficients in turn.
@@ -499,13 +539,29 @@ Controlled for 100 fixed-effect covariates in total in this model.
 Estimates converged after 53 BFGS iterations.
 
 Results of likelihood-ratio test with 55 degrees of freedom:
-Chi-square test statistic is 18593.292085674126
+Chi-square test statistic is 18593.292335792677
 with P-value = 0.0
 ```
 
 As before, `--restricted-no-var-genetic`, `--restricted-rho-genetic`, and/or `--restricted-genetic-model` cannot be combined with one another. Similarly, `--restricted-rho-environment` and `--restricted-environment-model` cannot be combined with each other.
 
 :warning: **when using options such as `--restricted-genetic-model` and `--genetic-model`, it is your own responsibility to ensure the restricted model is nested with respect to the other model.** `mgreml` only inspects nestedness superficially. The best way to allow `mgreml` to assert nestedness is to appropriately label the factors in both models.
+
+#### A further example of estimating factor structures
+
+As indicated previously, the genetic components of the traits in truth follow the block structure shown in `block_model.txt`, where there at two blocks of five traits, where each block has its own genetic factors, ensuring genetic correlations within each block and no genetic correlation between the blocks.
+
+Thus, an interesting sequence of analysis would be to formulate three models. Model I: no genetic variance at all, Model II: a genetic factor model in accordance with `block_model.txt`, and Model III: a saturated genetic factor model. In all three models we then assume the environmental model is saturated.
+
+First, let's compare Model I (restricted) and Model II (main) using the following `mgreml` command:
+
+```
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --restricted-no-var-genetic \
+                   --genetic-model ./tutorial/block_model.txt \
+                   --out ./tutorial/restricted_novarG_main_blockG
+```
 
 ### Estimation reinitialisation 
 
