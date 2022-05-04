@@ -1,0 +1,11 @@
+	factor 0	factor 1	factor 2	factor 3	factor 4	factor 5	factor 6	factor 7	factor 8	factor 9
+Some pheno 101	1	0	0	0	0	0	0	0	0	0
+Some pheno 102	1	1	0	0	0	0	0	0	0	0
+Some pheno 103	1	1	1	0	0	0	0	0	0	0
+Some pheno 104	1	1	1	1	0	0	0	0	0	0
+Some pheno 105	1	1	1	1	1	0	0	0	0	0
+Some pheno 106	0	0	0	0	0	1	0	0	0	0
+Some pheno 107	0	0	0	0	0	1	1	0	0	0
+Some pheno 108	0	0	0	0	0	1	1	1	0	0
+Some pheno 109	0	0	0	0	0	1	1	1	1	0
+Some pheno 110	0	0	0	0	0	1	1	1	1	1
