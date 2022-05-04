@@ -549,9 +549,9 @@ As before, `--restricted-no-var-genetic`, `--restricted-rho-genetic`, and/or `--
 
 #### A further example of estimating factor structures
 
-As indicated previously, the genetic components of the traits in truth follow the block structure shown in `block_model.txt`, where there at two blocks of five traits, where each block has its own genetic factors, ensuring genetic correlations within each block and no genetic correlation between the blocks.
+As indicated previously, the genetic components of the traits in truth follow the block structure shown in `block_model.txt`, where there at two blocks of five traits, where each block has its own block-specific genetic factors, ensuring genetic correlations within each block and no genetic correlation between the blocks.
 
-Thus, an interesting sequence of analysis would be to formulate three models. Model I: no genetic variance at all, Model II: a genetic factor model in accordance with `block_model.txt`, and Model III: a saturated genetic factor model. In all three models we then assume the environmental model is saturated.
+Thus, an interesting sequence of analyses would be to estimate and compare three models. Model I: no genetic variance at all, Model II: a genetic factor model in accordance with `block_model.txt`, and Model III: a saturated genetic factor model. In all three models we then assume the environmental model is saturated.
 
 First, let's compare Model I (restricted) and Model II (main) using the following `mgreml` command:
 
@@ -562,6 +562,61 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
                    --genetic-model ./tutorial/block_model.txt \
                    --out ./tutorial/restricted_novarG_main_blockG
 ```
+
+Output in `restricted_novarG_main_blockG.loglik.out` reveals that the genetic factor model in accordance with `block_model.txt` fits the data far better than the model with no genetic variance:
+
+```
+Log-likelihood of nested model (null hypothesis) = -94524.01375204933,
+based on data on 10 traits and 4980 observations,
+with a model consisting of 1 genetic factors and 10 environment factors,
+comprising 0 free genetic factor coefficients and 55 free environment factor coefficients in turn.
+Controlled for 100 fixed-effect covariates in total in this model.
+Estimates converged after 20 BFGS iterations.
+
+Log-likelihood of parent model (alternative hypothesis) = -85233.78515817931,
+based on data on 10 traits and 4980 observations,
+with a model consisting of 10 genetic factors and 10 environment factors,
+comprising 30 free genetic factor coefficients and 55 free environment factor coefficients in turn.
+Controlled for 100 fixed-effect covariates in total in this model.
+Estimates converged after 54 BFGS iterations.
+
+Results of likelihood-ratio test with 30 degrees of freedom:
+Chi-square test statistic is 18580.457187740045
+with P-value = 0.0
+```
+
+Second, let's compare Model II (restricted) and Model III (main) using the following command:
+
+```
+python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
+                   --covar ./tutorial/covar.txt \
+                   --restricted-genetic-model ./tutorial/block_model.txt \
+                   --out ./tutorial/restricted_blockG_main_satG
+```
+
+Now, the output in `restricted_blockG_main_satG.loglik.out` reveals that Model III does not yield a better fit than Model II (i.e. comparison of the models yields a likehood-ratio test statistic equals 12.8, which under the 25 additional degrees of freedom that Model III has over Model II, gives an insignificant *p*-value):
+
+```
+Log-likelihood of nested model (null hypothesis) = -85233.78515817931,
+based on data on 10 traits and 4980 observations,
+with a model consisting of 10 genetic factors and 10 environment factors,
+comprising 30 free genetic factor coefficients and 55 free environment factor coefficients in turn.
+Controlled for 100 fixed-effect covariates in total in this model.
+Estimates converged after 54 BFGS iterations.
+
+Log-likelihood of parent model (alternative hypothesis) = -85227.36758415299,
+based on data on 10 traits and 4980 observations,
+with a model consisting of 10 genetic factors and 10 environment factors,
+comprising 55 free genetic factor coefficients and 55 free environment factor coefficients in turn.
+Controlled for 100 fixed-effect covariates in total in this model.
+Estimates converged after 53 BFGS iterations.
+
+Results of likelihood-ratio test with 25 degrees of freedom:
+Chi-square test statistic is 12.835148052632576
+with P-value = 0.9784583536238805
+```
+
+Also, notice how close the estimated genetic correlations in `restricted_blockG_main_satG.RhoG.null.out` (i.e. from Model II) are to the true genetic correlations. Finally, observe that the standard errors for the non-zero genetic correlations in Model II are considerably smaller than those in Model III (i.e. comparing `restricted_blockG_main_satG.RhoG.null.SE.out` and `restricted_blockG_main_satG.RhoG.alt.SE.out`).
 
 ### Estimation reinitialisation 
 
