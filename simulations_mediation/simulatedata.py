@@ -1,7 +1,6 @@
 ''' 
 simulatedata.py: simulates data for simulation study
 of mediation analysis using MGREML
-last edit: October 11, 2021
 '''
 import numpy as np
 import pandas as pd
@@ -90,13 +89,13 @@ def SimulatePhenotypes(mG,miID,iRun,rng):
     vY_partial = mX@vBetaY + vM*dB + vG*dGY + vE*dEY
     vY_full = mX@vBetaY + vM*dB + vG*0 + vE*dEY
     # set phenotype matrices
-    mY_no = np.hstack((vM,vY_no))
-    mY_partial = np.hstack((vM,vY_partial))
-    mY_full = np.hstack((vM,vY_full))
+    mY_no = np.hstack((vY_no,vM))
+    mY_partial = np.hstack((vY_partial,vM))
+    mY_full = np.hstack((vY_full,vM))
     # set matrix of covariates including mediator
     mXM = np.hstack((mX,vM))
     # generate names of phenotypes and covariates
-    lPheno = ['Mediator','Outcome']
+    lPheno = ['Outcome','Mediator']
     lCovar = ['Covariate ' + str(i) for i in range(1,iK)]
     lCovarM = ['Covariate ' + str(i) for i in range(1,iK)]
     lCovarM.append('Mediator')
@@ -105,11 +104,11 @@ def SimulatePhenotypes(mG,miID,iRun,rng):
     dfY_partial = pd.DataFrame(mY_partial, index = miID, columns = lPheno)
     dfY_full = pd.DataFrame(mY_full, index = miID, columns = lPheno)
     # construct DataFrame mediator only
-    dfM = pd.DataFrame(vM, index = miID, columns = [lPheno[0]])
+    dfM = pd.DataFrame(vM, index = miID, columns = [lPheno[1]])
     # construct DataFrames outcome only
-    dfO_no = pd.DataFrame(vY_no, index = miID, columns = [lPheno[1]])
-    dfO_partial = pd.DataFrame(vY_partial, index = miID, columns = [lPheno[1]])
-    dfO_full = pd.DataFrame(vY_full, index = miID, columns = [lPheno[1]])
+    dfO_no = pd.DataFrame(vY_no, index = miID, columns = [lPheno[0]])
+    dfO_partial = pd.DataFrame(vY_partial, index = miID, columns = [lPheno[0]])
+    dfO_full = pd.DataFrame(vY_full, index = miID, columns = [lPheno[0]])
     # construct DataFrame covariates, ignoring the intercept
     # as MGREML takes care of that by itself
     dfX = pd.DataFrame(mX[:,1:], index = miID, columns = lCovar)

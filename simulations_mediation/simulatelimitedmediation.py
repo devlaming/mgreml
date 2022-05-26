@@ -1,7 +1,6 @@
 ''' 
 simulatelimitedmediation.py: simulates data, mainly without
 genetic mediation, for second simulation study of mediation GREML
-last edit: April 12, 2022
 '''
 import numpy as np
 import pandas as pd
@@ -91,12 +90,12 @@ def SimulatePhenotypes(mG,miID,iRun,rng):
     vY_A0 = mX@vBetaY + vM_A0*dB + vG*dGY + vE*dEY
     vY_B0 = mX@vBetaY + vG*dGY + vE*dEY
     # set phenotype matrices
-    mY = np.hstack((vM,vY))
-    mY_A0 = np.hstack((vM_A0,vY_A0))
-    mY_B0 = np.hstack((vM,vY_B0))
-    mY_A0B0 = np.hstack((vM_A0,vY_B0))
+    mY = np.hstack((vY,vM))
+    mY_A0 = np.hstack((vY_A0,vM_A0))
+    mY_B0 = np.hstack((vY_B0,vM))
+    mY_A0B0 = np.hstack((vY_B0,vM_A0))
     # generate names of phenotypes and covariates
-    lPheno = ['Mediator','Outcome']
+    lPheno = ['Outcome','Mediator']
     lCovar = ['Covariate ' + str(i) for i in range(1,iK)]
     # construct DataFrames phenotypes
     dfY = pd.DataFrame(mY, index = miID, columns = lPheno)
