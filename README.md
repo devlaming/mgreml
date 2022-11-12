@@ -2,11 +2,13 @@
 
 [![DOI](https://zenodo.org/badge/176773372.svg)](https://zenodo.org/badge/latestdoi/176773372)
 
-`mgreml` is a command-line tool using Python 3.x for rapid estimation of SNP-based heritability and genetic correlations for (nearly) balanced data on many traits in a single analysis, using a genomic-relatedness matrix (GRM) derived from SNP data on unrelated individuals.
+`mgreml` is a command-line tool for rapid estimation of SNP-based heritability and genetic correlations for (nearly) balanced data on many traits in a single analysis, using a genomic-relatedness matrix (GRM) derived from SNP data on unrelated individuals. `mgreml` can easily estimate the full genetic correlation matrix for up to 100 traits in a sample of 20,000 individuals. Moreover, `mgreml` can handle a considerable number of fixed-effect covariates and a minor degree of phenotypic missingness (De Vlaming et al. 2021; see [Citations](#citations)).
 
-`mgreml` can easily handle estimation of the full genetic correlation matrix for up to 100 traits observed in 20,000 individuals. `mgreml` allows users to specify structural models and test hypotheses regarding nested models (e.g. no genetic correlations). In addition, the tool can handle a considerable amount of fixed-effect covariates and a very minor degree of phenotypic missingness.
+The `mgreml` tool also allows users to specify structural models and test hypotheses regarding nested models, for instance regarding the absence of genetic correlations or specific shared genetic factors between traits (De Vlaming et al. 2022; see [Citations](#citations)).
 
-Finally, `mgreml` has built-in options to return (*i*) the full set of factor coefficients and (*ii*) variance components, as well as (*iii*) the complete covariance matrix of those estimates, and (*iv*) estimates of a genetic mediation model for two traits as discussed by Rietveld et al. (2022; see [Citation](#citation)).
+The tool has built-in options to return the full set of factor coefficients and variance components, as well as the complete covariance matrix of those estimates.
+
+Finally, `mgreml` can be used to estimate the degree to which the genetic variance of one trait is mediated by another trait (Rietveld et al. 2022; see [Citations](#citations)).
 
 ## Installation
 
@@ -64,7 +66,7 @@ In this tutorial, you will learn how to use `mgreml`. Before you start using `mg
 9. [Variance components](#variance-components)
 10. [Nested models and likelihood-ratio tests](#nested-models-and-likelihood-ratio-tests)
 11. [Estimation reinitialisation](#estimation-reinitialisation)
-12. [Genetic mediation analysis](#genetic-mediation-analysis)
+12. [Mediation analysis using GREML](#mediation-analysis-using-greml)
 13. [Data formats and management](#data-formats-and-management)
 14. [Missing data and unbalancedness](#missing-data-and-unbalancedness)
 15. [Advanced options](#advanced-options)
@@ -297,7 +299,7 @@ E.g. `my covar 301` does not affect `Some pheno 101` in this case.
 
 ### Specifying structural models
 
-Analogous to `--covar-model`, users can also specify which genetic factor affects which trait and which environment factor affects which trait. Such specifications can be passed to `mgreml` using the `--genetic-model` and `--environment-model` options.
+Analogous to `--covar-model`, users can also specify which genetic factor affects which trait and which environment factor affects which trait. Such specifications can be passed to `mgreml` using the `--genetic-model` and `--environment-model` options. For a full description of the underlying methodology, please see our work on this extension of `mgreml` in *BMC Bioinformatics* (De Vlaming et al. 2022; see [Citations](#citations)).
 
 These specifications are effectively binary tables with factor labels in the header row and traits labels in the column header. In case a given factor is permitted to have an effect on a given trait, the corresponding element is set equal to one and otherwise that element is set to zero. An element equal to one is, thus, a free coefficient.
 
@@ -664,9 +666,9 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/pheno.txt \
 ```
 reinitialises estimation for the null and alternative model from appropriate `.pkl` files. Notice that analogous to `--reinitialise`, the `--restricted-reinitialise` option cannot be combined with options such as `--restricted-environment-model` and `--restricted-rho-genetic`, as the `.pkl` file already contains the full model specification.
 
-### Genetic mediation analysis
+### Mediation analysis using GREML
 
-Rietveld et al. (2022; see [Citation](#citation)) propose a structural equations model (SEM), which can be used to answer the question to which degree the genetic variance of outcome *Y* is mediated by supposed mediator *M*.
+Rietveld et al. (2022; see [Citations](#citations)) propose a structural equation model (SEM), which can be used to answer the question to which degree the genetic variance of outcome *Y* is mediated by supposed mediator *M*. This approach is referred to as Mediation Analysis using GREML (MA-GREML).
 
 `mgreml` has a `--mediation` option which estimates the relevant parameters from this SEM by, first, fitting a bivariate saturated model for *Y* and *M* and, second, by transforming the estimated variance components and their sampling variance matrix to estimates and standard errors of the parameters in the SEM.
 
@@ -690,17 +692,15 @@ As an example, consider `mediation.txt` in the subdirectory `tutorial`. This fil
 
 An overview of the SEM that underlies this data is shown in the figure below:
 
-![Structural equations model used to generate phenotypes `mediation.txt`](https://github.com/devlaming/mgreml/blob/development/tutorial/sem.png?raw=true)
+![Structural equation model used to generate phenotypes `mediation.txt`](https://github.com/devlaming/mgreml/blob/development/tutorial/sem.png?raw=true)
 
 This SEM for *M* and *Y* is equivalent to the following two equations: (1) *M* = 3*G* + 4*G*<sup>\*</sup> + 5*E*<sup>\*</sup> and (2) *Y* = *M* + 2*G* + 4*E* = 5*G* + 4*G*<sup>\*</sup> + 5*E*<sup>\*</sup> + 4*E*. The last expression in Equation (2) is found by substituting *M* by its underlying terms.
 
 In this model, *M* has a genetic variance of 25, of which 9 is caused by a genetic factor that also has a direct effect on the outcome *Y*. The remaining genetic variance is caused by a genetic factor that has no direct bearing on *Y*. In addition, *M* has an environment variance of 25. Thus, the SNP-based heritability of *M* is 50%. Finally, *M* is affected by the fixed-effect covariates in `covariates.txt`.
 
-Also, under this model, *M* has a direct effect on *Y* equal to 1. Moreover, the aforementioned genetic factor *G* that directly affects both *M* and *Y*, has a direct effect of 2 on *Y*. Moreover, *Y* has an idiosyncratic environment factor, which adds 16 to its variance. The total genetic variance and environment variance of *Y* are both equal 41, putting the SNP-based heritability of *Y* also at 50%. Finally, *Y* is also affected by the fixed-effect covariates in `covariates.txt`.
+Under this model, *M* has an effect on *Y* equal to 1. Moreover, the aforementioned genetic factor *G* that directly affects both *M* and *Y*, has a direct effect of 2 on *Y*. In addition, *Y* has an idiosyncratic environment factor, which adds 16 to its variance. The total genetic variance and environment variance of *Y* are both equal 41, putting the SNP-based heritability of *Y* also at 50%. Finally, *Y* is also affected by the fixed-effect covariates in `covariates.txt`.
 
-Under this model, the genetic variance of *Y* that is mediated by *M* equals 25. This number effectively quantifies the so-called indirect effect that is often reported in the mediation literature. Here, this indirect effect reflects (i) the total effect genes have on *M* and (ii) the effect *M*, in turn, has on *Y*.
-
-Moreover, under this model, if would consider *R* = *Y* - *Mb*, where *b* is the true effect of *M* on *Y* (here, *b* = 1) and, thus, *R* is the part of *Y* that remains if we would correct *Y* for *M* without any bias, then in this model *R* = 2*G* + 4*E*. In other words, *R* has an idiosyncratic genetic variance equal to four. Put differently, out of the full genetic variance of *Y* (which equals 41), only 4 is truly non-mediated. Thus, 4/41 = 9.76% of the genetic variance of *Y* is non-mediated.
+Under this model, the genetic variance of *Y* that is mediated by *M* equals 25. This we refer to as the indirect effect (analogous to the mediation literature). If we now consider *R* = *Y* - *Mb*, where *b* is the true effect of *M* on *Y* (here, *b* = 1) and, thus, *R* is the part of *Y* that is free from the true contribution of *M* to *Y*, then *R* = 2*G* + 4*E*. In other words, *R* has an idiosyncratic genetic variance equal to four. Put differently, out of the full genetic variance of *Y* (which equals 41), only 4 is truly non-mediated. This non-mediated genetic variance we refer to as the direct effect. Thus, the direct effect here equals 4, and the proportion of genetic variance of *Y* that is not mediated by *M* then equals 4/41 = 9.76%.
 
 Bearing these considerations, let's run the following `mgreml` command:
 
@@ -713,24 +713,24 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/mediation.txt \
 Now, let's have a look at the output file `try_mediation.mediation.out`:
 
 ```
-Mediation analysis in line with Rietveld et al. (2022):
+MA-GREML (Rietveld et al., 2022) results:
 Mediator M = Mediator; Outcome Y = Outcome
+Genetic variance M (S.E.) = 24.842148570667977 (1.196723311443547)
+Genetic variance Y (S.E.) = 42.45409805220828 (2.0056705514777766)
 Effect M on Y (S.E.; Wald test statistic; asymptotic P value)* = 0.9852851661820797 (0.015112075740820264; 4250.848682017674; 0.0)
-Total genetic variance of M (S.E.) = 24.842148570667977 (1.196723311443547)
-Total genetic variance of Y (S.E.) = 42.45409805220828 (2.0056705514777766)
-Indirect genetic effect = Genetic variance Y mediated by M (S.E.; Wald test statistic; asymptotic P value)* = 24.116431374238918 (1.3575738009054434; 315.57252934910156; 0.0)
-Direct genetic effect = Genetic variance Y not mediated by M (S.E.; Wald test statistic; asymptotic P value)* = 4.465297347901618 (0.4541251486913681; 96.68289860365418; 0.0)
+Indirect effect (S.E.; Wald test statistic; asymptotic P value)* = 24.116431374238918 (1.3575738009054434; 315.57252934910156; 0.0)
+Direct effect (S.E.; Wald test statistic; asymptotic P value)* = 4.465297347901618 (0.4541251486913681; 96.68289860365418; 0.0)
 Proportion of genetic variance Y not mediated by M (S.E.) = 0.10517941854306695 (0.009209180342654846)
 * Wald test statistic and P value under null hypothesis that parameter of interest = 0
-Log-likelihood restricted model with no genetic variance of mediator = -31083.96823086367
-Log-likelihood restricted model with no effect mediator on outcome = -32233.66196536825
-Supremum restricted models is achieved under model with no genetic variance of mediator: test has 2 degrees of freedom 
-Log-likelihood unrestricted model with genetic mediation = -30531.931576827894
-Chi-square test statistic for presence of genetic mediation = 1104.0733080715509
+Log-likelihood restricted model where M has no genetic variance = -31083.96823086367
+Log-likelihood restricted model where M has no effect on Y = -32233.66196536825
+Supremum restricted models is achieved when M has no genetic variance: test has 2 degrees of freedom 
+Log-likelihood unrestricted model with indirect effect = -30531.931576827894
+Chi-square test statistic for presence of indirect effect = 1104.0733080715509
 with P-value = 0.0
 ```
 
-Estimates are all less than two standard errors away from the true parameters of the structural model. Moreover, estimates in `try_mediation.HSq.out` also show that the estimated heritabilities are less than two standard errors removed from the true value (50% for both). In addition, based on Wald tests, observe that the estimated effect of *M* on *Y* is significant, the indirect effect of genes on *Y* via *M* is significant, and the direct effect of genes on *Y* is also significant. Finally, observe that the likelihood-ratio test (more reliable than the Wald test) also finds the estimated indirect genetic effect on *Y* (i.e. mediated by *M*) to be highly significant.
+Estimates are all less than two standard errors away from the true parameters of the structural model. Moreover, estimates in `try_mediation.HSq.out` also show that the estimated heritabilities are less than two standard errors removed from the true value (50% for both). In addition, according to the Wald test, the estimated effect of *M* on *Y* is significant, the indirect effect of genes on *Y* via *M* is significant, and the direct effect of genes on *Y* is also significant. Finally, observe that the likelihood-ratio test (more reliable than the Wald test) also finds the estimated indirect genetic effect on *Y* (i.e. mediated by *M*) to be highly significant.
 
 ### Data formats and management
 
@@ -805,7 +805,7 @@ An overview of all `mgreml` commands is listed below:
 | `--grm-cutoff THRESHOLD` | option to drop individuals using a greedy algorithm, such that there is no relatedness in GRM in excess of threshold for remaining individuals |
 | `--adjust-pcs INTEGER [INTEGER]` | option to specify for how many leading principal components (PCs) from genetic data to adjust (to control for population stratification) and for how many trailing PCs to adjust (for computational efficiency); if just one non-negative integer is specified this is taken as the number of leading PCs to adjust for |
 | `--pheno FILENAME [nolabelpheno]` | phenotype file: should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per phenotype; can be followed by optional flag `nolabelpheno`, e.g. `--pheno` `mypheno.txt nolabelpheno`, but we recommend to label phenotypes |
-| `--mediation` | option to perform a genetic mediation analysis, in line with the structural equations model proposed by Rietveld et al. (2022) and based on estimates from a saturated bivariate model; the second phenotype in the phenotype file is assumed to act as mediator for the genetic component of the first phenotype in the phenotype file; all further phenotypes are ignored; cannot be combined with `--(restricted-)genetic-model`, `--(restricted-)rho-genetic`, `--(restricted-)no-var-genetic`, `--(restricted-)environment-model`, `--(restricted-)rho-environment`, `--(restricted-)reinitialise`, and `--store-iter` |
+| `--mediation` | option to perform mediation analysis using GREML (MA-GREML) based on estimates from a saturated bivariate model, in line with the structural equation model proposed by Rietveld et al. (2022); the second phenotype in the phenotype file is assumed to act as mediator for (part of) the genetic component of the first phenotype in the phenotype file; all further phenotypes are ignored; this flag cannot be combined with `--(restricted-)genetic-model`, `--(restricted-)rho-genetic`, `--(restricted-)no-var-genetic`, `--(restricted-)environment-model`, `--(restricted-)rho-environment`, `--(restricted-)reinitialise`, and `--store-iter` |
 | `--drop-missings` | option to drop all observations from data with at least one missing phenotype or at least one missing covariate |
 | `--no-intercept` | option to indicate an intercept should not be included automatically as covariate |
 | `--covar FILENAME [nolabelcovar]` | optional covariate file: should be comma-, space-, or tab- separated, with one row per individual, with FID and IID as first two fields, followed by a field per covariate; can be followed by optional flag `nolabelcovar`, e.g. `--covar mycovar.txt nolabelcovar`, but we recommend to label covariates; :warning: do not include principal components from genetic data as covariates, use `--adjust-pcs` instead |
@@ -871,19 +871,23 @@ conda env update --file mgreml.yml
 Before contacting us, please try the following:
 
 1. Go over the tutorial in this `README.md` file
-2. Go over the method, described in detail in the supplementary information of the paper (see [Citation](#citation))
+2. Go over the method, described in detail in the supplementary information of the relevant papers (see [Citations](#citations))
 
 ### Contact
 
 In case you have a question that is not resolved by going over the preceding two steps, or in case you have encountered a bug, please send an e-mail to r\[dot\]devlaming\[at\]vu\[dot\]nl.
 
-## Citation
+## Citations
 
 In general, if you use the software, please cite
 
 [R. de Vlaming, E.A.W. Slob, P.R. Jansen, A. Dagher, P.D. Koellinger, P.J.F. Groenen, and C.A. Rietveld (2021). Multivariate analysis reveals shared genetic architecture of brain morphology and human behavior. *Commun Biol* **4**, 1180](https://doi.org/10.1038/s42003-021-02712-y)
 
-In addition, if you use the `--mediation` option, please also cite
+If you use the options to estimate customised factor structures, such as `--genetic-model`, please also cite
+
+[R. de Vlaming, E.A.W. Slob, P.J.F. Groenen, and C.A. Rietveld (2022). Multivariate estimation of factor structures of complex traits using SNP-based genomic relationships. *BMC Bioinform* **23**, 305](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-022-04835-3)
+
+If you use the `--mediation` option, please also cite
 
 [C.A. Rietveld, R. de Vlaming, E.A.W. Slob (2022). *tba*]
 

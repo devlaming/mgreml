@@ -90,34 +90,34 @@ class DataWriter:
         # if SEs are desired, store them together with mediation estimates
         if (self.bSEs):
             with open(sMF, 'w') as oMFfile:
-                oMFfile.write('Mediation analysis in line with Rietveld et al. (2022):\n')
+                oMFfile.write('MA-GREML (Rietveld et al., 2022) results:\n')
                 oMFfile.write('Mediator M = ' + sM + '; Outcome Y = ' + sY + '\n')
+                oMFfile.write('Genetic variance M (S.E.) = ' + str(self.estimates.dVGM) + ' (' + str(self.estimates.dVGM_SE) + ')\n')
+                oMFfile.write('Genetic variance Y (S.E.) = ' + str(self.estimates.dVGY) + ' (' + str(self.estimates.dVGY_SE) + ')\n')
                 oMFfile.write('Effect M on Y (S.E.; Wald test statistic; asymptotic P value)* = ' + str(self.estimates.dBetaMY) + ' (' + str(self.estimates.dBetaMY_SE) + '; ' + str(self.estimates.dWaldBetaMY) + '; ' + str(self.estimates.dPvalBetaMY) + ')\n')
-                oMFfile.write('Total genetic variance of M (S.E.) = ' + str(self.estimates.dVGM) + ' (' + str(self.estimates.dVGM_SE) + ')\n')
-                oMFfile.write('Total genetic variance of Y (S.E.) = ' + str(self.estimates.dVGY) + ' (' + str(self.estimates.dVGY_SE) + ')\n')
-                oMFfile.write('Indirect genetic effect = Genetic variance Y mediated by M (S.E.; Wald test statistic; asymptotic P value)* = ' + str(self.estimates.dMediatedVGY) + ' (' + str(self.estimates.dMediatedVGY_SE) + '; ' + str(self.estimates.dWaldMediatedVGY) + '; ' + str(self.estimates.dPvalMediatedVGY) + ')\n')
-                oMFfile.write('Direct genetic effect = Genetic variance Y not mediated by M (S.E.; Wald test statistic; asymptotic P value)* = ' + str(self.estimates.dNonMediatedVGY) + ' (' + str(self.estimates.dNonMediatedVGY_SE) + '; ' + str(self.estimates.dWaldNonMediatedVGY) + '; ' + str(self.estimates.dPvalNonMediatedVGY) + ')\n')
+                oMFfile.write('Indirect effect (S.E.; Wald test statistic; asymptotic P value)* = ' + str(self.estimates.dMediatedVGY) + ' (' + str(self.estimates.dMediatedVGY_SE) + '; ' + str(self.estimates.dWaldMediatedVGY) + '; ' + str(self.estimates.dPvalMediatedVGY) + ')\n')
+                oMFfile.write('Direct effect (S.E.; Wald test statistic; asymptotic P value)* = ' + str(self.estimates.dNonMediatedVGY) + ' (' + str(self.estimates.dNonMediatedVGY_SE) + '; ' + str(self.estimates.dWaldNonMediatedVGY) + '; ' + str(self.estimates.dPvalNonMediatedVGY) + ')\n')
                 oMFfile.write('Proportion of genetic variance Y not mediated by M (S.E.) = ' + str(self.estimates.dPropNonMediatedVGY) + ' (' + str(self.estimates.dPropNonMediatedVGY_SE) + ')\n')
                 oMFfile.write('* Wald test statistic and P value under null hypothesis that parameter of interest = 0\n')
         else:
             with open(sMF, 'w') as oMFfile:
-                oMFfile.write('Mediation analysis in line with Rietveld et al. (2021):\n')
+                oMFfile.write('MA-GREML (Rietveld et al., 2022) results:\n')
                 oMFfile.write('Mediator M = ' + sM + '; Outcome Y = ' + sY + '\n')
+                oMFfile.write('Genetic variance M = ' + str(self.estimates.dVGM) + '\n')
+                oMFfile.write('Genetic variance Y = ' + str(self.estimates.dVGY) + '\n')
                 oMFfile.write('Effect M on Y = ' + str(self.estimates.dBetaMY) + '\n')
-                oMFfile.write('Total genetic variance of M = ' + str(self.estimates.dVGM) + '\n')
-                oMFfile.write('Total genetic variance of Y = ' + str(self.estimates.dVGY) + '\n')
-                oMFfile.write('Indirect genetic effect = Genetic variance Y mediated by M = ' + str(self.estimates.dMediatedVGY) + '\n')
-                oMFfile.write('Direct genetic effect = Genetic variance Y not mediated by M = ' + str(self.estimates.dNonMediatedVGY) + '\n')
+                oMFfile.write('Indirect effect = ' + str(self.estimates.dMediatedVGY) + '\n')
+                oMFfile.write('Direct effect = ' + str(self.estimates.dNonMediatedVGY) + '\n')
                 oMFfile.write('Proportion of genetic variance Y not mediated by M = ' + str(self.estimates.dPropNonMediatedVGY) + '\n')
         with open(sMF, 'a') as oMFfile:
-            oMFfile.write('Log-likelihood restricted model with no genetic variance of mediator = ' + str(self.estimates1.dLogL) + '\n')
-            oMFfile.write('Log-likelihood restricted model with no effect mediator on outcome = ' + str(self.estimates2.dLogL) + '\n')
+            oMFfile.write('Log-likelihood restricted model where M has no genetic variance = ' + str(self.estimates1.dLogL) + '\n')
+            oMFfile.write('Log-likelihood restricted model where M has no effect on Y = ' + str(self.estimates2.dLogL) + '\n')
             if self.estimates1.dLogL > self.estimates2.dLogL:
-                oMFfile.write('Supremum restricted models is achieved under model with no genetic variance of mediator: test has 2 degrees of freedom \n')
+                oMFfile.write('Supremum restricted models is achieved when M has no genetic variance: test has 2 degrees of freedom \n')
             else:
-                oMFfile.write('Supremum restricted models is achieved under model with no effect mediator on outcome: test has 1 degree of freedom \n')
-            oMFfile.write('Log-likelihood unrestricted model with genetic mediation = ' + str(self.estimates.dLogL) + '\n')
-            oMFfile.write('Chi-square test statistic for presence of genetic mediation = ' + str(self.dTestStat) + '\n')
+                oMFfile.write('Supremum restricted models is achieved when M has no effect on Y: test has 1 degree of freedom \n')
+            oMFfile.write('Log-likelihood unrestricted model with indirect effect = ' + str(self.estimates.dLogL) + '\n')
+            oMFfile.write('Chi-square test statistic for presence of indirect effect = ' + str(self.dTestStat) + '\n')
             oMFfile.write('with P-value = ' + str(self.dPval) + '\n')
     
     def WriteHSq(self):
