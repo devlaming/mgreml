@@ -7,7 +7,7 @@ from numpy.matlib import repmat
 from tqdm import tqdm
 pd.options.mode.chained_assignment = None
 
-__version__ = 'v1.1.0'
+__version__ = 'v1.1.1'
 MASTHEAD  = "\n"
 MASTHEAD += "########################################################################\n"
 MASTHEAD += "##                                                                    ##\n"
@@ -26,7 +26,7 @@ MASTHEAD += "###################################################################
 MASTHEAD += "##                                                                    ##\n"
 MASTHEAD += "##  BETA {V}                                                       ##\n".format(V=__version__)
 MASTHEAD += "##                                                                    ##\n"
-MASTHEAD += "##  (C) 2022 Ronald de Vlaming and Eric Slob                          ##\n"
+MASTHEAD += "##  (C) 2023 Ronald de Vlaming and Eric Slob                          ##\n"
 MASTHEAD += "##                                                                    ##\n"
 MASTHEAD += "##  Vrije Universiteit Amsterdam and University of Cambridge          ##\n"
 MASTHEAD += "##  GNU General Public License v3                                     ##\n"
@@ -427,7 +427,7 @@ class MgremlReader:
         self.parser.add_argument('--pheno', metavar = '', default = None, type = str, nargs = '+',
                             help = '\b\b\b\b\b\b\b\b\b\b\b\b\b\bFILENAME [nolabelpheno] phenotype file: should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per phenotype; can be followed by optional flag nolabelpheno, e.g. --pheno mypheno.txt nolabelpheno, but we recommend to label phenotypes')
         self.parser.add_argument('--mediation', action = 'store_true',
-                            help = 'option to perform mediation analysis using GREML (MA-GREML) based on estimates from a saturated bivariate model, in line with the structural equation model proposed by Rietveld et al. (2022); the second phenotype in the phenotype file is assumed to act as mediator for (part of) the genetic component of the first phenotype in the phenotype file; all further phenotypes are ignored; this flag cannot be combined with --(restricted-)genetic-model, --(restricted-)rho-genetic, --(restricted-)no-var-genetic, --(restricted-)environment-model, --(restricted-)rho-environment, --(restricted-)reinitialise, and --store-iter')
+                            help = 'option to perform mediation analysis using GREML (MA-GREML) based on estimates from a saturated bivariate model, in line with the structural equation model proposed by Rietveld et al. (2023); the second phenotype in the phenotype file is assumed to act as mediator for (part of) the genetic component of the first phenotype in the phenotype file; all further phenotypes are ignored; this flag cannot be combined with --(restricted-)genetic-model, --(restricted-)rho-genetic, --(restricted-)no-var-genetic, --(restricted-)environment-model, --(restricted-)rho-environment, --(restricted-)reinitialise, and --store-iter')
         self.parser.add_argument('--drop-missings', action = 'store_true',
                             help = 'option to drop all observations from data with at least one missing phenotype or at least one missing covariate')
         self.parser.add_argument('--no-intercept', action = 'store_true',
