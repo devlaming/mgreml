@@ -893,9 +893,9 @@ If you use the `--mediation` option, please also cite
 
 ## Derivations
 
-For full details on the derivation of the `mgreml` method, see the [Supplementary Information](https://static-content.springer.com/esm/art%3A10.1038%2Fs42003-021-02712-y/MediaObjects/42003_2021_2712_MOESM2_ESM.pdf).
+For full details on the derivation of the `mgreml` method, see the [Supplementary Information](https://static-content.springer.com/esm/art%3A10.1038%2Fs42003-021-02712-y/MediaObjects/42003_2021_2712_MOESM2_ESM.pdf) of the work by De Vlaming et al. (2021).
 
-For derivations on the structural model used in the mediation analysis, see *tba*.
+For derivations of the structural model used in the mediation analysis, see the [Supplementary Information](https://doi.org/10.1371/journal.pgen.1010638.s001) of the work by Rietveld et al. (2023).
 
 ## License
 
