@@ -8,7 +8,7 @@ The `mgreml` tool also allows users to specify structural models and test hypoth
 
 The tool has built-in options to return the full set of factor coefficients and variance components, as well as the complete covariance matrix of those estimates.
 
-Finally, `mgreml` can be used to estimate the degree to which the genetic variance of one trait is mediated by another trait (Rietveld et al. 2022; see [Citations](#citations)).
+Finally, `mgreml` can be used to estimate the degree to which the genetic variance of one trait is mediated by another trait (Rietveld et al. 2023; see [Citations](#citations)).
 
 ## Installation
 
@@ -668,7 +668,7 @@ reinitialises estimation for the null and alternative model from appropriate `.p
 
 ### Mediation analysis using GREML
 
-Rietveld et al. (2022; see [Citations](#citations)) propose a structural equation model (SEM), which can be used to answer the question to which degree the genetic variance of outcome *Y* is mediated by supposed mediator *M*. This approach is referred to as Mediation Analysis using GREML (MA-GREML).
+Rietveld et al. (2023; see [Citations](#citations)) propose a structural equation model (SEM), which can be used to answer the question to which degree the genetic variance of outcome *Y* is mediated by supposed mediator *M*. This approach is referred to as Mediation Analysis using GREML (MA-GREML).
 
 `mgreml` has a `--mediation` option which estimates the relevant parameters from this SEM by, first, fitting a bivariate saturated model for *Y* and *M* and, second, by transforming the estimated variance components and their sampling variance matrix to estimates and standard errors of the parameters in the SEM.
 
@@ -713,7 +713,7 @@ python ./mgreml.py --grm ./tutorial/data --pheno ./tutorial/mediation.txt \
 Now, let's have a look at the output file `try_mediation.mediation.out`:
 
 ```
-MA-GREML (Rietveld et al., 2022) results:
+MA-GREML (Rietveld et al., 2023) results:
 Mediator M = Mediator; Outcome Y = Outcome
 Genetic variance M (S.E.) = 24.842148570667977 (1.196723311443547)
 Genetic variance Y (S.E.) = 42.45409805220828 (2.0056705514777766)
@@ -805,7 +805,7 @@ An overview of all `mgreml` commands is listed below:
 | `--grm-cutoff THRESHOLD` | option to drop individuals using a greedy algorithm, such that there is no relatedness in GRM in excess of threshold for remaining individuals |
 | `--adjust-pcs INTEGER [INTEGER]` | option to specify for how many leading principal components (PCs) from genetic data to adjust (to control for population stratification) and for how many trailing PCs to adjust (for computational efficiency); if just one non-negative integer is specified this is taken as the number of leading PCs to adjust for |
 | `--pheno FILENAME [nolabelpheno]` | phenotype file: should be comma-, space-, or tab-separated, with one row per individual, with FID and IID as first two fields, followed by a field per phenotype; can be followed by optional flag `nolabelpheno`, e.g. `--pheno` `mypheno.txt nolabelpheno`, but we recommend to label phenotypes |
-| `--mediation` | option to perform mediation analysis using GREML (MA-GREML) based on estimates from a saturated bivariate model, in line with the structural equation model proposed by Rietveld et al. (2022); the second phenotype in the phenotype file is assumed to act as mediator for (part of) the genetic component of the first phenotype in the phenotype file; all further phenotypes are ignored; this flag cannot be combined with `--(restricted-)genetic-model`, `--(restricted-)rho-genetic`, `--(restricted-)no-var-genetic`, `--(restricted-)environment-model`, `--(restricted-)rho-environment`, `--(restricted-)reinitialise`, and `--store-iter` |
+| `--mediation` | option to perform mediation analysis using GREML (MA-GREML) based on estimates from a saturated bivariate model, in line with the structural equation model proposed by Rietveld et al. (2023); the second phenotype in the phenotype file is assumed to act as mediator for (part of) the genetic component of the first phenotype in the phenotype file; all further phenotypes are ignored; this flag cannot be combined with `--(restricted-)genetic-model`, `--(restricted-)rho-genetic`, `--(restricted-)no-var-genetic`, `--(restricted-)environment-model`, `--(restricted-)rho-environment`, `--(restricted-)reinitialise`, and `--store-iter` |
 | `--drop-missings` | option to drop all observations from data with at least one missing phenotype or at least one missing covariate |
 | `--no-intercept` | option to indicate an intercept should not be included automatically as covariate |
 | `--covar FILENAME [nolabelcovar]` | optional covariate file: should be comma-, space-, or tab- separated, with one row per individual, with FID and IID as first two fields, followed by a field per covariate; can be followed by optional flag `nolabelcovar`, e.g. `--covar mycovar.txt nolabelcovar`, but we recommend to label covariates; :warning: do not include principal components from genetic data as covariates, use `--adjust-pcs` instead |
@@ -889,7 +889,7 @@ If you use the options to estimate customised factor structures, such as `--gene
 
 If you use the `--mediation` option, please also cite
 
-[C.A. Rietveld, R. de Vlaming, E.A.W. Slob (2022). *tba*]
+[C.A. Rietveld, R. de Vlaming, and E.A.W. Slob (2023). The identification of mediating effects using genome-based restricted maximum likelihood estimation. *PLOS Genet* **19**, e1010638](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1010638)
 
 ## Derivations
 
